@@ -14,6 +14,7 @@
 <div class="navsec">Decision</div>
 <a class="doc" href="03-integration-options.html">Integration options</a>
 <a class="doc on" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<a class="doc" href="07-functional-architecture.html">Functional architecture</a>
 <div class="navsec">Delivery</div>
 <a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
 <div class="navsec">Evidence</div>
@@ -21,7 +22,7 @@
 <div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Decision / 04-recommended-target-architecture.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-the-structure">1. The structure</a><a class="l2" href="#2-the-end-to-end-functional-workflow">2. The end-to-end functional workflow</a><a class="l2" href="#3-ownership-at-a-glance">3. Ownership at a glance</a><a class="l2" href="#4-boundary-rules">4. Boundary rules</a><a class="l2" href="#5-the-governed-rsi-loop">5. The governed RSI loop</a><a class="l2" href="#6-what-retires-when-in-the-mature-form">6. What retires when, in the mature form</a></nav><h1 id="recommended-target-architecture"><a class="anchor" href="#recommended-target-architecture" aria-hidden="true">#</a>Recommended Target Architecture</h1>
 <p><strong>AI4RnD is a first-class, persistent project subsystem on JiuwenSwarm. AI4RnD permanently owns product semantics; JiuwenSwarm owns the application foundation; OpenJiuwen supplies execution mechanisms; a thin bridge compiles ready sub-plans onto them progressively.</strong></p>
-<p>This is Option C from <a href="03-integration-options.html">03-integration-options.md</a>. This document gives the structure, the central end-to-end workflow, and the rules that keep the boundaries honest.</p>
+<p>This is Option C from <a href="03-integration-options.html">03-integration-options.md</a>. This document gives the <em>structural</em> view — components, lanes and hand-offs — and the rules that keep the boundaries honest. The authoritative <em>functional</em> narrative (journey, decision ownership, state spine, loops) is <a href="07-functional-architecture.html">07-functional-architecture.md</a>.</p>
 <hr>
 <h2 id="1-the-structure"><a class="anchor" href="#1-the-structure" aria-hidden="true">#</a>1. The structure</h2>
 <div class="fig fig-svg"><svg viewBox="0 0 1190 448" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Recommended integration structure">
@@ -304,7 +305,7 @@
 <h2 id="6-what-retires-when-in-the-mature-form"><a class="anchor" href="#6-what-retires-when-in-the-mature-form" aria-hidden="true">#</a>6. What retires when, in the mature form</h2>
 <p>Option C's end state approaches full delegation. Each fallback below dies only when its named test passes — never on a date:</p>
 <div class="tw"><table><thead><tr><th>AI4RnD-side fallback</th><th>Retires when</th></tr></thead><tbody><tr><td>Model routing</td><td>the runtime fails loudly on an unknown model instead of substituting</td></tr><tr><td>Resume re-drive logic</td><td>resume is reachable through a supported runtime surface</td></tr><tr><td>Failure detection in the fact converter</td><td>failed steps propagate as failures, not <code>None</code></td></tr><tr><td>Typed-executor enforcement in the bridge</td><td>the runtime honors executor typing end to end</td></tr><tr><td>Compile-time write-scope exclusion</td><td>only if the runtime ever offers equivalent isolation guarantees</td></tr></tbody></table></div>
-<p>What never retires: semantic readiness, evidence sufficiency, gate decisions, repair/replanning, and project-completion authority. Those are the product.</p></article><div class="pager"><a href="03-integration-options.html"><div class="d">← Previous</div><div class="t">Integration options</div></a><a class="nx" href="05-feature-ownership-implementation-plan.html"><div class="d">Next →</div><div class="t">Ownership &amp; implementation plan</div></a></div></main>
+<p>What never retires: semantic readiness, evidence sufficiency, gate decisions, repair/replanning, and project-completion authority. Those are the product.</p></article><div class="pager"><a href="03-integration-options.html"><div class="d">← Previous</div><div class="t">Integration options</div></a><a class="nx" href="07-functional-architecture.html"><div class="d">Next →</div><div class="t">Functional architecture</div></a></div></main>
 </div>
 <button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
 <script src="vendor/mermaid.min.js"></script>
@@ -365,7 +366,8 @@
     var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
     mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
       themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
-      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+      sequence:{useMaxWidth:false, actorMargin:30, width:140, noteMargin:8},
+      gantt:{useMaxWidth:false}});
   } else {
     document.querySelectorAll('pre.mermaid').forEach(function(el){
       el.classList.add('raw');

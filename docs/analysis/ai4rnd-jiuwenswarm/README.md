@@ -6,7 +6,7 @@ progressive, gated by compatibility tests. All 142 workbook outcomes are preserv
 
 Start with the [Executive Summary](00-executive-summary.md).
 
-## The seven documents
+## The primary documents
 
 | # | Document | Answers |
 |---|---|---|
@@ -14,7 +14,8 @@ Start with the [Executive Summary](00-executive-summary.md).
 | 01 | [The Intended AI4RnD Product](01-intended-ai4rnd-product.md) | what is being built — the 142-outcome definition |
 | 02 | [JiuwenSwarm & OpenJiuwen Architecture](02-jiuwenswarm-openjiuwen-architecture.md) | what the foundation reliably provides, and what it doesn't |
 | 03 | [Integration Options](03-integration-options.md) | the five coherent architectures and the preservation gate |
-| 04 | [Recommended Target Architecture](04-recommended-target-architecture.md) | the design: layers, end-to-end workflow, boundary rules, RSI |
+| 04 | [Recommended Target Architecture](04-recommended-target-architecture.md) | the design: layers, structural workflow, boundary rules, RSI |
+| 07 | [Functional Architecture, End to End](07-functional-architecture.md) | the authoritative functional view: journey, decision ownership, state spine, loops |
 | 05 | [Feature Ownership & Implementation Plan](05-feature-ownership-implementation-plan.md) | who owns what, and the dependency-driven plan |
 | 06 | [Evidence, Assumptions & Open Questions](06-evidence-assumptions-open-questions.md) | verified vs judged vs assumed, and what remains open |
 

@@ -14,6 +14,7 @@
 <div class="navsec">Decision</div>
 <a class="doc" href="03-integration-options.html">Integration options</a>
 <a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<a class="doc" href="07-functional-architecture.html">Functional architecture</a>
 <div class="navsec">Delivery</div>
 <a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
 <div class="navsec">Evidence</div>
@@ -141,7 +142,8 @@
     var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
     mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
       themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
-      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+      sequence:{useMaxWidth:false, actorMargin:30, width:140, noteMargin:8},
+      gantt:{useMaxWidth:false}});
   } else {
     document.querySelectorAll('pre.mermaid').forEach(function(el){
       el.classList.add('raw');

@@ -19,6 +19,7 @@ DOCS = [
     ("02-jiuwenswarm-openjiuwen-architecture.md",  "JiuwenSwarm & OpenJiuwen",          "Background"),
     ("03-integration-options.md",                  "Integration options",               "Decision"),
     ("04-recommended-target-architecture.md",      "Recommended architecture",          "Decision"),
+    ("07-functional-architecture.md",              "Functional architecture",           "Decision"),
     ("05-feature-ownership-implementation-plan.md","Ownership & implementation plan",   "Delivery"),
     ("06-evidence-assumptions-open-questions.md",  "Evidence & open questions",         "Evidence"),
 ]
@@ -354,6 +355,7 @@ td code{font-size:12px}
   border-radius:10px;overflow-x:auto}
 .fig pre.mermaid{background:none;border:0;padding:0;margin:0;text-align:center}
 .fig svg{max-width:none;height:auto}
+.fig svg[aria-roledescription=sequence]{max-width:100%;height:auto}
 .fig-svg{text-align:center}
 .fig-svg svg{max-width:100%;height:auto}
 .fig[data-wide]{padding-bottom:14px}
@@ -477,7 +479,8 @@ MERMAID_JS = """
     var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
     mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
       themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
-      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+      sequence:{useMaxWidth:false, actorMargin:30, width:140, noteMargin:8},
+      gantt:{useMaxWidth:false}});
   } else {
     document.querySelectorAll('pre.mermaid').forEach(function(el){
       el.classList.add('raw');
@@ -578,7 +581,8 @@ DESC = {
  "01-intended-ai4rnd-product.md":"What is being built: the 142-outcome definition, the capsule model, current state.",
  "02-jiuwenswarm-openjiuwen-architecture.md":"What the foundation reliably provides, what exists but is unreachable, what is missing.",
  "03-integration-options.md":"Five coherent architectures, the preservation gate, and why progressive compilation wins.",
- "04-recommended-target-architecture.md":"The design: layers, the end-to-end workflow, twelve boundary rules, the governed RSI loop.",
+ "04-recommended-target-architecture.md":"The design: layers, structural workflow, twelve boundary rules, the governed RSI loop.",
+ "07-functional-architecture.md":"The authoritative end-to-end functional view: journey, decision ownership, state spine, execution round trip, loops.",
  "05-feature-ownership-implementation-plan.md":"Who owns each feature group, the ten dependency-critical capabilities, six phases.",
  "06-evidence-assumptions-open-questions.md":"Verified vs architectural judgment vs unverified assumption, plus open product questions.",
 }

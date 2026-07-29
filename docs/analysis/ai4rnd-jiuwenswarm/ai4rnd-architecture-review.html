@@ -135,6 +135,7 @@ td code{font-size:12px}
   border-radius:10px;overflow-x:auto}
 .fig pre.mermaid{background:none;border:0;padding:0;margin:0;text-align:center}
 .fig svg{max-width:none;height:auto}
+.fig svg[aria-roledescription=sequence]{max-width:100%;height:auto}
 .fig-svg{text-align:center}
 .fig-svg svg{max-width:100%;height:auto}
 .fig[data-wide]{padding-bottom:14px}
@@ -215,7 +216,7 @@ section h1{padding-top:8px}
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
 <p class="rev">Architecture review &middot; Rev 4</p>
-<div class="navsec">Overview</div><a href="#d-00-executive-summary">Executive summary</a><div class="navsec">Background</div><a href="#d-01-intended-ai4rnd-product">The intended AI4RnD product</a><a href="#d-02-jiuwenswarm-openjiuwen-architecture">JiuwenSwarm &amp; OpenJiuwen</a><div class="navsec">Decision</div><a href="#d-03-integration-options">Integration options</a><a href="#d-04-recommended-target-architecture">Recommended architecture</a><div class="navsec">Delivery</div><a href="#d-05-feature-ownership-implementation-plan">Ownership &amp; implementation plan</a><div class="navsec">Evidence</div><a href="#d-06-evidence-assumptions-open-questions">Evidence &amp; open questions</a>
+<div class="navsec">Overview</div><a href="#d-00-executive-summary">Executive summary</a><div class="navsec">Background</div><a href="#d-01-intended-ai4rnd-product">The intended AI4RnD product</a><a href="#d-02-jiuwenswarm-openjiuwen-architecture">JiuwenSwarm &amp; OpenJiuwen</a><div class="navsec">Decision</div><a href="#d-03-integration-options">Integration options</a><a href="#d-04-recommended-target-architecture">Recommended architecture</a><a href="#d-07-functional-architecture">Functional architecture</a><div class="navsec">Delivery</div><a href="#d-05-feature-ownership-implementation-plan">Ownership &amp; implementation plan</a><div class="navsec">Evidence</div><a href="#d-06-evidence-assumptions-open-questions">Evidence &amp; open questions</a>
 <div class="side-foot">Single-page edition<br>jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>
 AI4Research @ d35c511</div></aside>
 <main><section id="d-00-executive-summary"><div class="crumb">Overview / 00-executive-summary.md</div><h1 id="executive-summary"><a class="anchor" href="#executive-summary" aria-hidden="true">#</a>Executive Summary</h1>
@@ -452,7 +453,7 @@ AI4Research @ d35c511</div></aside>
 <h2 id="4-what-is-permanently-ai4rnd-s-under-every-option"><a class="anchor" href="#4-what-is-permanently-ai4rnd-s-under-every-option" aria-hidden="true">#</a>4. What is permanently AI4RnD's, under every option</h2>
 <p>Regardless of how far delegation eventually goes, the product keeps final authority over: <strong>semantic readiness</strong> (is this step <em>meaningfully</em> ready, not just dependency-ready), <strong>evidence sufficiency</strong>, <strong>gate decisions</strong>, <strong>repair and replanning</strong>, and <strong>project completion</strong>. These are product semantics, not scheduling — no execution engine can decide them, and no option proposes that one should.</p></section><section id="d-04-recommended-target-architecture"><div class="crumb">Decision / 04-recommended-target-architecture.md</div><h1 id="recommended-target-architecture"><a class="anchor" href="#recommended-target-architecture" aria-hidden="true">#</a>Recommended Target Architecture</h1>
 <p><strong>AI4RnD is a first-class, persistent project subsystem on JiuwenSwarm. AI4RnD permanently owns product semantics; JiuwenSwarm owns the application foundation; OpenJiuwen supplies execution mechanisms; a thin bridge compiles ready sub-plans onto them progressively.</strong></p>
-<p>This is Option C from <a href="#d-03-integration-options">03-integration-options.md</a>. This document gives the structure, the central end-to-end workflow, and the rules that keep the boundaries honest.</p>
+<p>This is Option C from <a href="#d-03-integration-options">03-integration-options.md</a>. This document gives the <em>structural</em> view — components, lanes and hand-offs — and the rules that keep the boundaries honest. The authoritative <em>functional</em> narrative (journey, decision ownership, state spine, loops) is <a href="#d-07-functional-architecture">07-functional-architecture.md</a>.</p>
 <hr>
 <h2 id="1-the-structure"><a class="anchor" href="#1-the-structure" aria-hidden="true">#</a>1. The structure</h2>
 <div class="fig fig-svg"><svg viewBox="0 0 1190 448" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Recommended integration structure">
@@ -735,7 +736,183 @@ AI4Research @ d35c511</div></aside>
 <h2 id="6-what-retires-when-in-the-mature-form"><a class="anchor" href="#6-what-retires-when-in-the-mature-form" aria-hidden="true">#</a>6. What retires when, in the mature form</h2>
 <p>Option C's end state approaches full delegation. Each fallback below dies only when its named test passes — never on a date:</p>
 <div class="tw"><table><thead><tr><th>AI4RnD-side fallback</th><th>Retires when</th></tr></thead><tbody><tr><td>Model routing</td><td>the runtime fails loudly on an unknown model instead of substituting</td></tr><tr><td>Resume re-drive logic</td><td>resume is reachable through a supported runtime surface</td></tr><tr><td>Failure detection in the fact converter</td><td>failed steps propagate as failures, not <code>None</code></td></tr><tr><td>Typed-executor enforcement in the bridge</td><td>the runtime honors executor typing end to end</td></tr><tr><td>Compile-time write-scope exclusion</td><td>only if the runtime ever offers equivalent isolation guarantees</td></tr></tbody></table></div>
-<p>What never retires: semantic readiness, evidence sufficiency, gate decisions, repair/replanning, and project-completion authority. Those are the product.</p></section><section id="d-05-feature-ownership-implementation-plan"><div class="crumb">Delivery / 05-feature-ownership-implementation-plan.md</div><h1 id="feature-ownership-and-implementation-plan"><a class="anchor" href="#feature-ownership-and-implementation-plan" aria-hidden="true">#</a>Feature Ownership and Implementation Plan</h1>
+<p>What never retires: semantic readiness, evidence sufficiency, gate decisions, repair/replanning, and project-completion authority. Those are the product.</p></section><section id="d-07-functional-architecture"><div class="crumb">Decision / 07-functional-architecture.md</div><h1 id="the-functional-architecture-end-to-end"><a class="anchor" href="#the-functional-architecture-end-to-end" aria-hidden="true">#</a>The Functional Architecture, End to End</h1>
+<p><strong>This document is the authoritative functional view of the proposed product.</strong> It was derived independently from the 142-feature workbook, the verified state of the three repositories, and the reuse audit — not from the earlier diagrams. Where it disagrees with them, this document wins; §8 says exactly where and why.</p>
+<p>The one-sentence version first:</p>
+<blockquote><p><strong>AI4RnD is a claims refinery.</strong> A user brings a need; the product converts it into explicit, falsifiable claims; everything in the middle exists to turn those claims into verdicts backed by evidence; and every run leaves the refinery itself measurably better, under governance.</p></blockquote>
+<p>That sentence is the organizing principle. The stages (§2), the state model (§3), the execution round trip (§4) and the loops (§5) all follow from it.</p>
+<p>Labels used throughout: <strong>[today]</strong> — verified current behaviour; <strong>[target]</strong> — the proposed architecture; <strong>[evidence]</strong> — the observation that justifies a choice, with its verification class. Dense probe detail stays in <a href="#d-06-evidence-assumptions-open-questions">06-evidence-assumptions-open-questions.md</a>.</p>
+<hr>
+<h2 id="1-the-user-journey-where-it-really-begins-and-ends"><a class="anchor" href="#1-the-user-journey-where-it-really-begins-and-ends" aria-hidden="true">#</a>1. The user journey — where it really begins and ends</h2>
+<p>The journey does not begin at a chat message and does not end at a report.</p>
+<p>It <strong>begins when a need exists</strong> — a research question, a qualified technical clue, or a pile of material worth understanding. Two of the workbook's seven intake features are about capturing needs the user did not type into a chat box (qualified channel signals, imported material).</p>
+<p>It <strong>ends twice</strong>. First for the requester: they hold a deliverable whose every claim resolves to evidence, distributed with authorization. Then for the organization: the project closes, its evidence freezes, and what was learned — concepts, datasets, code, benchmarks, and sometimes a new capability capsule — outlives the run. The workbook is explicit that closure and knowledge transfer are product outcomes, not clean-up.</p>
+<p>One loop deliberately <strong>outlives every journey</strong>: governed improvement. It consumes run history across projects and returns better capsules, prompts, routing and evaluators to future runs.</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 314" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="The user journey">
+<defs><marker id="ahj" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="40" y="56" width="190" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="135.0" y="83" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">A need</text>
+<text x="135.0" y="97" font-size="11" text-anchor="middle" fill="var(--muted)">question · clue · material</text>
+<rect x="290" y="56" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="400.0" y="83" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Understand</text>
+<text x="400.0" y="97" font-size="11" text-anchor="middle" fill="var(--muted)">mint the Research Contract</text>
+<rect x="570" y="56" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="680.0" y="76" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Frame</text>
+<text x="680.0" y="90" font-size="11" text-anchor="middle" fill="var(--muted)">mint falsifiable claims</text>
+<text x="680.0" y="104" font-size="11" text-anchor="middle" fill="var(--muted)">and the plan</text>
+<rect x="850" y="56" width="250" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="975.0" y="76" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Establish</text>
+<text x="975.0" y="90" font-size="11" text-anchor="middle" fill="var(--muted)">build · benchmark · evaluate</text>
+<text x="975.0" y="104" font-size="11" text-anchor="middle" fill="var(--muted)">mint verdicts</text>
+<path d="M230 86 L290 86" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M510 86 L570 86" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M790 86 L850 86" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M975 56 L975 28 L680 28 L680 56" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<text x="827" y="22" font-size="11" text-anchor="middle" fill="var(--muted)">claim refuted — reframe honestly</text>
+<rect x="290" y="216" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="400.0" y="236" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Deliver</text>
+<text x="400.0" y="250" font-size="11" text-anchor="middle" fill="var(--muted)">the evidence-backed</text>
+<text x="400.0" y="264" font-size="11" text-anchor="middle" fill="var(--muted)">deliverable</text>
+<rect x="570" y="216" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="680.0" y="236" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Close & retain</text>
+<text x="680.0" y="250" font-size="11" text-anchor="middle" fill="var(--muted)">freeze evidence ·</text>
+<text x="680.0" y="264" font-size="11" text-anchor="middle" fill="var(--muted)">keep the knowledge</text>
+<rect x="850" y="216" width="250" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="975.0" y="236" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improve — governed</text>
+<text x="975.0" y="250" font-size="11" text-anchor="middle" fill="var(--muted)">better capsules · prompts ·</text>
+<text x="975.0" y="264" font-size="11" text-anchor="middle" fill="var(--muted)">routing · evaluators</text>
+<path d="M940 116 L940 186 L400 186 L400 216" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<text x="668" y="178" font-size="11" text-anchor="middle" fill="var(--muted)">Contract satisfied — deliver</text>
+<path d="M510 246 L570 246" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M790 246 L850 246" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahj)"/>
+<text x="820" y="240" font-size="11" text-anchor="middle" fill="var(--muted)">run history</text>
+<path d="M1010 216 L1010 146 L400 146 L400 116" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahj)"/>
+<text x="668" y="140" font-size="11" text-anchor="middle" fill="var(--muted)">next runs start stronger — the loop outlives every journey</text>
+</svg></div>
+<p>Five journey phases, one standing loop. The nine workbook lanes live inside these phases (Understand = Ingestion + Requirement compilation; Frame = Search &amp; ideation + Opportunity selection + Claims &amp; hypotheses; Establish = POC + Benchmarking + Evaluation; Deliver and Close = Delivery). The lanes remain individually addressable capabilities — a literature-only project never enters Establish; a refuted claim re-enters Frame — but the <em>phases</em> are what a stakeholder should hold in mind, because each phase exists to mint one kind of durable object.</p>
+<p><strong>[evidence]</strong> The phase grouping is not aesthetic. The workbook gives each lane an evidence obligation, and the obligations cluster exactly this way: Understand owes a confirmed Contract, Frame owes falsifiable claims (feature 33 makes falsifiability screening a hard gate before construction), Establish owes verdicts against acceptance criteria, Deliver owes an authorized, evidence-linked deliverable, Close owes frozen evidence and packaged knowledge.</p>
+<h2 id="2-the-functional-stages-and-who-decides"><a class="anchor" href="#2-the-functional-stages-and-who-decides" aria-hidden="true">#</a>2. The functional stages and who decides</h2>
+<p>Every stage has exactly one decision owner. "The system" is never an answer.</p>
+<div class="tw"><table><thead><tr><th>Stage</th><th>What it decides</th><th>Decision owner</th><th>Human involvement</th></tr></thead><tbody><tr><td>Intake &amp; qualification</td><td>is this a real, authorized, non-duplicate need?</td><td><strong>AI4RnD</strong> intake rules</td><td>none</td></tr><tr><td>Intention compilation</td><td>what does the user actually want; is it unambiguous?</td><td><strong>AI4RnD</strong> Intention Compiler</td><td>answers ambiguity questions; <strong>confirms the Contract</strong> — work cannot start before this</td></tr><tr><td>Planning</td><td>what must be established, in what dependency order?</td><td><strong>AI4RnD</strong> Planner</td><td>inspects the plan; may constrain it</td></tr><tr><td>Semantic readiness</td><td>is this step <em>meaningfully</em> ready — deps, inputs, budget, scope?</td><td><strong>AI4RnD</strong> run-state authority</td><td>none</td></tr><tr><td>Capability &amp; model binding</td><td>which capsule, executor and model may serve this step?</td><td><strong>Integration bridge</strong>, from the capsule registry — stalls when nothing qualifies</td><td>resolves stalls (add capability, relax requirement, or cancel)</td></tr><tr><td>Mechanism choice</td><td>agent turn, scripted pipeline, staged workflow, team, or worktree build?</td><td><strong>Integration bridge</strong> compiler, from the sub-plan's shape</td><td>never — this is invisible to users</td></tr><tr><td>Physical execution</td><td>ordering, batching, retries <em>within</em> a specification</td><td><strong>OpenJiuwen</strong> runtime</td><td>none</td></tr><tr><td>Step success</td><td>did the step actually succeed?</td><td><strong>AI4RnD</strong> — never inferred from the engine's completion signal</td><td>none</td></tr><tr><td>Evidence validity</td><td>does the artifact support the claim?</td><td><strong>AI4RnD</strong> evaluators, writer ≠ verifier</td><td>none</td></tr><tr><td>Gate verdicts</td><td>does the claim stand; may work proceed?</td><td><strong>AI4RnD</strong> gate policy</td><td><strong>approves where policy requires</strong></td></tr><tr><td>Repair vs replan</td><td>fix the artifact, or change the plan?</td><td><strong>AI4RnD</strong> repair logic</td><td>escalation target</td></tr><tr><td>Completion &amp; delivery</td><td>is the Contract satisfied; who may receive the result?</td><td><strong>AI4RnD</strong> against Contract acceptance</td><td>authorizes distribution</td></tr><tr><td>Identity, session, config</td><td>who is the user; where do they interact?</td><td><strong>JiuwenSwarm</strong> application</td><td>n/a</td></tr><tr><td>Self-modification</td><td>may the system change its own capabilities?</td><td><strong>Governed RSI</strong> loop</td><td><strong>approves every promotion</strong></td></tr></tbody></table></div>
+<p>Three human touchpoints are load-bearing and deliberate: Contract confirmation, gated approvals, and improvement approvals. Everything else is designed to run unattended.</p>
+<p><strong>[evidence]</strong> Step success stays with AI4RnD because of an executed finding: a SwarmFlow step that fails all its retries returns an empty result and the run reports success (EXEC, probe V-22). Binding stalls rather than substitutes because the runtime silently falls back to the default model when a requested one is missing (SRC, V-24). Mechanism choice is hidden from users because exposing it would couple the product's semantics to a guess about internals — a judgment, recorded as such.</p>
+<h2 id="3-the-state-spine-how-persistent-product-state-changes"><a class="anchor" href="#3-the-state-spine-how-persistent-product-state-changes" aria-hidden="true">#</a>3. The state spine — how persistent product state changes</h2>
+<p>The functional heart of the product is not a pipeline of services. It is a short chain of <strong>durable objects</strong>, each minted by one phase, owned by one authority, and never silently mutated. Execution, by contrast, is stateless from the product's point of view: runtime state (journals, checkpoints) is scoped to sessions and runs, and nothing the product asserts may depend on it.</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 300" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="The state spine">
+<defs><marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="40" y="36" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="155.0" y="60" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Contract</text>
+<text x="155.0" y="73" font-size="10.5" text-anchor="middle" fill="var(--muted)">confirmed promise</text>
+<text x="155.0" y="86" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">written once, then immutable</text>
+<rect x="330" y="36" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="445.0" y="60" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">TaskGraph</text>
+<text x="445.0" y="73" font-size="10.5" text-anchor="middle" fill="var(--muted)">the living plan</text>
+<text x="445.0" y="86" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">versioned on every replan</text>
+<rect x="620" y="36" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="735.0" y="60" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Claims</text>
+<text x="735.0" y="73" font-size="10.5" text-anchor="middle" fill="var(--muted)">falsifiable statements</text>
+<text x="735.0" y="86" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">each knows what refutes it</text>
+<rect x="910" y="36" width="240" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1030.0" y="60" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence</text>
+<text x="1030.0" y="73" font-size="10.5" text-anchor="middle" fill="var(--muted)">citation-anchored records</text>
+<text x="1030.0" y="86" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">append-only</text>
+<path d="M270 69 L330 69" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<path d="M560 69 L620 69" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<path d="M850 69 L910 69" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<rect x="910" y="196" width="240" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1030.0" y="220" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Verdicts</text>
+<text x="1030.0" y="233" font-size="10.5" text-anchor="middle" fill="var(--muted)">gate decisions</text>
+<text x="1030.0" y="246" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">append-only · writer-attributed</text>
+<rect x="620" y="196" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="735.0" y="220" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Deliverable</text>
+<text x="735.0" y="233" font-size="10.5" text-anchor="middle" fill="var(--muted)">claims + verdicts + evidence</text>
+<text x="735.0" y="246" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">frozen at closure</text>
+<rect x="330" y="196" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="445.0" y="220" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Knowledge</text>
+<text x="445.0" y="233" font-size="10.5" text-anchor="middle" fill="var(--muted)">typed graph projections</text>
+<text x="445.0" y="246" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">outlives the project</text>
+<rect x="40" y="196" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="155.0" y="220" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improvements</text>
+<text x="155.0" y="233" font-size="10.5" text-anchor="middle" fill="var(--muted)">versioned promotions</text>
+<text x="155.0" y="246" font-size="10.5" text-anchor="middle" font-style="italic" fill="var(--muted)">reversible</text>
+<path d="M1030 102 L1030 196" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<path d="M910 229 L850 229" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<path d="M620 229 L560 229" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<path d="M330 229 L270 229" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahs)"/>
+<path d="M960 196 L960 152 L470 152 L470 102" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahs)"/>
+<text x="715" y="146" font-size="10.5" text-anchor="middle" fill="var(--muted)">verdict fails → a new plan revision — recorded evidence is never edited</text>
+<path d="M155 196 L155 102" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahs)"/>
+<text x="165" y="152" font-size="10.5" text-anchor="start" fill="var(--muted)">improves future runs only —</text>
+<text x="165" y="166" font-size="10.5" text-anchor="start" fill="var(--muted)">in-flight runs pin their versions</text>
+</svg></div>
+<p>Rules that make this spine trustworthy, each traceable to a workbook requirement or a verified gap:</p>
+<ol><li><strong>A Contract is written once.</strong> Scope change means a new Contract version and re-confirmation — otherwise "done" is negotiable after the fact.</li><li><strong>The TaskGraph is the only mutable object</strong>, and it mutates by versioned revision, so the plan's history is itself evidence.</li><li><strong>Evidence and verdicts only append.</strong> A failed verdict is superseded, never edited <strong>[today]</strong> — this is the one part of the spine that already exists and runs: the AI4RnD gate ledger is append-only and writer-attributed (EXEC).</li><li><strong>The deliverable is a projection</strong>, not a document written from memory: it can cite only what the evidence ledger holds.</li><li><strong>Knowledge is a set of typed projections over one authoritative store</strong> — seven graph views, not seven databases. <strong>[today]</strong> none of the seven exists yet in either repository (EXEC — exhaustive search); this is honest new construction under every architecture option.</li><li><strong>Runtime state is not product state.</strong> The runtime's replay journal is keyed by session and would silently reset on a session change (SRC) — which is precisely why a multi-week project cannot lean on it.</li></ol>
+<h2 id="4-how-work-reaches-execution-and-how-truth-comes-back"><a class="anchor" href="#4-how-work-reaches-execution-and-how-truth-comes-back" aria-hidden="true">#</a>4. How work reaches execution and how truth comes back</h2>
+<p>One step's round trip, in the target architecture. This is where the two systems actually touch.</p>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant H as Human
+    participant P as Plan authority&lt;br/&gt;(AI4RnD)
+    participant B as Integration&lt;br/&gt;bridge
+    participant R as Runtime&lt;br/&gt;(OpenJiuwen)
+    participant E as Evidence &amp; gates&lt;br/&gt;(AI4RnD)
+
+    P-&gt;&gt;B: ready step —&lt;br/&gt;operator request +&lt;br/&gt;capability requirement
+    Note over B: bind capsule · executor · model&lt;br/&gt;enforce declared effects&lt;br/&gt;writer ≠ verifier at candidate set
+    alt nothing qualifies
+        B--&gt;&gt;P: stall, with the missing&lt;br/&gt;capability named
+        P-&gt;&gt;H: surface the stall
+    else bound
+        B-&gt;&gt;R: execution specification&lt;br/&gt;(mechanism chosen by shape)
+        Note over R: sandboxed calls to external&lt;br/&gt;models, tools and sources
+        R--&gt;&gt;B: progress events
+        R-&gt;&gt;B: receipts and artifacts
+        B-&gt;&gt;P: verified step state —&lt;br/&gt;an empty result is a failure
+        B-&gt;&gt;E: evidence records,&lt;br/&gt;citation-anchored
+        Note over E: evaluators run —&lt;br/&gt;independent of the writer
+        E-&gt;&gt;P: gate verdict
+        alt verdict passes
+            P-&gt;&gt;P: release dependent steps
+        else verdict fails
+            P-&gt;&gt;P: repair, or revise the plan
+        else policy requires approval
+            P-&gt;&gt;H: approval request&lt;br/&gt;with the dossier
+            H-&gt;&gt;P: decision, recorded&lt;br/&gt;in the gate ledger
+        end
+    end</pre></div>
+<p>Three properties of this round trip carry the whole integration:</p>
+<ul><li><strong>Ready is semantic.</strong> A step is dispatched when the <em>product</em> says it is ready — dependencies,</li></ul>
+<p>inputs, budget, scope — not merely when the graph engine could run it. <strong>[evidence]</strong> The runtime's own readiness (Pregel supersteps, journal replay, admission control) is real and verified (EXEC) and is reused <em>inside</em> a specification; it just doesn't get to define product readiness.</p>
+<ul><li><strong>The specification is disposable.</strong> If a run dies, the bridge re-derives a specification from</li></ul>
+<p>the plan and resumes; completed work replays from the journal. <strong>[evidence]</strong> Journal replay re-executed only the failed step in probe V-22 (EXEC); the missing piece is only that no agent surface can trigger resume today (EXEC) — bridge work, listed in the plan.</p>
+<ul><li><strong>Truth flows one way.</strong> Execution produces facts; only evaluators and gates turn facts into</li></ul>
+<p>verdicts; only verdicts change what the plan does next. There is no path where an engine signal directly advances the plan.</p>
+<h2 id="5-the-three-loops-repair-intervention-improvement"><a class="anchor" href="#5-the-three-loops-repair-intervention-improvement" aria-hidden="true">#</a>5. The three loops — repair, intervention, improvement</h2>
+<p>Failure is a normal state, and the architecture gives it three concentric responses. Each loop has a different owner, timescale, and blast radius; none of them touches recorded evidence.</p>
+<div class="tw"><table><thead><tr><th>Loop</th><th>Trigger</th><th>What changes</th><th>Decided by</th><th>Typical timescale</th></tr></thead><tbody><tr><td><strong>Repair</strong></td><td>a step fails, an artifact fails its checks</td><td>the artifact — rebuilt, re-tested, re-evaluated under the same plan node</td><td>AI4RnD repair logic</td><td>minutes–hours</td></tr><tr><td><strong>Replan / reframe</strong></td><td>a gate verdict fails; a hypothesis is refuted; a stall cannot be resolved</td><td>the TaskGraph — a versioned revision; in the honest case, the <em>claims</em> change</td><td>AI4RnD Planner, sometimes back through Frame</td><td>hours–days</td></tr><tr><td><strong>Governed improvement</strong></td><td>accumulated performance history across runs</td><td>the system itself — capsules, prompts, routing, evaluators — via proposal → risk class → frozen-policy check → isolated evaluation → <strong>human approval</strong> → versioned promotion → monitoring → rollback</td><td>Governed RSI loop</td><td>days–weeks</td></tr></tbody></table></div>
+<p>Human intervention is not a loop of its own; it is a <em>gate inside each loop</em>: stalls surface to a person, failed verdicts above a risk threshold need sign-off, and no improvement promotes itself.</p>
+<p>A distinction the product must keep sacred: <strong>a refuted hypothesis is a success of the verification machinery, not a failure of the run.</strong> The repair loop fixes defects; it must never be used to torture an artifact until a false claim passes. That is why repair and replanning are separate decisions with separate owners, and why evidence of the refutation stays in the ledger forever.</p>
+<p><strong>[evidence]</strong> The improvement loop's substrate exists and is real (trainer, candidate selection, snapshot/rollback — SRC/EXEC), but only one of the eight improvement surfaces is wired end to end today (EXEC), and the loop's governance — proposals, frozen-policy checks, the approval inbox — exists nowhere yet. The loop is drawn as <strong>[target]</strong>, honestly.</p>
+<h2 id="6-what-each-side-contributes-functionally"><a class="anchor" href="#6-what-each-side-contributes-functionally" aria-hidden="true">#</a>6. What each side contributes, functionally</h2>
+<div class="tw"><table><thead><tr><th>Function</th><th>AI4RnD</th><th>Integration bridge</th><th>JiuwenSwarm / OpenJiuwen</th></tr></thead><tbody><tr><td>Meaning: Contract, claims, plan, completion</td><td><strong>owns</strong></td><td>—</td><td>—</td></tr><tr><td>Capability governance: capsules, operators, effects</td><td><strong>owns</strong></td><td>enforces at binding</td><td>skills &amp; Symphony exist below, ungoverned</td></tr><tr><td>Verification: evidence, evaluators, gates</td><td><strong>owns</strong></td><td>converts facts to evidence</td><td>—</td></tr><tr><td>Mechanism choice &amp; binding</td><td>—</td><td><strong>owns</strong></td><td>—</td></tr><tr><td>Physical execution: agents, pipelines, staged graphs, teams, worktrees</td><td>—</td><td>—</td><td><strong>owns</strong> (verified engines)</td></tr><tr><td>Sandboxing, channels, sessions, UI, accounts, config, packaging</td><td>—</td><td>—</td><td><strong>owns</strong></td></tr><tr><td>Failure truth: what actually succeeded</td><td><strong>owns</strong></td><td>detects</td><td>reports (unreliably today — hence the split)</td></tr><tr><td>Self-improvement</td><td><strong>governs</strong></td><td>binds subjects</td><td>provides the training machinery</td></tr></tbody></table></div>
+<p>The boundary discipline in one line each way: <strong>AI4RnD never schedules physical work; the runtime never decides what anything means.</strong> The bridge is the only component allowed to speak both languages, and it is forbidden to make semantic decisions — it translates them.</p>
+<h2 id="7-today-versus-target"><a class="anchor" href="#7-today-versus-target" aria-hidden="true">#</a>7. Today versus target</h2>
+<p>The same functional map, coloured by what exists. This is the honest distance between the repositories and the product.</p>
+<div class="tw"><table><thead><tr><th>Functional element</th><th>Today</th><th>In the target</th></tr></thead><tbody><tr><td>Intake via channels, sessions, UI shell</td><td><strong>exists</strong> (JiuwenSwarm, 9 channels, web UI)</td><td>reused; project object added behind it</td></tr><tr><td>Intention compilation</td><td>partial — requirement compiler exists in AI4RnD</td><td>adapted onto the Contract schema</td></tr><tr><td>Contract, project record</td><td><strong>absent as durable objects</strong></td><td>new; the P1 foundation</td></tr><tr><td>Planning &amp; TaskGraph</td><td>exists in AI4RnD, fused with a 4,189-line physical scheduler; carrier is a tmux cockpit with a polling script</td><td>plan survives as a semantic artifact; the scheduler and the tmux carrier are <strong>retired</strong> (see §8)</td></tr><tr><td>Capsules &amp; registry</td><td><strong>exists</strong> — 42 governed manifests, 35 registered (EXEC)</td><td>wired to binding; extended with versions, history, RSI targets</td></tr><tr><td>Honest binding &amp; stall</td><td>absent — Symphony ranks, never refuses; runtime substitutes models silently</td><td>new, in the bridge; the single most safety-critical build</td></tr><tr><td>Execution engines</td><td><strong>exist and verified</strong> — durable graphs, replayable pipelines, admission, sandbox, worktrees</td><td>reused as-is behind specifications</td></tr><tr><td>Resume reachable from the product</td><td>engine replay works; no surface can invoke it</td><td>bridge exposes dispatch · resume · cancel</td></tr><tr><td>Evidence ledger, gate ledger</td><td><strong>exist and run standalone</strong> (EXEC)</td><td>ported; project-scoped</td></tr><tr><td>Grounding / entailment check</td><td>exists, <strong>measured at 0.25 precision</strong> (EXEC)</td><td>replaced; bar published before building, measurement after</td></tr><tr><td>Evaluator families</td><td>fragments</td><td>six families, new/adapted</td></tr><tr><td>Typed knowledge graphs</td><td><strong>absent</strong> (all seven)</td><td>projections over one store; new</td></tr><tr><td>Governed RSI</td><td>machinery real, one surface wired, zero governance</td><td>the full §5 loop; mostly new</td></tr><tr><td>Accounts</td><td>absent in both</td><td>new</td></tr></tbody></table></div>
+<h2 id="8-where-this-view-corrects-the-earlier-diagrams"><a class="anchor" href="#8-where-this-view-corrects-the-earlier-diagrams" aria-hidden="true">#</a>8. Where this view corrects the earlier diagrams</h2>
+<p>This document was required to challenge the existing pictures, and it does change the story in four places:</p>
+<ol><li><strong>The structural swimlane view (doc 04) is demoted to supporting material.</strong> It answers "which component talks to which" — useful for engineers wiring the bridge — but it invites reading the product as a message pipeline. The authoritative functional view is the <strong>state spine</strong> (§3): the product <em>is</em> its durable objects; components are replaceable staff around them.</li><li><strong>The journey is longer than the earlier diagrams showed.</strong> They began at a channel message and ended at a deliverable. The workbook's intake features start earlier (needs that were never typed) and its delivery lane ends later (closure, knowledge transfer, capability growth). §1 restores both ends.</li><li><strong>Repair and reframing were drawn as one "fail" edge.</strong> They are different decisions with different owners and different blast radii (§5), and conflating them is how a system ends up retrying its way past a refuted hypothesis. The separation is now explicit.</li><li><strong>Two pieces of current architecture are formally rejected, with labels, not silence:</strong> the tmux cockpit with its polling coordinator (replaced by channels, sessions and the project view — it cannot meet the multi-user, multi-channel vertical requirements), and AI4RnD's physical scheduler (its readiness/batching/retry duplicates verified runtime engines; only its <em>semantic</em> readiness and binding logic survive, relocated to where §2 puts those decisions). Both remain documented in <a href="source-material/README.md">source-material/</a> as rejected designs useful for explaining the decision.</li></ol>
+<p>What did <strong>not</strong> change: the recommendation itself. Progressive compilation (Option C), the preservation of all 142 outcomes, and the seven negative findings all stand exactly as stated in <a href="#d-03-integration-options">03</a> and <a href="#d-04-recommended-target-architecture">04</a>.</p>
+<h2 id="9-what-remains-uncertain"><a class="anchor" href="#9-what-remains-uncertain" aria-hidden="true">#</a>9. What remains uncertain</h2>
+<ul><li><strong>Compilation coverage</strong> — will real research plans compile to the deterministic pipeline</li></ul>
+<p>engine, or fall back to staged workflows more often than expected? The F4 spike (three representative plans, including a failed-verification-repair-replan shape) answers this; until then the compiler's mechanism mix is a design intention, not a fact.</p>
+<ul><li><strong>Entailment quality</strong> — the state spine's trustworthiness rests on evidence records meaning</li></ul>
+<p>what they claim. 0.25 precision is the measured floor; the achievable ceiling on research citations is unknown until the replacement is built and measured.</p>
+<ul><li><strong>Where semantic readiness converges</strong> — if the runtime's gaps close upstream (loud model</li></ul>
+<p>failure, reachable resume, propagated step failure), the run-state authority thins toward a pure policy layer. How thin is an empirical question the compatibility tests will answer.</p>
+<ul><li><strong>Human-touchpoint load</strong> — three touchpoints are designed; whether gated approvals become a</li></ul>
+<p>bottleneck at real project volume is unknowable before Stage-1 usage.</p>
+<h2 id="10-assumptions-made-in-deriving-this-view"><a class="anchor" href="#10-assumptions-made-in-deriving-this-view" aria-hidden="true">#</a>10. Assumptions made in deriving this view</h2>
+<ol><li>The 142-outcome workbook is the complete product definition; nothing outside it was treated as required.</li><li>Phases were grouped by <em>evidence obligation</em> (what each mints), judged the clearest cut for stakeholders; the workbook itself does not name macro-phases.</li><li>The Contract is assumed immutable-by-version; the workbook requires confirmation (feature 14) but does not state mutability rules. Chosen for auditability.</li><li>"One authoritative store with typed projections" is an architectural judgment satisfying the nine data-foundation outcomes; the workbook does not prescribe physical storage.</li><li>Human touchpoints were limited to the three named; the workbook implies human review (evaluator group 6, delivery authorization) but does not enumerate touchpoints.</li><li>The claims-refinery framing itself is interpretation — chosen because falsifiability screening (feature 33) and evidence-anchored delivery are the two least negotiable outcomes in the workbook, and every architecture that satisfies them looks like this.</li></ol></section><section id="d-05-feature-ownership-implementation-plan"><div class="crumb">Delivery / 05-feature-ownership-implementation-plan.md</div><h1 id="feature-ownership-and-implementation-plan"><a class="anchor" href="#feature-ownership-and-implementation-plan" aria-hidden="true">#</a>Feature Ownership and Implementation Plan</h1>
 <p><strong>Purpose of this document: say who owns each part of the product, what work exists, and in what order to do it.</strong> The full row-level detail — all 142 features with semantic owner, runtime implementer, persistence authority, verification authority, product surface, decision, evidence and open questions per row — lives in the CSVs and stays authoritative:</p>
 <ul><li><a href="traceability/142-feature-implementation-ownership.csv">142-feature-implementation-ownership.csv</a></li><li><a href="traceability/142-feature-preservation-gate.csv">142-feature-preservation-gate.csv</a></li></ul>
 <p>This document summarizes them and adds the dependency structure the CSVs cannot express.</p>
@@ -863,7 +1040,8 @@ AI4Research @ d35c511</div></aside>
     var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
     mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
       themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
-      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+      sequence:{useMaxWidth:false, actorMargin:30, width:140, noteMargin:8},
+      gantt:{useMaxWidth:false}});
   } else {
     document.querySelectorAll('pre.mermaid').forEach(function(el){
       el.classList.add('raw');

@@ -132,6 +132,7 @@ td code{font-size:12px}
   border-radius:10px;overflow-x:auto}
 .fig pre.mermaid{background:none;border:0;padding:0;margin:0;text-align:center}
 .fig svg{max-width:none;height:auto}
+.fig svg[aria-roledescription=sequence]{max-width:100%;height:auto}
 .fig-svg{text-align:center}
 .fig-svg svg{max-width:100%;height:auto}
 .fig[data-wide]{padding-bottom:14px}

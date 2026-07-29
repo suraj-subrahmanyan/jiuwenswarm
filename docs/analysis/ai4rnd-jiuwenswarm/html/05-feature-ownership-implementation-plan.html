@@ -14,6 +14,7 @@
 <div class="navsec">Decision</div>
 <a class="doc" href="03-integration-options.html">Integration options</a>
 <a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<a class="doc" href="07-functional-architecture.html">Functional architecture</a>
 <div class="navsec">Delivery</div>
 <a class="doc on" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
 <div class="navsec">Evidence</div>
@@ -63,7 +64,7 @@
 <h3 id="p6-governed-rsi-accounts-and-operational-hardening"><a class="anchor" href="#p6-governed-rsi-accounts-and-operational-hardening" aria-hidden="true">#</a>P6 — Governed RSI, accounts and operational hardening</h3>
 <p><em>Objective:</em> the system improves itself only under governance, and ships as a product. <em>Major work:</em> bind AI4RnD subjects (capsules, prompts, routing, evaluators) to the evolution framework; proposal store, risk classes, frozen-policy check, approval inbox; capsule version pinning; the account subsystem (all new); packaging across the four platforms; runtime resource visibility; budget enforcement per project. <em>Acceptance evidence:</em> a proposal relaxing a frozen policy is rejected before evaluation; a promotion is rolled back in a drill and in-flight runs are unaffected; a reviewer answers <em>what changed, why, is it better</em> from the inbox alone. <em>Exit:</em> all 142 outcomes delivered, deferred-with-reason, or explicitly resolved as product decisions (see the two open rows in <a href="06-evidence-assumptions-open-questions.html">06-evidence-assumptions-open-questions.md</a>).</p>
 <h2 id="5-decision-points"><a class="anchor" href="#5-decision-points" aria-hidden="true">#</a>5. Decision points</h2>
-<div class="tw"><table><thead><tr><th>After</th><th>Decide</th></tr></thead><tbody><tr><td>P1</td><td>Is the project the right product unit, or do users want one-shot runs?</td></tr><tr><td>P2</td><td>Did F4 pass? Both targets failing reverts the architecture to Option A.</td></tr><tr><td>P3</td><td>Did entailment clear the published bar? If not, stop widening and fix the core.</td></tr><tr><td>P4</td><td>Are ported lanes better than Jiuwen-native alternatives, or was PORT wrong anywhere?</td></tr><tr><td>P6</td><td>Is evolution producing measured improvement, or churn?</td></tr></tbody></table></div></article><div class="pager"><a href="04-recommended-target-architecture.html"><div class="d">← Previous</div><div class="t">Recommended architecture</div></a><a class="nx" href="06-evidence-assumptions-open-questions.html"><div class="d">Next →</div><div class="t">Evidence &amp; open questions</div></a></div></main>
+<div class="tw"><table><thead><tr><th>After</th><th>Decide</th></tr></thead><tbody><tr><td>P1</td><td>Is the project the right product unit, or do users want one-shot runs?</td></tr><tr><td>P2</td><td>Did F4 pass? Both targets failing reverts the architecture to Option A.</td></tr><tr><td>P3</td><td>Did entailment clear the published bar? If not, stop widening and fix the core.</td></tr><tr><td>P4</td><td>Are ported lanes better than Jiuwen-native alternatives, or was PORT wrong anywhere?</td></tr><tr><td>P6</td><td>Is evolution producing measured improvement, or churn?</td></tr></tbody></table></div></article><div class="pager"><a href="07-functional-architecture.html"><div class="d">← Previous</div><div class="t">Functional architecture</div></a><a class="nx" href="06-evidence-assumptions-open-questions.html"><div class="d">Next →</div><div class="t">Evidence &amp; open questions</div></a></div></main>
 </div>
 <button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
 <script src="vendor/mermaid.min.js"></script>
@@ -124,7 +125,8 @@
     var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
     mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
       themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
-      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+      sequence:{useMaxWidth:false, actorMargin:30, width:140, noteMargin:8},
+      gantt:{useMaxWidth:false}});
   } else {
     document.querySelectorAll('pre.mermaid').forEach(function(el){
       el.classList.add('raw');

@@ -5,7 +5,9 @@ product semantics; JiuwenSwarm owns the application foundation; OpenJiuwen suppl
 mechanisms; a thin bridge compiles ready sub-plans onto them progressively.**
 
 This is Option C from [03-integration-options.md](03-integration-options.md). This document gives
-the structure, the central end-to-end workflow, and the rules that keep the boundaries honest.
+the *structural* view — components, lanes and hand-offs — and the rules that keep the boundaries
+honest. The authoritative *functional* narrative (journey, decision ownership, state spine,
+loops) is [07-functional-architecture.md](07-functional-architecture.md).
 
 ---
 
