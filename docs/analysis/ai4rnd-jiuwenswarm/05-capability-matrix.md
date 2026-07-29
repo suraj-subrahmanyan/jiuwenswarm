@@ -2,6 +2,18 @@
 
 Every AI4RnD requirement classified against what JiuwenSwarm provides.
 
+> **Revision 2 note.** This matrix was built against AI4RnD *as it exists*. The controlling
+> matrix is now [`traceability/142-feature-matrix.md`](traceability/142-feature-matrix.md),
+> which covers all 142 intended Level-2 features. This document is retained because its
+> per-capability reasoning remains valid, with four corrections from execution:
+>
+> | Row | Was | Now |
+> |---|---|---|
+> | 4.2 tool registration out-of-tree | `X` extensible, inferred | `X` **verified by execution** [V-2] |
+> | 8.2 built-in high-risk denials | `P` provided | **`~P`** — loads 0 rules in a stock install [V-4] |
+> | 6.14 writer ≠ verifier | `M` port to JiuwenSwarm | **`M`** — must live in AI4RnD's router; JiuwenSwarm has 2 roles + global policy [V-6] |
+> | 6.11 entailment "partial in AI4RnD" | partial | **absent** — measured precision 0.25, no NLI anywhere [V-12] |
+
 ## Legend
 
 | Symbol | Meaning |

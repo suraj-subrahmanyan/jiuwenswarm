@@ -1,242 +1,270 @@
-# Staged Implementation Plan
+# Staged Path to the Complete Product
 
-Five stages. Each has an exit gate that must pass before the next begins. Effort figures
-assume 2–3 engineers familiar with both codebases and are **estimates, not commitments**
-— they are derived from module sizes and coupling, not from any measured velocity.
+Revised for the full 142-feature target. Effort figures are **estimates derived from module
+sizes, coupling and test coverage** — not measured velocity, and not commitments.
+
+Prior spikes E1–E3, E7, E8 are now **closed by execution**
+([12-verification-appendix.md](12-verification-appendix.md)); the remaining open ones are
+carried into Stage 0 below.
 
 ```mermaid
 gantt
     dateFormat X
     axisFormat %s
     title Stage sequence (relative weeks)
-    section Stage 0
-    Evidence spikes           :s0, 0, 2
-    section Stage 1
-    Rail plugin + ledger lib  :s1, after s0, 6
-    section Stage 2
-    Extract research service  :s2, after s1, 8
-    section Stage 3
-    Capability router + DAG   :s3, after s2, 10
-    section Stage 4
-    Node-exec callback        :s4, after s3, 6
-    section Stage 5
-    Verification hardening    :s5, after s4, 8
+    section Foundation
+    S0 Close remaining spikes        :s0, 0, 3
+    S1 Evidence lane + real entailment :s1, after s0, 8
+    section Services
+    S2 Extract AI4RnD services       :s2, after s1, 10
+    S3 Wire the unwired              :s3, after s2, 12
+    section Governed execution
+    S4 Execution adapter + callback  :s4, after s3, 8
+    section Product
+    S5 Workflow lanes + evaluators   :s5, after s4, 16
+    S6 RSI surfaces                  :s6, after s5, 16
+    S7 Verticals + accounts          :s7, after s6, 10
 ```
 
 ---
 
-## Stage 0 — Evidence spikes (2 weeks)
+## Stage 0 — Close the remaining spikes (3 weeks)
 
-Answer E1–E8 from [08-recommended-architecture.md](08-recommended-architecture.md) §8
-before writing production code. This stage exists because several conclusions in this
-analysis rest on documentation rather than executed code
-(see [10-risks-assumptions-open-questions.md](10-risks-assumptions-open-questions.md) §L1).
+Most verification is already done. What remains is the pair that can flip the architecture.
 
-**Deliverables**
+| Spike | Question | Method | If it fails |
+|---|---|---|---|
+| **G2** | Does an out-of-tree Rail survive agent-cache invalidation and agent-server restart? | run a live JiuwenSwarm agent server with a model backend; install a Rail plugin, restart, re-invoke | Option G — the seam is not durable |
+| **G1** | Can a bounded work packet be dispatched to a live `DeepAgent` and cancelled mid-flight? | prototype the callback against a real agent | Option G — governed execution unavailable |
+| **E6** | What fraction of `graph_scheduler.py` (4,189 LOC) is Solar-coupled? | dependency audit | rewrite rather than port; same exit gate |
+| **G6** | Is the tmux cockpit a user requirement? | ask the owners (Q4) | changes the physical-operator model |
+| **N1** | Does JiuwenSwarm's `builtin_rules.yaml` load if placed in openjiuwen's package path? | copy + re-run V-4 harness | permission repair needs an upstream fix |
 
-- A working JiuwenSwarm install with `openjiuwen` present, and a written note on the real
-  `DeepAgentRail` / `ability_manager` API surface — the largest unverified dependency in
-  this whole analysis.
-- A minimal `hello_rail` plugin that registers one tool, proving E1.
-- A dependency audit of `graph_scheduler.py` — what fraction is Solar-coupled (E6).
-- A standalone import of `research/{schemas,storage,hashing,ids}` outside the Solar tree (E3).
-- A head-to-head comparison of `openJiuwen-DeepSearch` against the AI4RnD survey pipeline on
-  one fixed topic (E7).
-- A precision measurement of `_jaccard`-based grounding against hand-labelled unsupported
-  claims (E8).
-
-**Exit gate**
-
-- E1 ✅ and E3 ✅ — otherwise re-open the architecture decision entirely.
-- E7 answered with a written value judgement. If `openJiuwen-DeepSearch` is close in
-  quality, escalate to a stakeholder decision before Stage 1.
-- E8 answered. If grounding precision is poor, move real entailment work from Stage 5 into
-  Stage 1 — because otherwise Stage 1 ships a verification claim it cannot support.
+**Exit gate.** G1 ✅ and G2 ✅, or the architecture decision reopens with Option G as the
+front-runner.
 
 ---
 
-## Stage 1 — Rail plugin + evidence ledger as a library (6 weeks)
+## Stage 1 — Evidence lane, with verification that actually verifies (8 weeks)
 
-Smallest thing that puts verified research in front of a user through JiuwenSwarm.
-**Zero core-tree changes.**
+Smallest thing that puts *trustworthy* research output in front of a user. **Zero core
+changes.**
 
 **Build**
 
 1. Extract `harness/lib/research/{schemas,storage,hashing,ids,evidence,extractors}` into an
-   installable package (`ai4rnd-research-core`). Keep the SQLite schema and JSONL export.
-2. Port `evaluator.py`'s grounding, authority, diversity and source-type gates, plus the
-   `@register_gate` registry.
-3. Write `ResearchToolkitRail` as an out-of-tree plugin exposing `research_start`,
-   `research_status`, `research_evidence`, `research_claims`, `research_gate_report`,
-   `research_report`.
-4. Run the pipeline **in-process, synchronously**, bounded to the `quick` depth tier so it
-   fits inside a tool call.
-5. Migrate 3–5 AI4RnD research skills to JiuwenSwarm's model-invoked convention.
-
-**Explicitly not in scope:** DAG scheduling, capability routing, the service process, any
-core-tree change.
+   installable package. Verified standalone in V-10, so this is packaging, not porting.
+2. **Replace the grounding check.** V-12 measured precision 0.25 / detection 0.14 for
+   `ok = bool(token_overlap)`. Build real entailment — an NLI cross-encoder, or a bounded
+   LLM judge with its own schema, golden set and audit trail. *This is Stage 1 work, not
+   Stage 5 hardening: shipping the current check would ship a verification claim the code
+   cannot support.*
+3. Port the rest of the evaluator suite (source authority, diversity, source-type
+   plausibility, section coverage) — 104 tests already pass.
+4. Port `gate_ledger` — append-only, writer-attributed, status-as-projection.
+5. `ResearchToolkitRail` as an out-of-tree plugin; tools return **references, not bulk
+   evidence** (boundary rule 6.2).
+6. Ship JiuwenSwarm's `builtin_rules.yaml` into the openjiuwen package path so the permission
+   guardrails are actually active (V-4).
 
 **Exit gate**
 
-- A user asks for research in the web UI and receives a report where **every claim resolves
-  to a citation span that verifies at char and byte offsets**.
-- Gate failures are visible to the user as gate failures, not hidden.
-- E4 ✅ — results survive `/compact` and session rewind.
-- The plugin installs, toggles and uninstalls through the existing UI with no restart.
-- No regression in JiuwenSwarm's own test suite.
+- Every claim in a delivered report resolves to a citation span verified at char and byte
+  offsets.
+- **Entailment precision measured on a labelled set and published.** Must materially beat
+  0.25 — set the bar before building, not after.
+- Gate failures are visible to the user as gate failures.
+- `get_builtin_security_rules()` returns > 0 in the deployed configuration.
+- No regression in JiuwenSwarm's 2,816-test suite.
 
-**Risk:** the `quick` tier may still exceed a reasonable tool-call duration. If so, move the
-async split forward from Stage 2.
+**Features delivered:** ~18 (5, 6, 17–19, 31, 43, 45–49, 52, 66, 70, 89, 117, 121).
 
 ---
 
-## Stage 2 — Extract the research service (8 weeks)
+## Stage 2 — Extract AI4RnD services (10 weeks)
 
-Move the research core out of the agent process, behind an HTTP API.
+Move the workflow out of the agent process, behind an API. Proves the ownership boundary.
 
 **Build**
 
-1. FastAPI service: `POST /runs`, `GET /runs/{id}`, `GET /runs/{id}/evidence`,
-   `/claims`, `/gates`, `/report`, `POST /runs/{id}/cancel`.
-   Bind loopback; require a bearer token; no unauthenticated surface.
-2. Run orchestrator driven by a declarative state machine adapted from
-   `coordinator-state-machine.json` — but with typed artifact validation replacing
-   file-existence guards [E-A03].
-3. Port the gate ledger unchanged: append-only, 8 record kinds, writer attribution, node
-   status as a projection [E-A10].
-4. Port the contracted-intake fail-closed behaviour [E-A17].
-5. Rewrite the Rail plugin's tools as HTTP clients; runs become asynchronous with polling.
-6. Process supervision — the service starts with the agent server, following the
-   `jiuwenbox_runner` pattern (subprocess with `PR_SET_PDEATHSIG`) [E-J11].
-7. Support `standard` and `deep` depth tiers now that runs are long-lived.
+1. FastAPI service: runs, status, evidence, claims, gates, report, cancel. Loopback + bearer
+   token; no unauthenticated surface.
+2. Port the intention compiler (`intent_gateway` 736 + `intent_engine_adapter` 851) and
+   contract layer (`workflow_contract` 1,136 + `workflow_intake` fail-closed).
+3. Port the planner (`apo_plan_compiler` 1,093 + `plan_validator` 1,564 + `epic_decomposer`
+   926), preserving "compiles implies dispatchable".
+4. Run lifecycle state machine adapted from `coordinator-state-machine.json`, with typed
+   artifact validation replacing file-existence guards.
+5. Process supervision following the `jiuwenbox_runner` pattern.
 
 **Exit gate**
 
-- A `deep`-tier run completes across an agent-server restart.
-- Node status is *never* written directly — verified by an audit test asserting every
-  status change has a corresponding ledger record with a `writer` field.
-- The service refuses unauthenticated requests and does not bind a public interface.
-- Session rewind past a run's start does not corrupt the run (behaviour chosen and tested).
+- A long run survives an agent-server restart.
+- Every status change has a gate-ledger record with a `writer` field — asserted by test.
+- An unknown `workflow_id` fails closed (exit 3/4 semantics preserved).
+- **Decision point:** if two processes prove operationally unacceptable, reconsider now — not
+  later.
+
+**Features delivered:** ~14 (8–11, 14, 92, 97–99, 101–105).
 
 ---
 
-## Stage 3 — Capability router + DAG scheduler (10 weeks)
+## Stage 3 — Wire the unwired (12 weeks)
 
-The largest porting job. Gives the research service real orchestration.
+The highest-leverage stage: ~8,000 LOC of tested code with no live caller (V-8).
 
 **Build**
 
-1. **Capability router** (~2 weeks). Port the assignment loop [E-A06] preserving:
-   the hard capability gate that is never relaxed; skills as preference with the Layer-3
-   liveness net; discriminated stall reasons with `missing_capabilities` / `missing_skills`.
-   Define the JiuwenSwarm worker schema — capabilities derived from swarm member config,
-   not `physical-operators.json`.
-2. **DAG scheduler** (~6 weeks). Port validation (cycles, missing deps, duplicates), topo
-   layering, critical path, parallelism metrics, and **write-scope conflict avoidance**
-   [E-A07]. Rewrite the I/O layer against the service's store; keep the algorithm. Retain
-   `_assert_pass_mark_allowed` and `_passed_without_required_eval`.
-3. **Verification gate** (~1 week). Port writer ≠ verifier [E-A11], and strengthen it per
-   [08](08-recommended-architecture.md) §5.4 — the router excludes the writer from the
-   evaluation node's candidate set, making self-grading unroutable rather than merely
-   detected.
-4. **Repair planner** (~1 week). Generalise `survey-auto-repair` to arbitrary gate
-   failures; persist repair DAGs; `repair_exhausted` → `needs_human_review`.
+1. **Capsules** (~4 wks) — `capability_capsules` 1,351 + `capsule_execution_gate` 194 +
+   `skill_to_capsule_compiler` 323 + the 30 shipped manifests. Wire registry → discovery →
+   selection → invocation → composition. Build the capsule↔JiuwenSwarm-skill bridge
+   (`bindings.skills`).
+2. **Operators** (~3 wks) — `logical_operator_registry`, `physical_operator_catalog`,
+   `operator_state_machine`, `operator_score`, `operator_flow_control`. Wire capsule
+   `effects` and `operator_compatibility` into binding.
+3. **Capability router** (~2 wks) — port the assignment loop, preserving the hard capability
+   gate, the Layer-3 liveness net and discriminated stall reasons. **Add writer≠verifier
+   exclusion at candidate-set construction** (boundary rule 6.4).
+4. **DAG scheduler** (~2 wks if port, ~6 if rewrite — E6 decides) — validation, topo layering,
+   critical path, **write-scope conflict avoidance**, pass-mark guards. 321 tests to carry
+   over.
+5. **Durable queue + leases** (~1 wk) — `actor_registry`/`actor_lease`/`actor_mailbox`/
+   `actor_runtime` (1,051 LOC). This closes Harness Core features 2 and 4, which JiuwenSwarm
+   does not provide.
+6. TaskGraph persistence — `task_graph_io` + `task_graph_state_io`.
 
 **Exit gate**
 
-- A research run with ≥10 nodes and real dependencies executes with correct ordering.
-- Two nodes with overlapping `write_scope` are never batched together — asserted by test.
-- A node requiring an unavailable capability stalls with `no_matching_worker` and the
-  missing capability list, and no node is force-assigned.
-- A node cannot be marked passed without an independent evaluation record.
-- A gate failure produces a repair DAG that re-runs and either resolves or exhausts.
+- A ≥10-node TaskGraph executes with correct ordering.
+- Two nodes with overlapping `write_scope` are never batched — asserted by test.
+- A node needing an unavailable capability stalls with `no_matching_worker` + missing list;
+  nothing is force-assigned.
+- An evaluation node can never be bound to the operator that wrote the artifact.
+- A capsule declaring `effects.network: none` cannot bind to a network-capable operator.
+- Leases are reaped after operator death; no duplicate dispatch.
 
-**Risk:** E6 determines whether this is a port or a rewrite. If >50% of `graph_scheduler.py`
-is Solar-coupled, plan a rewrite against the documented guarantees instead — same exit gate,
-different means, roughly the same duration.
+**Features delivered:** ~24 (55–65, 88, 91, 93–95, 60–62, 64, 71 partial).
 
 ---
 
-## Stage 4 — Node-exec callback (6 weeks)
+## Stage 4 — Governed execution (8 weeks)
 
-The only stage that changes the JiuwenSwarm core tree. Research nodes execute as governed
-JiuwenSwarm agent work.
+The only stage touching JiuwenSwarm's core tree.
 
 **Build**
 
-1. In-tree `jiuwenswarm/extensions/research/` registering `research.execute_node`,
-   `research.node_status`, `research.cancel_node`.
-2. The core patch: `ReqMethod` members plus a dispatch branch in `interface.py` [E-J08].
-   **Prefer the general form** — a `_handle_extension_request` dispatching any registered
-   method under a reserved namespace — and offer it upstream, which removes the patch.
-3. The work-packet contract per [08](08-recommended-architecture.md) §4.3: bounded goal,
-   input artifact refs, output schema, token budget, idempotency key, cancellation mapping,
-   non-re-entrancy, attribution, circuit breaker.
-4. Route records into the gate ledger — provider, model, operator id, backend, exit code,
-   timings [E-A10].
-5. Non-re-entrancy enforced as a permission rule (E5), not a prompt instruction.
+1. In-tree extension directory registering execution RPC handlers.
+2. Core patch: `ReqMethod` members + dispatch branch in `interface.py`. **Prefer the generic
+   form** — a passthrough for any registered method under a reserved namespace — and offer it
+   upstream, which removes the patch.
+3. Work-packet contract: bounded goal, input artifact refs, output schema, token budget,
+   idempotency key `(run_id, node_id, attempt)`, cancellation mapping, non-re-entrancy,
+   attribution, circuit breaker. Model it on the Codex bridge, which already does budgets and
+   circuit-breaking correctly.
+4. Route records into the gate ledger for every execution.
+5. Non-re-entrancy enforced by policy, not prompt.
 
 **Exit gate**
 
-- A research node executes on a capability-matched swarm member, under the tiered permission
-  engine, optionally inside jiuwenbox.
-- Every node execution produces a route record naming the executing member and model.
+- A node executes on a capability-matched JiuwenSwarm agent under the permission engine,
+  optionally inside jiuwenbox.
 - Cancelling a run cancels in-flight node executions.
-- A node-exec agent attempting `research_start` is denied by the permission engine.
-- Re-delivery of the same `(run_id, node_id, attempt)` does not duplicate work.
-- The core patch is ≤20 lines across ≤2 files, or has been accepted upstream.
+- Re-delivery of the same idempotency key does not duplicate work.
+- Core patch ≤20 lines across ≤2 files, or accepted upstream.
+
+**Features delivered:** ~8 (63, 96, plus governed execution for the build lanes).
 
 ---
 
-## Stage 5 — Verification hardening (8 weeks)
+## Stage 5 — Workflow lanes and the full evaluator suite (16 weeks)
 
-Close the gaps that neither system has today
-([05-capability-matrix.md](05-capability-matrix.md) §Missing).
+The build-new middle of the R&D pipeline — the part neither system has.
 
 **Build**
 
-1. **Real entailment checking** to replace `_jaccard` token overlap — an NLI model or a
-   bounded LLM judge with its own schema and audit trail. *Move to Stage 1 if E8 showed
-   poor precision.*
-2. **Contradiction search** and a contradiction-coverage gate.
-3. **The research ontology** — entity and claim type vocabulary with synonym/alias
-   resolution and domain profiles.
-4. **The optimizer** — logical plan → physical operator plan, code-defined, inspectable,
-   persisted [E-A14].
-5. **JiuwenSwarm web view** — DAG, gate verdicts, evidence browser, honouring the
-   honest-state rules [E-A02].
-6. **Auto Harness integration** — expose research quality gates as an Auto Harness
-   optimisation signal, so harness changes are scored on grounding quality against a fixed
-   benchmark rather than only on CI pass. *This is the most valuable synergy identified in
-   the analysis and the strongest argument that the combined system exceeds the sum.*
-7. **Cross-run cost budgeting** with a circuit breaker, adapting the Codex bridge's model.
+1. **Opportunity selection lane** (features 23–29, ~6 wks) — candidate consolidation, idea
+   identification, **the Idea Card schema** (a governing artifact with no implementation
+   anywhere), opportunity definition, technical and strategic screening, portfolio
+   prioritisation.
+2. **Claims & hypotheses** (32–34, ~4 wks) — hypothesis pool, mechanism formation,
+   **falsifiability screening** (the scientific core; absent everywhere), POC design contract.
+3. **Benchmarking lane** (40–44, ~3 wks) — port the unwired benchmark suite.
+4. **Remaining evaluator families** (67–69, ~3 wks) — engineering correctness, performance/
+   cost, security/privacy/compliance/IP. Compose with JiuwenSwarm's LSP, Auto Harness CI and
+   permission engine rather than duplicating.
 
 **Exit gate**
 
-- A claim passing the grounding gate is genuinely entailed by its evidence — measured
-  against a labelled set, with the metric published.
-- Contradiction coverage is reported for every run.
-- Auto Harness can run an optimisation cycle scored on research quality.
-- Cost is bounded per research programme, not only per loop.
+- A full run goes intake → decision with an Idea Card, a falsifiability verdict, a benchmark
+  comparison and an evaluation dossier.
+- A non-falsifiable hypothesis is blocked before POC construction.
+
+**Features delivered:** ~21.
+
+---
+
+## Stage 6 — RSI (16 weeks)
+
+**Build**
+
+1. **Wire GEPA** (~2 wks) — 3,540 LOC already implemented with budget caps and a frozen-policy
+   checker. This is integration, not construction.
+2. **Wire `evolution_engine` + `failure_miner`** (~2 wks) — scorecard/recommend/promote/
+   demote and failure clustering into candidates.
+3. **RSI-3 capsule/operator evolution** (~3 wks) — `skill_to_capsule_compiler` exists;
+   add trajectory mining and compatibility testing.
+4. **RSI-5 evaluator/governance** (~3 wks) — judge calibration, golden sets, agreement rates.
+5. **RSI-2 routing, RSI-4 DAG/organisation, RSI-6 memory/retrieval, RSI-8 data/curriculum**
+   (~6 wks) — the four remaining surfaces with no code.
+6. **RSI-7 model weights** — **deferred** (needs training infrastructure).
+
+**Exit gate**
+
+- A candidate that relaxes a frozen policy is rejected before testing.
+- Every promotion is versioned, evidence-backed and reversible; rollback is exercised.
+- A regression detected post-promotion triggers rollback automatically.
+- Promotion of high-risk classes requires a recorded human verdict.
+
+**Features delivered:** ~7 of 8 RSI surfaces.
+
+---
+
+## Stage 7 — Verticals and accounts (10 weeks)
+
+**Build**
+
+1. **Account management** (132–135) — registration, auth/session, profile, **privacy/export/
+   delete controls**. Absent from both systems; carries compliance obligations.
+2. **Data graphs** (85, 86) — dataset graph, code graph.
+3. **Visibility** (120–123) — DAG/gate/evidence views as JiuwenSwarm surfaces, honouring the
+   honest-state rules. Cross-run cost budgeting (missing from both).
+4. Remaining delivery and packaging features.
+
+**Features delivered:** ~12.
 
 ---
 
 ## Cumulative view
 
-| Stage | Duration | Cumulative | Core changes | Value delivered |
+| Stage | Weeks | Cumulative | Core changes | Features (cum.) |
 |---|---|---|---|---|
-| 0 | 2 wks | 2 wks | none | de-risked decisions |
-| 1 | 6 wks | 8 wks | **none** | verified research in JiuwenSwarm's channels |
-| 2 | 8 wks | 16 wks | **none** | long-running, observable, restart-safe runs |
-| 3 | 10 wks | 26 wks | **none** | capability routing + DAG orchestration |
-| 4 | 6 wks | 32 wks | ~10–20 lines | governed node execution on real agents |
-| 5 | 8 wks | 40 wks | none | verification that withstands scrutiny |
+| 0 Spikes | 3 | 3 | none | 0 |
+| 1 Evidence + entailment | 8 | 11 | **none** | ~18 |
+| 2 Services | 10 | 21 | **none** | ~32 |
+| 3 Wire the unwired | 12 | 33 | **none** | ~56 |
+| 4 Governed execution | 8 | 41 | ~10–20 lines | ~64 |
+| 5 Workflow lanes | 16 | 57 | none | ~85 |
+| 6 RSI | 16 | 73 | none | ~92 |
+| 7 Verticals + accounts | 10 | 83 | none | ~104 |
 
-**~9–10 months to the full target; ~2 months to first user value.**
+**~19–20 months to substantial completeness; ~2.5 months to first trustworthy user value.**
 
-Stages 1–3 require **no JiuwenSwarm core changes at all**. That is the plan's most important
-property: the architecture can be abandoned at any point through Stage 3 with the research
-core intact and reusable, and with no upstream debt incurred.
+The residual ~38 features are `ADAPT`/`REUSE-JW` items absorbed incrementally across stages,
+plus the 2 `DEFER` items.
+
+**Stages 0–3 require no JiuwenSwarm core changes at all** — 33 weeks and ~56 features before
+any upstream commitment. That is the plan's most important property: the architecture can be
+abandoned for Option G at the Stage 3 boundary with all AI4RnD work intact.
 
 ---
 
@@ -244,22 +272,23 @@ core intact and reusable, and with no upstream debt incurred.
 
 | After | Decide |
 |---|---|
-| Stage 0 | proceed, or fall back to Option F (keep separate) if E1/E3 fail or E7 shows the value case is weak |
-| Stage 1 | whether users actually want verified research through a chat channel — measure, do not assume |
-| Stage 2 | whether two processes are acceptable operationally; if not, reconsider Option B with eyes open |
-| Stage 3 | whether the ported scheduler carries its weight, or whether the research DAG is better expressed with JiuwenSwarm swarm delegation |
-| Stage 4 | whether the core patch was accepted upstream; if not, whether carrying it is sustainable |
+| Stage 0 | proceed, or switch to Option G if G1/G2 fail |
+| Stage 1 | does entailment clear the published bar? If not, the product's core claim is unmet — fix before building further |
+| Stage 2 | are two processes operationally acceptable? |
+| Stage 3 | did the scheduler port carry its weight, or should routing be rebuilt? |
+| Stage 4 | was the core patch accepted upstream? If not, is carrying it sustainable? |
+| Stage 6 | is RSI producing measurable improvement, or only churn? Require evidence before extending it. |
 
 ---
 
 ## What this plan deliberately does not do
 
-- **Does not port `coordinator.sh` or `solar-harness.sh`.** Read them for behaviour;
+- **Does not port `coordinator.sh` or the tmux carrier.** Read them for behaviour;
   reimplement nothing.
-- **Does not port the tmux carrier.** Not in any stage, under any condition.
-- **Does not fork JiuwenSwarm.** If a fork ever becomes necessary, that is a signal the
-  boundary was drawn wrongly — revisit the boundary first.
-- **Does not migrate JiuwenSwarm users to AI4RnD's UI.** The 14,400-line status server is
-  replaced by a JiuwenSwarm view, not carried across.
-- **Does not attempt multi-tenancy.** Both systems are effectively single-user today; adding
-  tenancy to the research artifact model is separate work with its own justification.
+- **Does not ship the current grounding check.** It would encode a false verification claim.
+- **Does not put capsules, operators or RSI inside the JiuwenSwarm tree.** They must be
+  versionable and promotable independently.
+- **Does not assume JiuwenSwarm's permission guardrails are active.** V-4 proved otherwise;
+  Stage 1 repairs it explicitly.
+- **Does not attempt RSI-7 (model weights).** Deferred until the evidence and benchmark
+  layers produce trustworthy training signal.

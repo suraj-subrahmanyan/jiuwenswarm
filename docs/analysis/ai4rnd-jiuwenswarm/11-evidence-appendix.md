@@ -3,6 +3,12 @@
 Every tagged claim, resolved to a repository, file, and line reference at the analysed
 commit.
 
+> **Revision 2.** This appendix covers **source-read** evidence (`E-Jxx` / `E-Axx`).
+> **Executed** evidence — commands, transcripts and measurements — is in
+> [12-verification-appendix.md](12-verification-appendix.md), referenced as `V-n`.
+> Where the two conflict, **the executed result wins**; the affected entries below carry a
+> ⚠ pointer.
+
 ## Repositories and commits
 
 | Tag prefix | Repository | Commit | Branch |
@@ -23,8 +29,10 @@ with the inference stated.
 ### E-J01 — `openjiuwen` is an external, unvendored dependency
 **Verified.** `pyproject.toml:20` — `"openjiuwen==0.1.15.post3"` in `[project.dependencies]`
 (also line 60, `distribute = ["openjiuwen[postgres,zmq]"]`).
-No `openjiuwen` directory exists in the repository. A Python import in the analysis
-environment failed with `ModuleNotFoundError`.
+No `openjiuwen` directory exists in the repository. **Revision 2:** it was installed from
+PyPI and inspected — see [V-1](12-verification-appendix.md#v-1--openjiuwen-rail-api--the-real-shape).
+The dependency remains external and unvendored; the point stands that upstream exposure is to
+two projects.
 Imported throughout, e.g. `jiuwenswarm/agents/swarm/registry.py:22-45`
 (`openjiuwen.agent_evolving.trajectory`, `openjiuwen.agent_teams.harness.manifest`,
 `openjiuwen.agent_teams.rails.builtin_elements`, `…schema.build_context`) and
@@ -133,7 +141,7 @@ Driven from `jiuwenswarm/server/agent_ws_server.py:5922, 5957, 5988, 6022`
 (four handlers) and `interface_deep.py:4375-4377` (sets the agent instance for hot update).
 
 ### E-J10 — A Rail can register tools on a live agent ⭐
-**Verified.**
+**Verified in source, and now also EXECUTED — see [V-2](12-verification-appendix.md#v-2--can-an-out-of-tree-rail-register-and-invoke-an-ability-).**
 `jiuwenswarm/agents/harness/team/rails/team_member_skill_toolkit_rail.py`:
 - line 22 — `class MemberSkillToolkitRail(DeepAgentRail)`, `priority = 95`
 - line 40 — `def init(self, agent: "DeepAgent")`
@@ -155,7 +163,10 @@ Line 42 — `_PR_SET_PDEATHSIG = 1`.
 `models/policy.py` (762), `proxy/inference_privacy_proxy_manager.py` (498).
 
 ### E-J12 — Tiered permission policy
-**Documented.** `docs/en/ToolPermissionsSecurity.md` §1 (three-tier actions,
+**Documented — ⚠ partly superseded by [V-3](12-verification-appendix.md#v-3--permission-engine--severity-mapping-) and [V-4](12-verification-appendix.md#v-4--permission-engine--built-in-rules-do-not-load--new-finding).**
+The severity mapping is confirmed exactly. The built-in-rule layer described in §3 **loads
+zero rules** in a stock install, and the shell-operator escalation described in §2.4 behaves
+differently (decomposition, not escalation). `docs/en/ToolPermissionsSecurity.md` §1 (three-tier actions,
 `permissions.enabled` master switch, `permissions.schema: tiered_policy`), §2.1
 (severity→action mapping by `permission_mode`), §2.2 (parameter-rule matching by shell /
 path / network category), §2.3 (the nine-step resolution order), §2.4
@@ -182,7 +193,7 @@ and prompts — no data model, no schema, no gate. No SQL schema, dataclass, or 
 module for evidence or claims exists.
 
 ### E-J15 — Agent loop, rails, stop conditions
-**Documented.** `docs/en/Harness.md` §1.2 (single-round ReAct vs dual-layer task loop),
+**Documented — ⚠ rail event list superseded by [V-1](12-verification-appendix.md#v-1--openjiuwen-rail-api--the-real-shape): there are 11 events, including the undocumented `after_react_iteration`.** `docs/en/Harness.md` §1.2 (single-round ReAct vs dual-layer task loop),
 §1.3 (six design principles), §2 (three layers: core engine / extension / infrastructure),
 §3.1 (`TaskLoopController`, `LoopCoordinator`, `TaskLoopEventHandler`,
 `TaskLoopEventExecutor`, `LoopQueues`; `follow_up` / `steer` / `abort`; `TaskPlanningRail`,
@@ -420,7 +431,7 @@ Flag-gated by `SOLAR_GATE_LEDGER`; the raw append/read/projection APIs are uncon
   line 65
 
 ### E-A12 — Research evaluator and gate registry ⭐
-**Verified.** `harness/lib/research/evaluator.py` (1,673 LOC):
+**Verified — ⚠ the grounding component is MEASURED INADEQUATE, see [V-12](12-verification-appendix.md#v-12--citation-grounding-quality--measured--decisive) (precision 0.25).** `harness/lib/research/evaluator.py` (1,673 LOC):
 `policy_doctor` (133), `explain_source_authority` (165), `audit_sources` (207),
 `_grounding_checks` (443), `_citation_grounding_metrics` (482),
 `_expert_analysis_lines` (525), `_expert_novelty_metrics` (541),

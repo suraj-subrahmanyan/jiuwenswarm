@@ -19,6 +19,13 @@ standalone reference; several also appear in context in the analysis documents.
 | 12 | [Proposed end-to-end functional workflow](#12-proposed-end-to-end-functional-workflow) | — |
 | 13 | [Verification comparison](#13-verification-model-comparison) | [03](../03-workflow-traces.md) §6 |
 | 14 | [Extension surface map](#14-jiuwenswarm-extension-surface-map) | [06](../06-integration-challenges.md) §1 |
+| 15 | [Intended AI4RnD product — complete scope](#15-intended-ai4rnd-product--complete-scope) | [00](../00-intended-product-model.md) §1 |
+| 16 | [Capsule → Contract → Operator stack](#16-capsule--contract--logical-operator--physical-operator) | [00](../00-intended-product-model.md) §2 |
+| 17 | [TaskGraph lifecycle](#17-taskgraph-lifecycle--intent-to-closed-run) | [00](../00-intended-product-model.md) §5 |
+| 18 | [Evidence and evaluator chain](#18-evidence-and-evaluator-chain) | [00](../00-intended-product-model.md) §2.3 |
+| 19 | [RSI feedback loop](#19-rsi-feedback-loop) | [08](../08-recommended-architecture.md) §4 |
+| 20 | [Recommended target architecture (complete)](#20-recommended-target-architecture--complete-product) | [08](../08-recommended-architecture.md) §1 |
+| 21 | [Maturity overlay](#21-maturity-overlay--where-the-product-actually-stands) | [13](../13-maturity-map.md) |
 
 ---
 
@@ -552,4 +559,214 @@ flowchart TB
     E -.->|"externally callable ❌"| EN --> FS
     CS -.->|"gates inclusion of"| HE["@harness_element registrations"]
     L -.->|"would remove"| CS
+```
+
+---
+
+## 15. Intended AI4RnD product — complete scope
+
+```mermaid
+flowchart TB
+    subgraph W["WORKFLOW PLANE — 54 features"]
+        direction LR
+        W1["Ingestion<br/>7"] --> W2["Requirement<br/>compilation · 7"] --> W3["Search &<br/>ideation · 8"]
+        W3 --> W4["Opportunity<br/>selection · 7"] --> W5["Claims &<br/>hypotheses · 5"]
+        W5 --> W6["POC<br/>impl · 5"] --> W7["Bench-<br/>marking · 5"] --> W8["Evaluation<br/>6"] --> W9["Delivery<br/>4"]
+    end
+    subgraph F["FOUNDATION PLANE — 65 features"]
+        direction TB
+        F1["Capability Capsules · 5"]
+        F2["Operators — logical + physical · 6"]
+        F3["Evaluators — 6 families"]
+        F4["Foundational models · 3"]
+        F5["RSI — 8 surfaces"]
+        F6["Data foundations — 7 graphs + memory + TaskGraph · 9"]
+        F7["Harness Core · 6"]
+        F8["Intention compilers · 5"]
+        F9["Planner · 3"]
+        F10["Builder · 14"]
+    end
+    subgraph V["VERTICAL PLANE — 23 features"]
+        direction LR
+        V1["Visibility<br/>4"] --- V2["Installer/CLI/<br/>Webapp · 5"] --- V3["UI<br/>3"]
+        V4["Accounts<br/>4"] --- V5["Channels<br/>3"] --- V6["Config<br/>4"]
+    end
+    W --> F
+    V --> W
+```
+
+## 16. Capsule → Contract → Logical Operator → Physical Operator
+
+```mermaid
+flowchart TB
+    CAP["<b>Capability Capsule</b> — 'vehicle repair'<br/>governed · versioned · certified<br/>skill + rule + boundary + governance<br/><i>11 required schema sections</i>"]
+    CON["<b>Contract</b> — 'the repair plan for this model'<br/>typed inputs/outputs · preconditions ·<br/>postconditions · invariants · required evidence"]
+    LOP["<b>Logical Operator</b> — 'the specific tool'<br/>DAG-callable · identity+version · required capabilities ·<br/>write scope · evidence requirements · completion conditions"]
+    POP["<b>Physical Operator</b> — 'the mechanic'<br/>declared capabilities · quota · cost · latency · health"]
+    O1["JiuwenSwarm agent<br/><i>permissions + sandbox apply</i>"]
+    O2["API model"]
+    O3["Browser operator"]
+    O4["Remote host / code pane"]
+
+    CAP -->|contains one or more| CON
+    CON -->|realised by| LOP
+    LOP -->|bound at runtime by the router| POP
+    POP --> O1 & O2 & O3 & O4
+    O1 & O2 & O3 & O4 -.->|execution evidence| CAP
+
+    CAP -.->|"effects · operator_compatibility<br/>required_guard_capsules"| POP
+```
+
+## 17. TaskGraph lifecycle — intent to closed run
+
+```mermaid
+flowchart LR
+    UI["user intent"] --> RC["requirement<br/>compilation"] --> CS["capsule<br/>selection"]
+    CS --> RCON["research /<br/>task contract"] --> PL["planner"] --> DAG["TaskGraph"]
+    DAG --> VAL{"validate<br/>schema · cycles · coverage ·<br/>capability feasibility"}
+    VAL -->|invalid| BLOCK["blocked / replan"]
+    VAL -->|valid| RDY["readiness<br/>deps · gates · external waits"]
+    RDY --> BATCH["safe parallel batch<br/>write-scope · effects · capacity"]
+    BATCH --> BIND["operator binding"]
+    BIND -->|no capable operator| STALL["honest stall<br/>no_matching_worker"]
+    BIND --> ADMIT["admission · lease · quota"]
+    ADMIT --> EXEC["execute"]
+    EXEC --> GATE{"gates"}
+    GATE -->|fail| REPAIR["repair DAG"] --> RDY
+    GATE -->|pass| PROJ["node status<br/>= gate-ledger projection"]
+    PROJ --> CLOSE{"all required nodes<br/>+ gates satisfied?"}
+    CLOSE -->|no| RDY
+    CLOSE -->|yes| DONE["run closed"]
+```
+
+## 18. Evidence and evaluator chain
+
+```mermaid
+flowchart TB
+    SRC["source"] --> DOC["document<br/>content_hash SHA-256"]
+    DOC --> SPAN["span<br/>char + byte offsets"]
+    SPAN --> EV["evidence item"]
+    EV --> LNK["claim-evidence link"]
+    LNK --> CLM["claim<br/>verification_status · confidence"]
+    CLM --> CIT["citation span in report text"]
+
+    subgraph EVAL["Evaluator families — each a logical operator"]
+        E1["1 Contract / schema / artifact conformance"]
+        E2["2 Engineering correctness + code quality"]
+        E3["3 Performance · cost · benchmark"]
+        E4["4 Security · privacy · compliance · IP"]
+        E5["5 Evidence · factuality · scientific validity"]
+        E6["6 Lifecycle · parity · human review"]
+    end
+    CIT --> E5
+    E1 & E2 & E3 & E4 & E5 & E6 --> GL["gate ledger<br/>append-only · writer-attributed"]
+    GL --> ST["node status = projection"]
+    E6 -.->|high-risk / ambiguous| HITL["attributable HITL review"]
+    HITL --> GL
+
+    E5 -.->|"⚠ current check: ok = bool(shared token)<br/>measured precision 0.25 — must be replaced"| WARN["entailment: TO BUILD"]
+```
+
+## 19. RSI feedback loop
+
+```mermaid
+flowchart TB
+    EXEC["<b>Execution evidence</b><br/>route records · artifacts · traces"]
+    EVAL["<b>Evaluation</b><br/>6 families + operator capability profiling"]
+    CAND["<b>Improvement candidate</b> (versioned)<br/>GEPA propose · trajectory mining · failure clusters"]
+    ISO["<b>Isolated test + benchmark</b><br/>sandbox · holdout · golden set · replay · A/B<br/><i>budget caps: max-evals · max-spend · max-walltime</i>"]
+    POL["<b>Frozen-policy check</b><br/>may not relax: secrets · git_push ·<br/>destructive_shell · payment · external_api_write"]
+    DEC{"<b>Approve?</b><br/>evaluator verdict<br/>+ HITL for high risk"}
+    PROMO["<b>Promotion</b><br/>version bump · registry update"]
+    REJ["<b>Rejection</b> (recorded)"]
+    TGT["<b>Updated artifact</b><br/>Capsule · Operator · binding policy ·<br/>TaskGraph pattern · evaluator rubric ·<br/>prompt · model policy · memory · benchmark"]
+    MON["<b>Post-promotion monitoring</b>"]
+    RB["<b>Rollback</b>"]
+
+    EXEC --> EVAL --> CAND --> ISO --> POL --> DEC
+    DEC -->|approved| PROMO --> TGT --> MON
+    DEC -->|rejected| REJ
+    MON -->|regression| RB --> TGT
+    MON -->|stable| EXEC
+    REJ -.->|becomes a hard case| EXEC
+    TGT -.->|next run uses new version| EXEC
+```
+
+## 20. Recommended target architecture — complete product
+
+```mermaid
+flowchart TB
+    subgraph U["Users"]
+        UI2["Web · TUI · Desktop · CLI · IM · cron"]
+    end
+    subgraph JW["JiuwenSwarm — foundation · 23 features"]
+        GW["Gateway · channels · E2A"]
+        AS["AgentServer · session · skills · memory"]
+        DA["DeepAgent · members · sub-agents"]
+        PERM["Permission engine"] --- SBX["jiuwenbox sandbox"]
+    end
+    subgraph GL2["Integration — thin"]
+        RAIL["ResearchToolkitRail<br/><i>out-of-tree · verified V-2</i>"]
+        ADPT["Execution adapter<br/><i>~10-line core patch</i>"]
+    end
+    subgraph AI["AI4RnD services — 90 features"]
+        INT["Intention compiler → contract"]
+        PLAN["Planner → TaskGraph → validate"]
+        SCHED["DAG scheduler · readiness · batching"]
+        ROUTE["Capability router"]
+        ADMIT2["Admission · durable queue · leases"]
+        CAPS["Capsule registry"]
+        OPS["Operator registries"]
+        EVAL2["Evaluator suite"]
+        LED["Gate + evidence ledger"]
+        RSI2["RSI loop"]
+    end
+    subgraph FLEET["Physical operators"]
+        JWA["JiuwenSwarm agents<br/><i>governed</i>"]
+        API["API models"]
+        BR["Browser operators"]
+        HS["Remote hosts"]
+    end
+
+    UI2 --> GW --> AS --> DA
+    DA -.mounts.-> RAIL
+    DA --> PERM --> SBX
+    RAIL --> INT --> PLAN --> SCHED --> ROUTE --> ADMIT2
+    CAPS --> ROUTE
+    OPS --> ROUTE
+    ADMIT2 --> ADPT --> DA --> JWA
+    ADMIT2 --> API & BR & HS
+    JWA & API & BR & HS --> LED
+    LED --> EVAL2 --> LED
+    LED --> RSI2
+    RSI2 -.->|promote / rollback| CAPS & OPS & PLAN & EVAL2
+```
+
+## 21. Maturity overlay — where the product actually stands
+
+```mermaid
+flowchart LR
+    subgraph A["AI4RnD"]
+        AC["ACTIVE · 68"]
+        AU["IMPL-UNWIRED · 27<br/><i>capsules · operators · actors · GEPA</i>"]
+        AS2["SCAFFOLD · 21"]
+        AP["SPEC · 16<br/><i>opportunity lane · hypotheses</i>"]
+        AB["ABSENT · 10<br/><i>RSI 2/4/7 · accounts</i>"]
+    end
+    subgraph J["JiuwenSwarm"]
+        JF["FULL · 20<br/><i>channels · UI · memory · sandbox</i>"]
+        JP["PARTIAL · 50"]
+        JN["NONE · 72<br/><i>all of the foundation plane</i>"]
+    end
+    subgraph D["Disposition"]
+        DP["PORT · 69"]
+        DB["BUILD · 27"]
+        DR["REUSE-JW · 23"]
+        DA2["ADAPT · 21"]
+        DD["DEFER · 2"]
+    end
+    AC & AU --> DP
+    AS2 & AP & AB --> DB
+    JF --> DR
+    JP --> DA2
 ```

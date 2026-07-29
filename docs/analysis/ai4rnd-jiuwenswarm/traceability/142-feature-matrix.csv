@@ -1,0 +1,143 @@
+id,sheet,l1,l2,firmness,ai4rnd_maturity,jw_coverage,evidence,evidence_class,disposition,verification_needed
+1,Workflow,Ingestion,1. Request Capture,FIRM,ACTIVE,FULL,JW gateway/channel_manager (9 IM+web+TUI+ACP); AI4R workflow_intake.py:1-24,EXEC,REUSE-JW,channel->run binding
+2,Workflow,Ingestion,2. Qualified Channel Signal Intake,DEBATED,SPEC,PARTIAL,JW im_pipeline/im_inbound.py; V-05 qualification not implemented either side,SRC,BUILD,define V-05 qualification contract
+3,Workflow,Ingestion,3. User-Supplied Material Import,FIRM,ACTIVE,FULL,"JW file services per channel; AI4R source_manifest.py, knowledge_ingest_registry.py",SRC,REUSE-JW,large-file/dataset limits
+4,Workflow,Ingestion,4. Intake Context Binding,FIRM,ACTIVE,PARTIAL,JW session/workspace binding; AI4R workspace_binding.py,SRC,ADAPT,project/workspace model mismatch
+5,Workflow,Ingestion,5. Real-Time Intake Deduplication & Cleaning,FIRM,IMPL-UNWIRED,NONE,AI4R lib/research/ids.py deterministic ids + content_hash; dedup in mirage_search,EXEC,PORT,near-duplicate policy
+6,Workflow,Ingestion,6. Intake Provenance Registration,FIRM,ACTIVE,NONE,AI4R research SourceDocument.content_hash; evidence ledger provenance,EXEC,PORT,provenance schema vs JW session
+7,Workflow,Ingestion,7. Intake Qualification,FIRM,IMPL-UNWIRED,NONE,AI4R workflow_intake fail-closed (exit 3/4); quarantine in coordinator,SRC,PORT,quarantine semantics
+8,Workflow,Requirement compilation,1. Intent Interpretation,FIRM,ACTIVE,PARTIAL,AI4R intent_gateway.py(736) + intent_engine_adapter.py(851) wired,EXEC,PORT,overlap with JW plan mode
+9,Workflow,Requirement compilation,2. Context Scoping,FIRM,ACTIVE,PARTIAL,"AI4R requirement_compiler/, requirement_coverage.py(471) wired",EXEC,PORT,
+10,Workflow,Requirement compilation,3. Ambiguity Resolution,FIRM,ACTIVE,PARTIAL,AI4R intent_gateway ambiguity path; JW structured_ask_user rail,SRC,ADAPT,who owns clarification UX
+11,Workflow,Requirement compilation,4. Constraint Resolution,FIRM,IMPL-UNWIRED,PARTIAL,AI4R workflow_contract.py(1136); JW permissions config,SRC,PORT,constraint->permission mapping
+12,Workflow,Requirement compilation,5. Requirement Prioritization,FIRM,SPEC,NONE,AI4R feature-list only; no prioritisation module found,SRC,BUILD,
+13,Workflow,Requirement compilation,6. Acceptance Definition,FIRM,ACTIVE,NONE,"AI4R contract Done+verify blocks (contract-template-v2), solar-verify",SRC,PORT,
+14,Workflow,Requirement compilation,7. Requirement Contract Confirmation,FIRM,ACTIVE,NONE,AI4R workflow_contract instantiate + hash/version; task_graph carries contract id,EXEC,PORT,
+15,Workflow,Search & ideation,1. Search Strategy Formation,FIRM,ACTIVE,PARTIAL,AI4R research/cli survey-plan; JW Symphony orchestration (different purpose),EXEC,PORT,
+16,Workflow,Search & ideation,2. Multi-Source Signal Discovery,FIRM,ACTIVE,PARTIAL,"AI4R mirage_search.py(931), gemini_enhanced_search.py, research search",EXEC,PORT,connector auth/quotas
+17,Workflow,Search & ideation,3. Source Qualification,FIRM,ACTIVE,NONE,AI4R evaluator._source_authority_metrics + policies/source_authority.json,EXEC,PORT,
+18,Workflow,Search & ideation,4. Technical Signal Extraction,FIRM,ACTIVE,NONE,"AI4R research extract -> evidence spans [0,150) verified in run",EXEC,PORT,
+19,Workflow,Search & ideation,5. Signal Organization,FIRM,ACTIVE,NONE,AI4R research mine -> 3 claims/3 links verified; signal clustering in survey,EXEC,PORT,
+20,Workflow,Search & ideation,6. Trend & Gap Analysis,FIRM,IMPL-UNWIRED,NONE,"AI4R survey/source_gap.py, tech_hotspot_radar/",SRC,PORT,
+21,Workflow,Search & ideation,7. Idea Generation,DEBATED,SPEC,NONE,Idea generation specified; no dedicated module found,SRC,BUILD,is this LLM-only or structured?
+22,Workflow,Search & ideation,8. Search Coverage Review,FIRM,IMPL-UNWIRED,NONE,AI4R evaluator._source_diversity_metrics + survey/gates/source_quality_distribution,EXEC,PORT,
+23,Workflow,Idea identification / screening / opportunity selection,1. Candidate Consolidation,FIRM,SPEC,NONE,Consolidation specified; partial in survey/chief_editor,SRC,BUILD,
+24,Workflow,Idea identification / screening / opportunity selection,2. Idea Identification,DEBATED,SPEC,NONE,No idea-identification module found,SRC,BUILD,
+25,Workflow,Idea identification / screening / opportunity selection,3. Idea Card Formation,FIRM,SPEC,NONE,Idea Card is the governing artifact; schema not found in code,SRC,BUILD,Idea Card schema is a gap
+26,Workflow,Idea identification / screening / opportunity selection,4. Opportunity Definition,FIRM,SPEC,NONE,No opportunity-definition module,SRC,BUILD,
+27,Workflow,Idea identification / screening / opportunity selection,5. Technical Opportunity Screening,FIRM,SPEC,NONE,Screening specified only,SRC,BUILD,
+28,Workflow,Idea identification / screening / opportunity selection,6. Strategic Opportunity Screening,DEBATED,SPEC,NONE,Strategic screening; overlaps product judgement,SRC,BUILD,who decides strategic fit
+29,Workflow,Idea identification / screening / opportunity selection,7. Opportunity Portfolio Prioritization,FIRM,SPEC,NONE,Portfolio prioritisation specified only,SRC,BUILD,
+30,Workflow,Generate technical claims & hypothesis,1. Research Question & Technical Claim Formation,FIRM,SCAFFOLD,NONE,AI4R research Claim dataclass + claim_type; formation not automated,EXEC,PORT,
+31,Workflow,Generate technical claims & hypothesis,"2. Claim, Evidence, Data & Method Modeling",FIRM,ACTIVE,NONE,AI4R Claim/EvidenceItem/ClaimEvidenceLink schemas executed,EXEC,PORT,
+32,Workflow,Generate technical claims & hypothesis,3. Hypothesis Pool & Mechanism Formation,FIRM,SPEC,NONE,Hypothesis pool not implemented,SRC,BUILD,
+33,Workflow,Generate technical claims & hypothesis,4. Falsifiability Screening & Hypothesis Contracting,FIRM,SPEC,NONE,Falsifiability screening not implemented,SRC,BUILD,core scientific gate is missing
+34,Workflow,Generate technical claims & hypothesis,5. Verification-Ready POC Design,FIRM,SPEC,NONE,POC design contract specified only,SRC,BUILD,
+35,Workflow,POC implementation,1. POC Implementation Environment Preparation,FIRM,ACTIVE,PARTIAL,AI4R hands_runtime/worktree.sh; JW jiuwenbox sandbox + worktree rail,SRC,REUSE-JW,
+36,Workflow,POC implementation,2. POC Construction,FIRM,ACTIVE,FULL,"JW code mode (interface_code, code_agent subagent); AI4R builder panes",SRC,REUSE-JW,
+37,Workflow,POC implementation,3. POC Component Integration & Configuration,FIRM,ACTIVE,PARTIAL,AI4R graph_node_dispatcher integration nodes,SRC,ADAPT,
+38,Workflow,POC implementation,4. POC Functional Readiness Validation,FIRM,ACTIVE,PARTIAL,"AI4R run_preflight.py, contract_gate_executor.py",SRC,PORT,
+39,Workflow,POC implementation,5. Testable POC Artifact Consolidation & Benchmark Handoff,FIRM,IMPL-UNWIRED,NONE,"AI4R artifact_manifest.py, accepted-artifact-export.py(1039)",SRC,PORT,
+40,Workflow,Benchmarking,1. Benchmark Framing,FIRM,IMPL-UNWIRED,NONE,"AI4R benchmark/solar_solver.py(1144), agent_arena_benchmark.py(1135)",SRC,PORT,
+41,Workflow,Benchmarking,2. Benchmark Protocol & Asset Preparation,FIRM,IMPL-UNWIRED,NONE,AI4R benchmark harness + heavy_proof_benchmark.py,SRC,PORT,
+42,Workflow,Benchmarking,3. Benchmark Execution,FIRM,IMPL-UNWIRED,NONE,AI4R benchmark runners; platform_workflow_benchmark.py,SRC,PORT,
+43,Workflow,Benchmarking,4. Metrics & Run Evidence Collection,FIRM,ACTIVE,NONE,AI4R gate_ledger route_record (provider/model/exit_code/timings),EXEC,PORT,
+44,Workflow,Benchmarking,5. Comparative Result Analysis & Benchmark Result Packaging,FIRM,IMPL-UNWIRED,NONE,"AI4R capability_fusion_benchmark.py, github_comparison_view.py",SRC,PORT,
+45,Workflow,Evaluation,1. Evaluation Scope & Evidence Assembly,FIRM,ACTIVE,NONE,AI4R evaluator.evaluate_artifacts; 104 evaluator tests pass,EXEC,PORT,
+46,Workflow,Evaluation,2. Evidence Completeness & Provenance Review,FIRM,ACTIVE,NONE,AI4R evaluator source-audit + provenance checks (executed),EXEC,PORT,
+47,Workflow,Evaluation,"3. Experimental, Reasoning & External Validity Review",FIRM,SCAFFOLD,NONE,"AI4R _expert_novelty_metrics, external validity partially heuristic",EXEC,PORT,external validity is weak
+48,Workflow,Evaluation,4. Claim & Acceptance-Criteria Comparison,FIRM,ACTIVE,NONE,AI4R _apply_profile_gate vs acceptance thresholds,EXEC,PORT,
+49,Workflow,Evaluation,"5. Verdict, Blocker & Residual-Risk Classification",FIRM,ACTIVE,NONE,AI4R gate_ledger verdict kinds + needs_human_review,EXEC,PORT,
+50,Workflow,Evaluation,6. Refinement & Follow-Up Recording,FIRM,ACTIVE,NONE,AI4R survey-diagnose / refinement recording,SRC,PORT,
+51,Workflow,Delivery,1. Delivery Planning & Evidence Handoff,FIRM,IMPL-UNWIRED,PARTIAL,AI4R accepted-artifact-export; JW send_file+channels,SRC,ADAPT,
+52,Workflow,Delivery,2. User-Facing Deliverable Generation,FIRM,ACTIVE,PARTIAL,AI4R research compile/synthesize/html_artifact; JW DeepSearch skill (no evidence),EXEC,PORT,
+53,Workflow,Delivery,"3. Deliverable, Reusable Asset & Knowledge Packaging",FIRM,IMPL-UNWIRED,NONE,AI4R artifact_manifest + bundle manifest spec,SRC,PORT,
+54,Workflow,Delivery,"4. Authorized Distribution, Knowledge Transfer & Lifecycle Closure",FIRM,SCAFFOLD,PARTIAL,AI4R acceptance_closeout.py; JW delivery via channels,SRC,ADAPT,
+55,Foundation,Capability capsule,1. Capability Capsule Definition & Assembly,FIRM,IMPL-UNWIRED,NONE,"AI4R capability_capsules.py(1351) + schema v1 (11 required sections); 30 registered, 23 manifests valid",EXEC,PORT,capsule<->JW skill bridge
+56,Foundation,Capability capsule,"2. Capsule Governance, Certification & Registry Management",FIRM,IMPL-UNWIRED,PARTIAL,AI4R registry+validate_capability_capsule_semantics executed; capability_certification_suite.py(412),EXEC,PORT,certification authority
+57,Foundation,Capability capsule,"3. Capability Discovery, Scoring & Selection",FIRM,IMPL-UNWIRED,PARTIAL,AI4R classify_task_goal + applicability signals; JW Symphony retrieval (adjacent),EXEC,PORT,
+58,Foundation,Capability capsule,4. Capsule Invocation & Composition,FIRM,IMPL-UNWIRED,PARTIAL,AI4R composition consumes/produces/compatible_with; capsule_execution_gate.py(194),EXEC,PORT,composition engine unproven
+59,Foundation,Capability capsule,5. Capability Capsule Evolution & Version Promotion,FIRM,IMPL-UNWIRED,NONE,AI4R skill_to_capsule_compiler.py(323) + evolution_engine promote/demote,EXEC,PORT,
+60,Foundation,Operators,"1. 逻辑算子定义、组装与注册 — Logical Operator Definition, Assembly & Registration",FIRM,IMPL-UNWIRED,NONE,AI4R logical_operator_registry.py(33)+config/logical-operators.json (9 types),EXEC,PORT,registry is thin (33 LOC)
+61,Foundation,Operators,"2. 算子准入、认证与治理 — Operator Qualification, Admission & Governance",FIRM,SCAFFOLD,NONE,AI4R physical_operator_catalog static_operator_rejection_reasons,EXEC,PORT,admission policy incomplete
+62,Foundation,Operators,"3. 逻辑—物理算子匹配、选择与绑定 — Logical-to-Physical Matching, Selection & Binding",FIRM,ACTIVE,NONE,AI4R graph_scheduler.py:2290-2400 hard capability gate + Layer-3 net,EXEC,PORT,THE key asset
+63,Foundation,Operators,4. 物理算子与执行舰队管理 — Physical Operator & Execution Fleet Management,FIRM,ACTIVE,PARTIAL,AI4R config/physical-operators.json (full fleet profiles); JW distributed_runtime,EXEC,ADAPT,tmux carrier must be dropped
+64,Foundation,Operators,5. 算子运行评估与能力画像 — Operator Runtime Evaluation & Capability Profiling,FIRM,IMPL-UNWIRED,NONE,"AI4R operator_score.py(226), operator_flow_control.py(820), capability_registry scorecards",EXEC,PORT,
+65,Foundation,Operators,6. 评估器驱动的算子演进 — Evaluator-Driven Operator Evolution,FIRM,SCAFFOLD,NONE,AI4R evolution_engine promote/demote executed (1 capability tracked),EXEC,PORT,barely populated
+66,Foundation,Evaluator,"1. Contract, Schema & Artifact Conformance Evaluator",FIRM,ACTIVE,PARTIAL,AI4R contract_gate_executor + verification_gate; JW A2UI validator (narrow),EXEC,PORT,
+67,Foundation,Evaluator,2. Engineering Correctness & Code Quality Evaluator,FIRM,ACTIVE,PARTIAL,AI4R eval_runner + CI; JW LSP rail + Auto Harness CI,SRC,ADAPT,
+68,Foundation,Evaluator,"3. Performance, Cost & Benchmark Evaluator",FIRM,IMPL-UNWIRED,NONE,AI4R benchmark suite + resource_telemetry.py,SRC,PORT,
+69,Foundation,Evaluator,"4. Security, Privacy, Compliance & IP Evaluator",FIRM,SCAFFOLD,PARTIAL,AI4R gitleaks.toml + data_plane_audit; JW permission engine+jiuwenbox,SRC,ADAPT,IP/licence checks absent both
+70,Foundation,Evaluator,"5. Evidence, Factuality & Scientific Validity Evaluator",FIRM,ACTIVE,NONE,AI4R evaluator grounding/authority/diversity; MEASURED precision 0.25,EXEC,PORT,entailment must be built
+71,Foundation,Evaluator,"6. Lifecycle, Parity & Human Review Evaluator",FIRM,ACTIVE,PARTIAL,AI4R verification_gate writer!=verifier + human_verdict; JW ask-permission,EXEC,PORT,JW has only leader/teammate roles
+72,Foundation,Foundational models,1. Model Capability Registry,FIRM,ACTIVE,PARTIAL,AI4R model_registry.py(167)+config/model-registry.json; JW models config,EXEC,ADAPT,
+73,Foundation,Foundational models,2. Model Routing & Selection,FIRM,ACTIVE,PARTIAL,AI4R model-scenario-routing.json + operator_model_selection; JW per-role model,EXEC,ADAPT,
+74,Foundation,Foundational models,3. Model Usage Auditing,FIRM,ACTIVE,PARTIAL,AI4R model_call_runtime.py(290) + token-tracker.sh; JW usage_summary events,EXEC,ADAPT,
+75,Foundation,RSI,1. Text-Based Artifacts (GEPA / MIPROv2 / TextGrad),FIRM,IMPL-UNWIRED,NONE,"AI4R integrations/gepa_optimizer/ (3540 LOC, propose/run/review/promote/rollback, budget caps, hard_policy_checker); MIPROv2+TextGrad ABSENT",EXEC,PORT,wire GEPA; others unbuilt
+76,Foundation,RSI,2. Runtime and Resource Routing (Bayesian Optimization / Bandits / Cost-Aware RL),ASPIRE,ABSENT,NONE,No bandit/Bayesian-optimisation code found (word-boundary search),EXEC,BUILD,
+77,Foundation,RSI,3. Capability Capsules and Physical Operators (Trajectory Mining / Code Evolution / CEGIS),DEBATED,SCAFFOLD,NONE,AI4R skill_to_capsule_compiler + evolution_engine; Voyager/CEGIS ABSENT,EXEC,BUILD,
+78,Foundation,RSI,4. DAG and Agent Organization (AFlow / MCTS / ADAS),ASPIRE,ABSENT,NONE,AFlow/MCTS/ADAS absent (only 1 incidental ADAS match),EXEC,BUILD,
+79,Foundation,RSI,"5. Evaluator, Reward, Contract, and Governance (Judge Calibration / Reward Modeling / CEGIS)",DEBATED,SCAFFOLD,NONE,AI4R gate/judge config exists; judge calibration + reward modelling absent,SRC,BUILD,
+80,Foundation,RSI,"6. Memory, Retrieval, and Evidence (Memory Learning / Self-RAG / Reranker Training)",DEBATED,SCAFFOLD,PARTIAL,AI4R memory/wiki schema; Self-RAG/reranker training absent; JW memory index,SRC,BUILD,
+81,Foundation,RSI,7. Model Policies and Weights (SFT / LoRA / DPO / GRPO / Agent RL),ASPIRE,ABSENT,NONE,SFT/LoRA/DPO/GRPO absent (matches are persona md + report appendix),EXEC,DEFER,needs training infra
+82,Foundation,RSI,"8. Data, Benchmarks, Curriculum, and Observability (Active Learning / Hard-Case Mining / Credit Assignment)",DEBATED,SCAFFOLD,NONE,AI4R failure_miner.py(109) + experience bank; active learning absent,EXEC,BUILD,
+83,Foundation,Data foundations,1. Persistent Memory & Context Retrieval,FIRM,ACTIVE,FULL,JW MemoryIndexManager(1224) SQLite+vector+watcher; AI4R context_store,SRC,REUSE-JW,
+84,Foundation,Data foundations,2. Concept Graph Management,FIRM,SCAFFOLD,NONE,AI4R runtime/schema/entities.yaml typed entity contract,SRC,PORT,
+85,Foundation,Data foundations,3. Dataset Graph Management,FIRM,SPEC,NONE,Dataset graph specified; no module,SRC,BUILD,
+86,Foundation,Data foundations,4. Code Graph Management,FIRM,SPEC,PARTIAL,JW coding memory / code graph adjacent; AI4R none,SRC,BUILD,
+87,Foundation,Data foundations,5. Policy Graph Management,FIRM,SCAFFOLD,PARTIAL,AI4R runtime/policy/writers.yaml + capsule effects; JW permissions,SRC,ADAPT,
+88,Foundation,Data foundations,6. Workflow Graph Management,FIRM,IMPL-UNWIRED,NONE,AI4R workflow_contract registry + config/workflows/,SRC,PORT,
+89,Foundation,Data foundations,7. Trace Graph Management,FIRM,ACTIVE,NONE,AI4R gate_ledger + events.jsonl + route_proof.py (trace graph in practice),EXEC,PORT,
+90,Foundation,Data foundations,8. Memory Graph Management,FIRM,SCAFFOLD,NONE,AI4R runtime/schema/xref.yaml bidirectional link contract,SRC,PORT,
+91,Foundation,Data foundations,9. TaskGraph Persistence & Lifecycle Management,FIRM,ACTIVE,NONE,AI4R task_graph_io.py(351)+task_graph_state_io.py(491)+node_runstate.py,EXEC,PORT,
+92,Foundation,Harness Core,1. Runtime Control Loop & Run Lifecycle Management,FIRM,ACTIVE,FULL,JW DeepAgent dual-layer task loop (verified 11 rail events); AI4R coordinator.sh,EXEC,REUSE-JW,
+93,Foundation,Harness Core,2. Message Bus & Durable Task Queue,FIRM,IMPL-UNWIRED,PARTIAL,AI4R actor_mailbox.py(102)+queue.sh+task_queue.py; JW in-proc queues,EXEC,PORT,durable queue is a real gap in JW
+94,Foundation,Harness Core,"3. DAG Scheduler, TaskGraph Readiness & Operator Binding",FIRM,ACTIVE,NONE,AI4R graph_scheduler validate/topo/write-scope batching; 321 graph tests pass,EXEC,PORT,
+95,Foundation,Harness Core,"4. Execution Admission, Lease & Concurrency Control",FIRM,IMPL-UNWIRED,PARTIAL,AI4R actor_lease.py(238)+pane_lease.py+concurrency_policy.py(320),EXEC,PORT,
+96,Foundation,Harness Core,5. Main Loop Dispatch & Runtime Supervision,FIRM,ACTIVE,FULL,JW agent dispatch in-process; AI4R graph_node_dispatcher(12948) tmux (drop),EXEC,REUSE-JW,
+97,Foundation,Harness Core,6. Failure Recovery & Resumability,FIRM,ACTIVE,PARTIAL,AI4R recover_detector/failure_handler/.finalized idempotency; JW rewind,SRC,PORT,
+98,Foundation,Intention compilers,1. Intent Classification & Compilation Variant Selection,FIRM,ACTIVE,NONE,AI4R intent_gateway.py(736) classification lanes,EXEC,PORT,
+99,Foundation,Intention compilers,"2. Goal, Scope and Context normalization",FIRM,ACTIVE,NONE,AI4R intent_engine_adapter.py(851),EXEC,PORT,
+100,Foundation,Intention compilers,3. Ambiguity Resolution & Readiness,FIRM,ACTIVE,PARTIAL,AI4R readiness checks; JW structured_ask_user rail,SRC,ADAPT,
+101,Foundation,Intention compilers,4. Constraint Compilation,FIRM,IMPL-UNWIRED,PARTIAL,AI4R workflow_contract constraints; JW permissions/budget,SRC,PORT,
+102,Foundation,Intention compilers,5. Task Contract & Acceptance Compilation,FIRM,ACTIVE,NONE,AI4R workflow_contract instantiate + version/hash (executed via intake),EXEC,PORT,
+103,Foundation,Planner,1. Task Contract Decomposition,FIRM,ACTIVE,PARTIAL,AI4R epic_decomposer.py(926)+apo_plan_compiler.py(1093); JW TaskPlanningRail,EXEC,PORT,
+104,Foundation,Planner,2. TaskGraph Construction,FIRM,ACTIVE,NONE,AI4R task_graph.json construction + plan IR,EXEC,PORT,
+105,Foundation,Planner,3. TaskGraph Validation & Feasibility Analysis,FIRM,ACTIVE,NONE,AI4R plan_validator.py(1564) 'compiles implies dispatchable',EXEC,PORT,
+106,Foundation,Builder,1. Build Contract Interpretation,FIRM,ACTIVE,PARTIAL,AI4R contract interpretation in dispatch prompts; JW code mode,SRC,ADAPT,
+107,Foundation,Builder,2. Build Preparation,FIRM,ACTIVE,FULL,JW workspace/worktree/deps; AI4R run_preflight,SRC,REUSE-JW,
+108,Foundation,Builder,3. Code Construction,FIRM,ACTIVE,FULL,JW code agent + LSP + edit tools,EXEC,REUSE-JW,
+109,Foundation,Builder,4. Model Construction,DEBATED,ABSENT,NONE,Model construction (train/finetune) absent both,SRC,BUILD,needs ML infra
+110,Foundation,Builder,5. Experimental Asset Construction,FIRM,SCAFFOLD,PARTIAL,AI4R experiment assets in benchmark/; JW generic code tools,SRC,ADAPT,
+111,Foundation,Builder,6. Benchmark Asset Construction,FIRM,IMPL-UNWIRED,NONE,AI4R benchmark asset builders,SRC,PORT,
+112,Foundation,Builder,7. Verification Asset Construction,FIRM,ACTIVE,FULL,JW test tooling; AI4R solar-verify verify blocks,SRC,REUSE-JW,
+113,Foundation,Builder,8. Decision Artifact Construction,FIRM,SPEC,NONE,Opportunity cards / decision records not implemented,SRC,BUILD,
+114,Foundation,Builder,9. Prototype Assembly,FIRM,SCAFFOLD,PARTIAL,AI4R demo-rsi/prototypes; JW code mode,SRC,ADAPT,
+115,Foundation,Builder,10. Product Integration,DEBATED,SCAFFOLD,PARTIAL,Product integration; JW code mode + worktree,SRC,ADAPT,
+116,Foundation,Builder,11. Defect Repair,FIRM,ACTIVE,PARTIAL,AI4R failure_handler+repair DAG; JW on_tool_exception rails,SRC,PORT,
+117,Foundation,Builder,12. Build Evidence Generation,FIRM,ACTIVE,NONE,AI4R artifact_manifest hashes/diffs + gate_ledger evidence,EXEC,PORT,
+118,Foundation,Builder,13. Report/Paper/Deliverable Construction,FIRM,ACTIVE,PARTIAL,AI4R research compile/html_artifact/render_sprint_html; JW skills(docx/pptx),EXEC,ADAPT,
+119,Foundation,Builder,14. Runtime Deliverable Construction,FIRM,SCAFFOLD,PARTIAL,AI4R release/+docker/; JW pip+desktop packaging,SRC,REUSE-JW,
+120,Vertical,Visibility / Statistics,1. Workflow & Platform Status Visibility,FIRM,ACTIVE,PARTIAL,AI4R status-server.py(14400)+React; JW web UI,SRC,ADAPT,rewrite as JW view
+121,Vertical,Visibility / Statistics,2. Execution Trace Search & Inspection,FIRM,ACTIVE,PARTIAL,AI4R events.jsonl+gate_ledger search; JW logs+OTel,SRC,PORT,
+122,Vertical,Visibility / Statistics,3. Runtime status visibility,FIRM,IMPL-UNWIRED,PARTIAL,AI4R resource_telemetry.py; JW psutil-based status,SRC,ADAPT,
+123,Vertical,Visibility / Statistics,"4. Resource Usage, Cost & Capacity Management",FIRM,SCAFFOLD,PARTIAL,AI4R token-tracker.sh+codex budget circuit breaker; JW TokenBudgetEvaluator(per-loop),EXEC,PORT,cross-run budget missing both
+124,Vertical,Installer & CLI & Webapp,1. Windows App,FIRM,SCAFFOLD,FULL,JW signed Windows desktop+auto-update; AI4R install.ps1 WSL2 (experimental),DOC,REUSE-JW,
+125,Vertical,Installer & CLI & Webapp,2. MacOS App,FIRM,SCAFFOLD,FULL,JW macOS desktop app; AI4R DMG needs release proof,DOC,REUSE-JW,
+126,Vertical,Installer & CLI & Webapp,3. MacOS CLI,FIRM,ACTIVE,FULL,JW pip CLI + jiuwenswarm-init/start; AI4R solar CLI,EXEC,REUSE-JW,
+127,Vertical,Installer & CLI & Webapp,4. Linux Cli,FIRM,ACTIVE,FULL,JW pip on Linux (verified install+2816 tests); AI4R linux CLI supported,EXEC,REUSE-JW,
+128,Vertical,Installer & CLI & Webapp,5. Web Application & Status Service,FIRM,ACTIVE,FULL,JW jiuwenswarm-web + frontend dist; AI4R status-server,SRC,REUSE-JW,
+129,Vertical,UI,1. CLI,FIRM,ACTIVE,FULL,JW cli/main.py + slash commands; AI4R solar-harness.sh,EXEC,REUSE-JW,
+130,Vertical,UI,2. GUI,FIRM,ACTIVE,FULL,JW web UI + desktop; AI4R React app,SRC,REUSE-JW,
+131,Vertical,UI,3. TUI,FIRM,ACTIVE,FULL,JW jiuwenswarm-tui package; AI4R tmux cockpit,SRC,REUSE-JW,
+132,Vertical,Account management,1. Account Registration,FIRM,ABSENT,NONE,No account registration in either system (both single-user local),EXEC,BUILD,multi-tenant is unbuilt
+133,Vertical,Account management,2. Authentication & Session Security,FIRM,ABSENT,PARTIAL,JW ws_origin check + crypto provider; no user auth/session model,EXEC,BUILD,
+134,Vertical,Account management,3. User Profile Management,FIRM,ABSENT,PARTIAL,JW config/user settings; no profile entity,SRC,BUILD,
+135,Vertical,Account management,4. Privacy & Personal Data Controls,FIRM,ABSENT,NONE,No privacy/export/delete controls either side,SRC,BUILD,compliance gap
+136,Vertical,Message Channels,1. Wechat,FIRM,ABSENT,PARTIAL,JW wechat_connect.py(1406) exists; AI4R none. Feature is link-import variant,SRC,REUSE-JW,
+137,Vertical,Message Channels,2. Discord,FIRM,ABSENT,FULL,JW discord.py connector shipped; AI4R none,SRC,REUSE-JW,
+138,Vertical,Message Channels,3. TMUX,DEBATED,ACTIVE,NONE,AI4R tmux panes as first-class surface; conflicts with JW in-process model,EXEC,DEFER,keep only if UX requirement
+139,Vertical,System Configurations,1. LLM Config,FIRM,ACTIVE,FULL,JW models config+/model command; AI4R model-config.sh,EXEC,REUSE-JW,
+140,Vertical,System Configurations,2. User Settings,FIRM,ACTIVE,FULL,JW config.yaml+.env+Configuration page; AI4R solar-user-config.json,EXEC,REUSE-JW,
+141,Vertical,System Configurations,3. Cost/Budget Settings,FIRM,SCAFFOLD,PARTIAL,AI4R codex budget hard_stop; JW per-loop token budget only,EXEC,PORT,cross-run/programme budget missing
+142,Vertical,System Configurations,4. Cluster setting,FIRM,ACTIVE,PARTIAL,AI4R config/actor-hosts.json+cluster; JW instance_manager+distributed_runtime,SRC,ADAPT,

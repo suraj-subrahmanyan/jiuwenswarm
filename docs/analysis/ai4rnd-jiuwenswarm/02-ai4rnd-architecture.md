@@ -1,7 +1,19 @@
-# AI4RnD Architecture
+# AI4RnD Architecture — Current State
 
 Analysed at `Stellven/AI4Research` commit `d35c511` (branch `openJiuwen-Solar`), with
 specifications from `Stellven/AI4Research-A` and run artifacts from `Stellven/AI4Research-B`.
+
+> **Revision 2.** This document describes what AI4RnD *is today*. What it is *meant to be* is
+> in [00-intended-product-model.md](00-intended-product-model.md), which is the controlling
+> target. Revision 1 under-described three areas; all three were re-examined by execution:
+>
+> | Area | Revision 1 | Revision 2 | Section |
+> |---|---|---|---|
+> | Capability Capsules | dismissed as ≈ skills | formal 11-section contract; 30 registered, 23 validated | §11 |
+> | RSI | "largely aspirational" | GEPA is 3,540 LOC with a full promote/rollback lifecycle — unwired | §12 |
+> | Unwired code | not identified | 19 modules, ~8,000 LOC, implemented + tested + uncalled | §13 |
+>
+> Also corrected: the citation-grounding evaluator was **measured** at precision 0.25 (§7.5).
 
 ---
 
@@ -399,6 +411,41 @@ rather than asserted.
 
 Persistence: SQLite (`migrations/001_init.sql`, 7 tables) plus JSONL export.
 
+### 7.5 ⚠ MEASURED — the grounding gate does not verify grounding
+
+Revision 1 left this as an open spike. It is now measured, and it is the most consequential
+finding in this analysis. [V-12]
+
+The check is not Jaccard-based, as Revision 1 assumed. `evaluator.py:443-476`:
+
+```python
+overlap = sorted(context_tokens & evidence_tokens)
+checks.append({..., "ok": bool(overlap), ...})
+```
+
+A citation is "grounded" if the citing line shares **one** token (≥3 chars) with the evidence
+text. Against one evidence item and nine hand-labelled citing sentences:
+
+```
+PRECISION of 'grounded'  = 0.25   (6 of 8 passes are wrong)
+DETECTION of unsupported = 1/7 = 0.14
+```
+
+- *"FlashAttention was invented in 1823 by Napoleon Bonaparte"* → **GROUNDED** (on
+  `flashattention`)
+- *"Bananas are yellow and grow in tropical climates"* → **GROUNDED** (on `and`)
+- Only a sentence sharing literally zero tokens is flagged.
+
+A word-boundary search for `entail`, `NLI`, `entailment`, `cross_encoder`, `deberta`, `mnli`
+across `harness/lib/**/*.py` returns **zero** matches — there is no entailment machinery
+anywhere.
+
+**Assessment.** The ledger, spans, content hashing and source-authority scoring are sound and
+portable. The *judgement layer* on top of them is not. AI4RnD's central claim — that its
+output is verified — does not currently hold at the citation-grounding layer. Real entailment
+must be built before the claim can be made, and this moves it from late hardening into
+Stage 1 of the plan.
+
 ### 7.4 The stated discipline
 
 From the Pipeline A SDD [E-A14]:
@@ -498,6 +545,115 @@ skills must not overwrite them; `wiki/graph` is tools-only; `wiki/log.md` is app
 
 ---
 
+## 11. Capability Capsules — the layer Revision 1 missed
+
+Revision 1 treated capsules as "versioned capability manifests binding a capability to a
+preferred worker profile" and dismissed them as near-skills. Execution shows a substantially
+richer abstraction. [V-11]
+
+**Executed:** `load_capability_capsule_registry()` returns **30 entries**; all 23 shipped
+manifests under `config/capability-capsules/` load and pass
+`validate_capability_capsule_semantics()` with **0 invalid**.
+
+The schema (`schemas/draft/capability-capsule.v1.draft.json`) requires **eleven** top-level
+sections. A JiuwenSwarm skill has two (`name`, `description`):
+
+| Section | Contents (verified on `cap.requirement-compiler-planner`) |
+|---|---|
+| `capability_capsule_id`, `version` | identity + versioning for promotion/rollback |
+| `capsule_kind` | `capability` \| `guard` \| `resource` |
+| `metadata` | name, description |
+| `applicability` | `task_types`, `positive_signals`, `negative_signals` |
+| `contract` | `inputs`, `outputs`, `preconditions`, `postconditions`, `invariants` |
+| `composition` | `consumes`, `produces`, `compatible_with`, `incompatible_with`, `requires_after` |
+| `effects` | `read`, `write`, `execute`, `network`, `cost` |
+| `bindings` | `skills`, `mcp_capabilities`, `data_refs`, `secret_refs`, `required_guard_capsules` |
+| `verification` | `self_check`, `external_verifier`, `pass_conditions` |
+| `operator_compatibility` | `preferred`, `forbidden` |
+| `provenance` | owner, created_at, manifest_path |
+
+Two details settle the "renamed skill" question:
+
+- **`bindings.skills`** — a skill is an *ingredient* of a capsule, not an equivalent.
+- **`required_guard_capsules`** — capsules can gate other capsules, which skills cannot do.
+
+`effects` and `operator_compatibility` are the architecturally significant additions: they let
+a capability declare "this must never touch the network" or "this may not run on operator X",
+and have it enforced at **binding time** rather than trusted at runtime. Nothing in
+JiuwenSwarm's skill model can express this.
+
+Supporting modules, all **implemented and unwired**: `capsule_execution_gate` (194 LOC —
+`check_cooldown`, `check_idempotency`, `GateDecision`, `IdempotencyResult`),
+`skill_to_capsule_compiler` (323 LOC — promotes a skill manifest into a capsule draft),
+`capability_token` (105 LOC).
+
+## 12. RSI — one surface of eight, built and disconnected
+
+Revision 1 called RSI "largely aspirational". That is right for seven of the eight surfaces
+and wrong for the most important one. [V-13]
+
+**`integrations/gepa_optimizer/` — 3,540 LOC across 11 modules**, exposing the complete
+controlled-improvement lifecycle:
+
+```
+propose · run · review · promote · rollback · status
+```
+
+Its safety contract is genuinely strong, and is the model the target architecture adopts:
+
+- dry-run default; `--execute` **rejected unless all three** of `--max-evals`,
+  `--max-spend`, `--max-walltime` are supplied;
+- promotion targets restricted to `/tmp`; production paths rejected;
+- `hard_policy_checker.py` freezes core safety policy — a candidate may not relax
+  `secrets_access`, `git_push`, `destructive_shell`, `payment_action`, `external_api_write`.
+
+`evolution_engine.py` (854 LOC) also executes — `scorecard`, `recommend`, `promote`,
+`demote-degraded`, `status` — but tracks exactly **one** capability
+(`deepresearch.quality_gate`) with 0 terminal nodes and 0 examples. `failure_miner.py`
+clusters events into candidates.
+
+**Neither is referenced by `coordinator.sh` or `solar-harness.sh`.**
+
+Coverage across the eight RSI surfaces the product specifies (word-boundary search):
+
+| Surface | Named methods | Status |
+|---|---|---|
+| 1 Text artifacts | GEPA / MIPROv2 / TextGrad | **GEPA built** (19 files); others absent |
+| 2 Runtime routing | Bayesian opt / bandits | absent |
+| 3 Capsules & operators | trajectory mining / CEGIS / Voyager | partial (`skill_to_capsule_compiler`) |
+| 4 DAG & organisation | AFlow / MCTS / ADAS | absent |
+| 5 Evaluator & governance | judge calibration / reward modelling | absent |
+| 6 Memory & evidence | Self-RAG / reranker training | absent |
+| 7 Model weights | SFT / LoRA / DPO / GRPO | absent |
+| 8 Data & benchmarks | active learning / hard-case mining | partial (`failure_miner`) |
+
+## 13. The unwired layer — ~8,000 LOC of finished, uncalled code
+
+An executed probe over 48 architecturally significant modules: **48/48 import cleanly**
+(stdlib + pyyaml), **29/48 are referenced by the live runtime**, **43/48 have tests**. [V-8]
+
+The 19 unwired modules are the finding. Two clusters matter most:
+
+- **The capsule layer** (`capability_capsules` 1351, `capsule_execution_gate` 194,
+  `skill_to_capsule_compiler` 323, `capability_token` 105) plus the operator registries
+  (`logical_operator_registry`, `physical_operator_catalog`, `operator_state_machine`).
+- **A durable actor model** — `actor_registry` (382), `actor_lease` (238), `actor_mailbox`
+  (102), `actor_runtime` (329). This directly implements the two Harness Core capabilities
+  JiuwenSwarm lacks: a durable task queue and lease/concurrency control. It sits unused while
+  the live system polls the filesystem and leases tmux panes.
+
+Plus `task_graph_io` / `task_graph_state_io` (842), `evidence_ledger` (117), `event_ledger`
+(198), and `gepa_optimizer` (3,540).
+
+**One naming trap for anyone porting:** `operator_router.py` (305 LOC) looks central and is
+not — it belongs to the AI-influence digest subsystem and dispatches scheduled scripts per
+named "line". It is unrelated to logical→physical operator binding, which lives in
+`graph_scheduler.py`.
+
+**Cost implication.** Treating these as "to build" over-estimates the work; treating them as
+working over-claims. They are one integration effort — not one implementation effort — from
+being live, and whether they compose correctly is unproven (risk R7).
+
 ## 9. Security and operational boundaries
 
 This is the weakest part of AI4RnD, and it matters for the integration decision.
@@ -564,7 +720,28 @@ engineering effort has gone into compensating for it.
 8. Extensive one-off `*_closeout.py` modules suggest artifacts of past sprints kept in the
    tree rather than a maintained API surface.
 
-**The one-line summary:** AI4RnD has the right *ideas about correctness* and the wrong
-*substrate for execution*. JiuwenSwarm has the right substrate and no ideas about
-correctness. That asymmetry is what makes the integration attractive — and determines its
-shape.
+**The one-line summary, revised.** AI4RnD has the right *architecture* for correctness — an
+evidence ledger, governed capsules, capability-gated routing, an append-only gate ledger, and
+a safety-bounded improvement loop — and the wrong *substrate for execution*. But it does not
+yet have the right *implementation* of correctness: the grounding gate that is supposed to
+enforce the whole discipline passes at precision 0.25, and the capsule and RSI layers that
+carry the architecture are not connected to anything. JiuwenSwarm has the right substrate,
+no ideas about correctness, and a permission layer that silently loads no rules.
+
+Both systems are further from their stated claims than their documentation suggests, in
+opposite directions. That is what the staged plan has to address first — see
+[09-implementation-plan.md](09-implementation-plan.md), Stages 0–1.
+
+## 15. Health signals, measured
+
+| Signal | Result |
+|---|---|
+| Module imports (48 architecturally significant) | **48/48 clean** on stdlib + pyyaml |
+| `tests/graph` | **321 passed** |
+| `tests/evaluators` | **104 passed** |
+| `tests/gate_ledger` | **124 passed**, 2 failed — both root-environment artifacts (`chmod 0o500` does not block uid 0) |
+| `tests/experience` | **7 passed** |
+| Full suite | **aborts at collection** — a test module raises `SystemExit(2)` at import |
+| Research core standalone | init → add-source → extract → ledger → mine, no harness |
+| Capsule manifests | 23/23 valid |
+| Grounding evaluator | **precision 0.25 / detection 0.14** |

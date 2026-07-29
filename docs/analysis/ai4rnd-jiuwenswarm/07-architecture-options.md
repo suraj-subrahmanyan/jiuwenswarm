@@ -1,262 +1,250 @@
-# Architecture Options Compared
+# Architecture Options — Reconsidered Against the Complete Product
 
-Six options, evaluated against the constraints in
-[06-integration-challenges.md](06-integration-challenges.md).
+**This document replaces the previous revision's version.** That version evaluated options
+against "AI4RnD as it exists today, modelled as a research report generator". The controlling
+question is now the complete intended product: 142 features across three planes
+([00-intended-product-model.md](00-intended-product-model.md)), of which JiuwenSwarm covers
+20 fully and 72 not at all.
+
+The previous recommendation (Option D, hybrid) is **not assumed**. It is re-derived below,
+and it survives — but with a materially different shape and for partly different reasons.
 
 ---
 
-## Option A — AI4RnD entirely through existing extension points
+## What changed in the inputs
 
-Everything lives out-of-tree: Rail plugins, skills, MCP servers, config. No JiuwenSwarm
-source changes.
+| Input | Previous revision | Now |
+|---|---|---|
+| Scope | one research lane | 142 features, 9 workflow lanes + 10 foundation groups + 6 verticals |
+| Rail seam | inferred, unverified | **executed** — register + invoke + uninit all work (V-2) |
+| Permission engine | "strong, non-overridable built-ins" | **built-in rules load 0 in a stock install** (V-4) |
+| Per-member permissions | assumed feasible | **only 2 roles, global policy** — writer≠verifier not expressible (V-6) |
+| Capsules | dismissed as ≈ skills | **formal 11-section contract**, 30 registered (V-11) |
+| RSI | "largely aspirational" | **GEPA 3,540 LOC, full lifecycle, unwired**; 6 of 8 surfaces absent (V-13) |
+| Grounding | unknown quality | **precision 0.25** (V-12) |
+| DeepSearch overlap risk | High | **Low** — zero evidence machinery (V-14) |
+| AI4RnD maturity | read | **48/48 import, 29 wired, 19 implemented-but-unwired** (V-8) |
 
-```mermaid
-flowchart LR
-    DA["DeepAgent"] -->|mounts| RAIL["ResearchRail (plugin)"]
-    RAIL -->|add_ability| TOOLS["research_* tools"]
-    TOOLS --> LIB["research library<br/>(installed as a Python dependency)"]
-    LIB --> STORE["evidence store (SQLite)"]
-    SKILLS["research SKILL.md packages"] -.-> DA
-```
+Two of these change option scoring directly: the operator/capsule layer is much more real
+than assumed (raising the cost of "rebuild inside JiuwenSwarm"), and JiuwenSwarm's team model
+is much thinner than assumed (lowering the value of "make AI4RnD agents into JiuwenSwarm
+members").
 
-**Feasible?** Partly. The Rail plugin can register tools and hook lifecycle events
-[E-J09],[E-J10]; skills and MCP need no code changes.
+---
+
+## Option A — AI4RnD through JiuwenSwarm extension points only
+
+Everything out-of-tree: Rail plugins, skills, MCP, config.
+
+**Now verified possible for tools** (V-2), and that matters — but the ceiling is lower than
+the product needs.
 
 | | |
 |---|---|
-| ✅ | zero upstream conflict; rebases cleanly forever |
-| ✅ | hot-installable, hot-toggleable, no restart |
-| ✅ | fastest path to a working demo |
-| ❌ | no external API — the research pipeline can only be driven by the agent, never by the web UI or a scheduler (§1.2) |
-| ❌ | no capability routing, no DAG scheduling — those need to sit *above* the agent loop, and a Rail sits *inside* it |
-| ❌ | no run lifecycle visible to JiuwenSwarm; runs are opaque tool calls |
-| ❌ | long research runs must complete inside a tool-call timeout, or become fire-and-forget |
-| ❌ | plugin runs unsandboxed with full agent-server privileges (§10) |
+| ✅ | zero upstream conflict; hot-installable; **mechanism proven by execution** |
+| ✅ | delivers the research evidence lane quickly |
+| ❌ | a Rail lives *inside* one agent's loop. The DAG scheduler, capability router, capsule registry and RSI loop must sit **above** agents, deciding which agent runs what. A Rail structurally cannot host them. |
+| ❌ | no durable queue, no leases, no run lifecycle — Harness Core 2/4/6 unreachable |
+| ❌ | 72 features with no JiuwenSwarm counterpart would all have to hide inside tool calls |
+| ❌ | capsule `effects` / `operator_compatibility` cannot influence JiuwenSwarm's tool permissions |
 
-**Cost:** ~4–6 weeks for a first useful version.
-**Verdict: viable as a first stage, insufficient as the target.** It delivers the evidence
-ledger and grounded synthesis to users quickly, and buys the evidence needed to justify
-anything larger.
+**Verdict: viable as Stage 1 only.** It can deliver perhaps 25 of 142 features. It is the
+right *first step* of a larger architecture, not an architecture.
 
 ---
 
-## Option B — AI4RnD components added inside JiuwenSwarm
+## Option B — A substantial AI4RnD product layer inside JiuwenSwarm
 
-Port the research core into the JiuwenSwarm tree as first-class subsystems
-(`jiuwenswarm/research/`), with new harness elements, new `ReqMethod` entries, new
-`config_specs` names, and web UI views.
+Port the Foundation plane into the JiuwenSwarm tree as first-class subsystems, with new
+harness elements, new `ReqMethod` entries, `config_specs` names, and UI views.
 
-```mermaid
-flowchart TB
-    subgraph TREE["jiuwenswarm/ (modified)"]
-        RES["research/<br/>ledger · claims · gates · scheduler"]
-        ELEM["swarm.research_* elements"]
-        CFG["config_specs.py (+ names)"]
-        MSG["message.py (+ ReqMethod)"]
-        IFACE["interface.py (+ frozenset)"]
-        UI["web UI research views"]
-    end
-    RES --- ELEM --- CFG
-    RES --- MSG --- IFACE
-```
+Now that we know the Foundation plane is ~25k LOC of existing tested code, this means moving
+~25k LOC into a 340k-LOC tree owned by someone else.
 
 | | |
 |---|---|
-| ✅ | full access to everything — elements, RPC, UI, session integration |
-| ✅ | single deployable; one process model; one config file |
-| ✅ | research state can participate in session rewind, permissions, sandbox natively |
-| ❌ | **permanent merge conflicts** in `config_specs.py`, `message.py`, `interface.py` — the three files any upstream refactor touches (§7) |
-| ❌ | couples the research roadmap to JiuwenSwarm's release cadence |
-| ❌ | research code must satisfy a Huawei-internal lint standard and Chinese-first documentation conventions |
-| ❌ | ~15–20k LOC of research code entering a tree whose maintainers did not ask for it — upstreaming is unlikely, so this is a soft fork in practice |
-| ❌ | AI4RnD's research pipeline evolves fast; JiuwenSwarm's release process would gate every change |
+| ✅ | full access to elements, RPC, UI, session; single process |
+| ✅ | capsule effects could genuinely drive the permission engine |
+| ❌ | permanent conflicts in `config_specs.py`, `message.py`, `interface.py` — the three files upstream refactors touch most |
+| ❌ | AI4RnD's roadmap becomes gated by JiuwenSwarm's release cadence, lint standard (`huawei-python-lint`) and Chinese-first documentation conventions |
+| ❌ | upstream did not ask for a research product; realistically un-upstreamable, so this is a soft fork wearing a different name |
+| ❌ | **RSI would have to mutate JiuwenSwarm's own source** to improve capsules/operators — a self-modifying agent inside someone else's package |
+| ❌ | the 27 build-new features arrive slower, gated by integration work |
 
-**Cost:** ~4–6 months, plus permanent rebase tax.
-**Verdict: rejected.** All the costs of a fork with none of the independence. If the code
-is going in-tree anyway, Option E is more honest about what has happened.
+**Verdict: rejected.** The RSI point is decisive on its own: a controlled self-improvement
+loop that promotes and rolls back Capsules and Operators needs to own its artifact tree. It
+cannot do that inside an upstream package it must periodically rebase.
 
 ---
 
-## Option C — AI4RnD as a separate service connected to JiuwenSwarm
+## Option C — AI4RnD as a separate service connected over a stable protocol
 
-The research core runs as its own process with an HTTP API. JiuwenSwarm reaches it through
-tools registered by a Rail plugin.
-
-```mermaid
-flowchart LR
-    subgraph JW["JiuwenSwarm process"]
-        DA["DeepAgent"] --> RAIL["ResearchToolkitRail"]
-        RAIL --> TOOLS["research_start · research_status<br/>research_evidence · research_gate_report"]
-    end
-    subgraph SVC["Research service process"]
-        API["FastAPI"] --> ORCH["run orchestrator + state machine"]
-        ORCH --> LEDGER["evidence ledger"]
-        ORCH --> GATES["gate registry"]
-        ORCH --> SCHED["DAG scheduler"]
-    end
-    TOOLS -->|HTTP| API
-    ORCH --> STORE[("SQLite / artifact tree")]
-```
+The whole Foundation + Workflow plane runs as AI4RnD-owned services. JiuwenSwarm is one
+client among several, reached over a defined protocol.
 
 | | |
 |---|---|
-| ✅ | clean ownership boundary; each system keeps its own model |
-| ✅ | independent release cadence, independent testing, independent language/lint standards |
-| ✅ | the research core stays reusable outside JiuwenSwarm (CLI, CI, other agent hosts) |
-| ✅ | long-running runs are natural — the agent polls status rather than blocking |
-| ✅ | minimal upstream footprint: one Rail plugin, zero core changes |
-| ✅ | the service can be given its own sandbox/network policy independently |
-| ⚠️ | research operators that need an LLM must either call one directly (bypassing JiuwenSwarm's model config, permissions and cost accounting) or call back into JiuwenSwarm (needs the §1.2 patch) |
-| ⚠️ | two processes to deploy, supervise, upgrade and secure |
-| ⚠️ | the API is a new attack surface — must bind loopback with auth |
-| ❌ | no capability-based routing over JiuwenSwarm's own agents unless the callback exists |
+| ✅ | clean ownership; independent release, testing, language and lint standards |
+| ✅ | the RSI loop owns its own artifact tree, registries and promotion path |
+| ✅ | the research core is reusable outside JiuwenSwarm (CLI, CI, other hosts) — **verified standalone** (V-10) |
+| ✅ | long-running runs are natural |
+| ✅ | minimal upstream footprint |
+| ⚠️ | execution has to happen *somewhere*. If AI4RnD executes work itself, it re-creates its own worker fleet — and the shipped one is tmux + `--dangerously-skip-permissions` |
+| ❌ | without a callback, physical operators cannot be governed JiuwenSwarm agents, so the permission engine and sandbox do not apply to research work |
 
-**Cost:** ~3–4 months.
-**Verdict: strong.** The `⚠️` on LLM access is the crux — and is exactly what the hybrid
-resolves.
+**Verdict: strong on ownership, incomplete on execution.** The gap is precisely what Option D
+closes.
 
 ---
 
-## Option D — Hybrid ✅ RECOMMENDED
+## Option D — Hybrid: JiuwenSwarm as interaction + execution foundation, AI4RnD-owned workflow services ✅ **RECOMMENDED**
 
-Option C, plus a *small* in-tree extension that gives the research service a governed way
-to execute work back through JiuwenSwarm agents.
+Option C plus a governed execution callback, so AI4RnD's capability router can bind a DAG
+node to a **JiuwenSwarm agent as a physical operator**.
 
 ```mermaid
 flowchart TB
-    subgraph JW["JiuwenSwarm"]
-        GW["Gateway / channels"] --> AS["AgentServer"]
-        AS --> DA["DeepAgent"]
-        DA --> RAIL["ResearchToolkitRail<br/>(out-of-tree plugin)"]
-        AS --> EXT["research extension<br/>(in-tree: RPC handlers + node-exec callback)"]
-        DA --> PERM["permission engine"] --> SBX["jiuwenbox"]
+    subgraph JW["JiuwenSwarm — interaction + execution foundation (23 features)"]
+        CH["Channels · gateway · E2A"]
+        AS["AgentServer · session · skills · memory"]
+        DA["DeepAgent · members · sub-agents"]
+        PERM["Permission engine"] --- SBX["jiuwenbox sandbox"]
     end
-    subgraph SVC["Research service"]
-        API["HTTP API"] --> ORCH["orchestrator"]
-        ORCH --> ROUTE["capability router"]
-        ORCH --> DAG["DAG scheduler"]
-        ORCH --> GL["gate ledger"]
-        ORCH --> EV["evidence ledger · claims · citations"]
-        ORCH --> GATES["quality gates + repair"]
+    subgraph GLUE["Integration layer — thin"]
+        RAIL["ResearchToolkitRail<br/>out-of-tree · VERIFIED V-2"]
+        EXT["execution adapter<br/>in-tree · ~10 line core patch"]
     end
-    RAIL -->|"start / status / results"| API
-    ROUTE -->|"execute node N with capability C"| EXT
-    EXT -->|"dispatch to swarm member / sub-agent"| DA
-    DA -->|"artifacts"| API
+    subgraph AI["AI4RnD-owned services (90 features)"]
+        INT["Intention compiler"] --> PLAN["Planner → TaskGraph"]
+        PLAN --> SCHED["DAG scheduler + readiness"]
+        SCHED --> ROUTE["Capability router<br/>logical → physical binding"]
+        CAPS["Capsule registry<br/>contract · effects · verification"] --> ROUTE
+        ROUTE --> ADMIT["Admission · leases · durable queue"]
+        EVAL["Evaluator suite"] --> LEDGER["Gate ledger + evidence ledger"]
+        LEDGER --> RSI["RSI loop<br/>propose → test → promote/rollback"]
+        RSI -.-> CAPS
+        RSI -.-> ROUTE
+    end
+    CH --> AS --> DA
+    DA -.mounts.-> RAIL
+    DA --> PERM --> SBX
+    RAIL -->|"start · status · evidence"| INT
+    ADMIT -->|"bounded work packet"| EXT
+    EXT -->|"governed dispatch"| DA
+    DA -->|"artifacts + provenance"| LEDGER
 ```
 
-Two flows, deliberately separate:
-
-- **User-facing** (out-of-tree, works today): the agent calls research tools; the Rail
-  plugin talks HTTP to the service.
-- **Service-facing** (small in-tree patch): the service asks JiuwenSwarm to execute a
-  bounded work packet on a capability-matched agent, and JiuwenSwarm executes it with full
-  permission and sandbox governance.
+**Ownership.** JiuwenSwarm owns: channels, session, conversational state, skills, memory,
+tool execution, permissions, sandbox, packaging, UI shell. AI4RnD owns: capsules, operators,
+TaskGraph, scheduling, routing, admission/leases, evaluators, evidence, gate ledger, RSI,
+and all workflow lanes.
 
 | | |
 |---|---|
-| ✅ | every benefit of Option C |
-| ✅ | research nodes execute as *governed* JiuwenSwarm tool calls — permissions, sandbox, audit, model config, cost accounting all apply |
-| ✅ | capability routing operates over real JiuwenSwarm workers |
-| ✅ | in-tree footprint is one extension directory plus ~10 lines in two files — small enough to upstream as a generic "extension RPC passthrough" feature that benefits everyone |
-| ✅ | degrades gracefully: without the patch, Option A/C behaviour still works |
-| ⚠️ | the callback contract is the hard design problem — bounded packets, idempotency, cancellation, timeout, and no re-entrancy loops |
-| ⚠️ | still two processes |
+| ✅ | all of Option C's ownership benefits |
+| ✅ | research nodes execute as **governed** JiuwenSwarm tool calls — permissions, sandbox, model config, cost accounting |
+| ✅ | capability routing operates over real JiuwenSwarm agents as one operator class among several (API models, browser operators, remote hosts) |
+| ✅ | in-tree footprint ≈ one extension directory + ~10 lines; **Stages 1–3 need none of it** |
+| ✅ | RSI keeps its own tree, registries and promotion path |
+| ⚠️ | **V-6 constraint:** JiuwenSwarm has only `leader`/`teammate` with global permission policy. Writer≠verifier and per-operator permissions must be enforced **in AI4RnD's router**, not delegated to JiuwenSwarm |
+| ⚠️ | the callback contract is the hard design problem (bounded packets, idempotency, cancellation, non-re-entrancy) |
+| ⚠️ | two processes to operate |
 
-**Cost:** ~5–7 months to full target; ~6 weeks to the Option A subset.
 **Verdict: recommended.** Detail in [08-recommended-architecture.md](08-recommended-architecture.md).
 
 ---
 
-## Option E — Fork JiuwenSwarm
-
-Take `suraj-subrahmanyan/jiuwenswarm`, add the research core in-tree, diverge.
+## Option E — Maintained JiuwenSwarm fork
 
 | | |
 |---|---|
-| ✅ | total freedom; no negotiation with upstream |
-| ✅ | can fix the closed RPC enum, the hardcoded `config_specs` lists, and add capability routing to swarm assembly directly |
-| ❌ | inherits ~340k LOC of Python plus a pinned pre-1.0 external framework, permanently |
-| ❌ | upstream is active (v0.2.0 → v0.2.1 → v0.2.3.beta1 over ~3 months, with a project rename in that window). Divergence cost compounds fast |
-| ❌ | `openjiuwen` is still an unforkable external dependency — the fork does not buy control of the actual agent runtime |
-| ❌ | loses security fixes, new channels, Symphony and Auto Harness improvements unless merged |
-| ❌ | a small team cannot maintain a fork of this size alongside a research programme |
+| ✅ | freedom to fix the closed `ReqMethod` enum, the hardcoded `config_specs` lists, the two-role team limit, and the V-4 built-in-rules regression |
+| ✅ | could add per-member permissions properly |
+| ❌ | inherits 340k LOC permanently, against an active upstream (v0.2.0 → v0.2.3.beta1 in ~3 months, including a project rename) |
+| ❌ | **does not buy control of `openjiuwen`** — `DeepAgent`, rails, the permission engine and the manifest framework live in a separate pinned pre-1.0 package. The fork takes the maintenance cost of the smaller half. |
+| ❌ | 27 build-new features and 6 missing RSI surfaces still have to be written; the fork buys none of them |
 
-**Cost:** low to start, unbounded to sustain.
-**Verdict: rejected.** The decisive argument is that forking JiuwenSwarm does not give
-control of `openjiuwen`, where half the runtime lives. It buys the smaller half of the
-problem at full price.
+**Verdict: rejected**, on the same ground as before, now reinforced: V-4 showed the most
+security-relevant defect is in `openjiuwen`, not JiuwenSwarm — so a JiuwenSwarm fork would
+not even let you fix it cleanly.
 
 ---
 
-## Option F — Keep the systems separate
-
-Do nothing. Run AI4RnD as it is; use JiuwenSwarm independently.
+## Option F — Separate systems, no integration
 
 | | |
 |---|---|
-| ✅ | zero integration cost and zero risk today |
-| ✅ | AI4RnD keeps full control of its roadmap |
-| ❌ | AI4RnD stays single-user, single-machine, macOS-primary, with no packaging story |
-| ❌ | research workers keep running `--dangerously-skip-permissions` with no isolation |
-| ❌ | the tmux/polling substrate keeps generating the failure classes in `DISPATCH-PROTOCOL.md` |
-| ❌ | no multi-channel delivery, no session management, no memory, no skill ecosystem |
-| ❌ | duplicated investment: JiuwenSwarm's Auto Harness and AI4RnD's evaluation loop solve overlapping problems separately |
+| ✅ | zero integration cost |
+| ❌ | AI4RnD stays single-user, macOS-primary, with `--dangerously-skip-permissions` workers and no isolation |
+| ❌ | 23 REUSE-JW features would have to be built: 9 IM channels, desktop apps, TUI, memory index, sandbox, packaging |
+| ❌ | the tmux/polling substrate keeps generating the failure classes documented in `DISPATCH-PROTOCOL.md` |
 
-**Cost:** zero now; ongoing opportunity cost.
-**Verdict: rejected as a target, valid as a fallback** if the Stage 1 evidence gates in
-[09-implementation-plan.md](09-implementation-plan.md) fail.
+**Verdict: rejected as a target.** Retained as the fallback if Stage 0/1 evidence gates fail.
+
+---
+
+## Option G — Defer JiuwenSwarm ⭐ **newly considered**
+
+The instruction explicitly allows concluding that JiuwenSwarm is not a suitable foundation.
+This option takes the finding that JiuwenSwarm covers only 20/142 features fully and asks:
+is the substrate worth the coupling at all? Build AI4RnD standalone on generic infrastructure
+(FastAPI + a real queue + a container sandbox), and integrate JiuwenSwarm later, or never.
+
+| | |
+|---|---|
+| ✅ | no coupling to two pre-1.0 upstreams |
+| ✅ | AI4RnD's Foundation plane never has to fit someone else's abstractions |
+| ✅ | avoids the V-6 two-role limitation entirely — operators can have arbitrary per-operator permissions |
+| ✅ | avoids the V-4 permission regression |
+| ❌ | forfeits 23 working features, several of which are large: 9 IM connectors, signed desktop apps for two platforms, a TUI, a 1,224-LOC memory index with vector search, and a real OS sandbox (bwrap/cgroup/network policy) |
+| ❌ | those are unglamorous, high-effort, low-differentiation builds — exactly the work worth *not* doing |
+| ❌ | loses JiuwenSwarm's 2,816-test regression suite as a stability floor for the substrate |
+
+**Verdict: rejected, but it is the closest competitor to Option D** and the honest
+counterfactual. The deciding argument: everything Option G would rebuild is commodity
+substrate, and everything AI4RnD differentiates on is already outside JiuwenSwarm under
+Option D. Option D gets the substrate for the price of a thin adapter; Option G pays full
+price for it. Option G becomes correct only if the callback contract proves unworkable or
+the upstream coupling proves unstable — the Stage-2 decision point.
 
 ---
 
 ## Comparison
 
-| Criterion | A: Extension points | B: In-tree | C: Service | **D: Hybrid** | E: Fork | F: Separate |
-|---|---|---|---|---|---|---|
-| Upstream conflict | none | severe | none | minimal | n/a (owns it) | none |
-| Core changes needed | 0 | many | 0 | ~10 lines, 2 files + 1 dir | unlimited | 0 |
-| Delivers evidence ledger | ✅ | ✅ | ✅ | ✅ | ✅ | already has |
-| Delivers capability routing | ❌ | ✅ | partial | ✅ | ✅ | already has |
-| Delivers DAG scheduling | ❌ | ✅ | ✅ | ✅ | ✅ | already has |
-| Governed tool execution | ✅ | ✅ | ⚠️ (service side ungoverned) | ✅ | ✅ | ❌ |
-| Multi-channel delivery | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Sandboxed research operators | ✅ | ✅ | ⚠️ | ✅ | ✅ | ❌ |
-| External API for research | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Independent release cadence | ✅ | ❌ | ✅ | ✅ | ⚠️ | ✅ |
-| Research core reusable elsewhere | ⚠️ | ❌ | ✅ | ✅ | ❌ | ✅ |
-| Processes to operate | 1 | 1 | 2 | 2 | 1 | 2 (unrelated) |
-| Time to first user value | **6 wks** | 4 mo | 3 mo | 6 wks (A subset) | 2 mo | 0 |
-| Time to target | n/a | 4–6 mo | 3–4 mo | 5–7 mo | 6+ mo | n/a |
-| Maintenance burden | low | high | medium | medium | **very high** | medium |
-| Risk of upstream break | low | high | low | low–medium | n/a | none |
-| **Overall** | stage 1 | ❌ | good | ✅ **recommended** | ❌ | fallback |
+| Criterion | A: extensions | B: in-tree | C: service | **D: hybrid** | E: fork | F: separate | G: defer JW |
+|---|---|---|---|---|---|---|---|
+| Features reachable (of 142) | ~25 | 142 | ~130 | **142** | 142 | 119 | 119 |
+| Core changes needed | 0 | many | 0 | ~10 lines | unlimited | 0 | 0 |
+| Capsules / operators / TaskGraph owned by | JW (badly) | JW | AI4RnD | **AI4RnD** | fork | AI4RnD | AI4RnD |
+| RSI can own its artifact tree | ❌ | ❌ | ✅ | **✅** | ⚠️ | ✅ | ✅ |
+| Research nodes governed by permissions+sandbox | ✅ | ✅ | ❌ | **✅** | ✅ | ❌ | needs building |
+| Durable queue + leases | ❌ | port | ✅ | **✅** | port | ✅ | ✅ |
+| Writer≠verifier enforceable | ❌ | ⚠️ | ✅ | **✅ (in AI4RnD router)** | ✅ | ✅ | ✅ |
+| Gets 23 REUSE-JW features free | ✅ | ✅ | ✅ | **✅** | ✅ | ❌ | ❌ |
+| Upstream coupling risk | low | **high** | low | low–med | n/a | none | none |
+| Time to first user value | 6 wks | 4 mo | 3 mo | **6 wks** | 2 mo | — | 3 mo |
+| Time to complete product | n/a | 20+ mo | 16 mo | **15–18 mo** | 20+ mo | 18 mo | 18–20 mo |
+| Maintenance burden | low | high | med | **med** | very high | med | med |
+| **Overall** | stage 1 | ❌ | good | ✅ | ❌ | fallback | runner-up |
 
 ---
 
-## Why D over C
+## Why D, restated against the complete product
 
-C's single weakness is that research operators needing an LLM must either call a model
-provider directly or call back into JiuwenSwarm. Calling directly means:
+1. **The Foundation plane must be AI4RnD-owned.** Capsules with formal contracts, logical/
+   physical operators, TaskGraph, evaluators and an RSI loop that promotes and rolls back
+   versions cannot live inside an upstream package on someone else's release cadence
+   (rules out B and E).
+2. **Execution must be governed.** Research operators fetch and parse untrusted web content —
+   the workload most in need of a permission engine and a sandbox. AI4RnD's own execution
+   path has neither (rules out C and F).
+3. **The substrate is not worth rebuilding.** 23 features — channels, desktop apps, TUI,
+   memory, sandbox, packaging — are commodity, large, and already tested to 2,816 passing
+   tests (rules out G).
+4. **The seam is proven.** V-2 executed the Rail registration and invocation path end to end.
+   The integration mechanism is no longer an assumption.
 
-- a second model configuration to maintain, diverging from `models show`
-- no permission checks on tools those operators use
-- no sandbox for fetching and parsing untrusted sources
-- cost accounting split across two systems
-- prompt-injection exposure with none of jiuwenswarm's mitigations
-
-D closes that gap for the price of a ~10-line core patch that is *generically useful* —
-allowing extension-registered RPC methods to be reached, which is arguably a bug fix rather
-than a feature, and a plausible upstream contribution.
-
-## Why D over A
-
-A cannot host the DAG scheduler or the capability router. A Rail lives *inside* the agent
-loop; those components must sit *above* it, deciding which agent runs what. A is the right
-**first stage** of D, not an alternative to it.
-
-## Why D over E
-
-Forking does not deliver control of `openjiuwen`, where `DeepAgent`, the rails, the
-permission engine and the harness manifest framework actually live. A fork therefore
-inherits the maintenance cost of 340k LOC while still being exposed to a pinned, external,
-pre-1.0 dependency for the runtime that matters. The trade is strictly bad.
+**What would overturn this.** If the execution callback cannot be made bounded, idempotent
+and cancellable — the Stage 2 exit gate — then governed execution through JiuwenSwarm fails,
+and Option G becomes correct. That is the single decision that flips the recommendation, and
+it is testable early.

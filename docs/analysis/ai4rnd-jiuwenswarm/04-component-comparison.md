@@ -1,5 +1,19 @@
 # Component-by-Component Comparison
 
+> **Revision 2 note.** This document compares the two systems *as they exist*. The
+> feature-level mapping against the **intended product** is in
+> [`traceability/142-feature-matrix.md`](traceability/142-feature-matrix.md) and summarised in
+> [14-reuse-vs-build-map.md](14-reuse-vs-build-map.md), which supersedes the summary tally at
+> the end of this document.
+>
+> Three verdicts below changed after execution:
+>
+> | Component | Rev 1 verdict | Rev 2 verdict | Why |
+> |---|---|---|---|
+> | Capability capsules | folded into "operator model — Conflict" | **Port** — a distinct governed abstraction | 11-section contract; 30 registered, 23 validated [V-11] |
+> | RSI / evolution | not treated as a component | **Port (GEPA) + Build (7 surfaces)** | 3,540 LOC with full promote/rollback, unwired [V-13] |
+> | Durable queue + leases | "Reuse JiuwenSwarm's task loop" | **Port from AI4RnD** — `actor_*` family | JiuwenSwarm has no durable queue or lease model [V-8] |
+
 For each AI4RnD component: what JiuwenSwarm offers in its place, and a verdict —
 **Reuse** (take JiuwenSwarm's), **Port** (bring AI4RnD's across largely intact),
 **Adapt** (bring the design, rewrite the implementation), **Rewrite** (neither is
@@ -128,11 +142,29 @@ verification and evidence layers.
 | **Verdict** | **Port.** The highest value-per-line item in the whole comparison. The algorithm is ~150 lines of pure scoring over a worker list; the data is two JSON files. [E-A06] |
 | **Adaptation** | JiuwenSwarm workers are swarm members and sub-agents, not tmux panes. Worker capability declarations would come from member config, not `physical-operators.json`. The `flow_control`/quota fields map onto model-provider rate limits. |
 
+## 5b. Capability Capsules ⭐ **new component, Rev 2**
+
+| | |
+|---|---|
+| **AI4RnD** | `capability_capsules.py` (1,351 LOC) + `capability-capsule.v1.draft.json` requiring 11 sections + 30 registered capsules + `capsule_execution_gate` + `skill_to_capsule_compiler`. **Executed:** 30 load, 23 manifests validate, 0 invalid |
+| **JiuwenSwarm** | skills — `SKILL.md` with `name` + `description`. No contract, no declared effects, no verification block, no operator compatibility, no composition rules |
+| **Verdict** | **Port.** Not a naming difference. `effects` (read/write/execute/network/cost) and `operator_compatibility` (preferred/forbidden) are *router inputs* that let a capability be constrained at binding time. `bindings.skills` shows a JiuwenSwarm skill is an **ingredient** of a capsule. `required_guard_capsules` lets capsules gate capsules. |
+| **Integration** | build a capsule↔skill bridge: a capsule's `bindings.skills` resolves to installed JiuwenSwarm skills, so the existing skill ecosystem becomes capsule-consumable without rewriting it. |
+
+## 5c. RSI / controlled self-improvement ⭐ **new component, Rev 2**
+
+| | |
+|---|---|
+| **AI4RnD** | `integrations/gepa_optimizer/` (3,540 LOC): propose · run · review · promote · rollback · status; dry-run default; `--execute` requires all three budget caps; promotion restricted to `/tmp`; `hard_policy_checker` freezes safety policy. Plus `evolution_engine` (854) and `failure_miner` (109). **All unwired.** |
+| **JiuwenSwarm** | Auto Harness — optimises *the harness* against CI pass, with worktree isolation and PR submission. Different target (capability, not correctness) and no promote/rollback of versioned artifacts |
+| **Verdict** | **Port GEPA + wire; Build the other 7 surfaces.** One of eight RSI surfaces exists. |
+| **Synergy** | Auto Harness could *consume* AI4RnD's quality gates as its optimisation signal — scoring harness changes on grounding quality against a fixed benchmark rather than CI-pass. The strongest identified synergy between the systems. |
+
 ## 6. Operator model
 
 | | |
 |---|---|
-| **AI4RnD** | `logical-operators.json` (types + required capabilities + concurrency), `physical-operators.json` (concrete workers), capability capsules (versioned manifests binding capability → preferred profile) |
+| **AI4RnD** | `logical-operators.json` (types + required capabilities + concurrency), `physical-operators.json` (concrete workers), capability capsules (see §5b) |
 | **JiuwenSwarm** | the harness element manifest — `@harness_element` descriptors with `kind`, `name`, `description`, `factory_ref`, `input_schema` with per-field `source` markers, `interface_methods`; catalog-driven registration; JSON round-trip |
 | **Verdict** | **Conflict — resolve in JiuwenSwarm's favour for *construction*, AI4RnD's for *routing*.** They answer different questions. JiuwenSwarm's manifest describes *how to build a capability*; AI4RnD's registry describes *which worker can serve a requirement*. Both are needed. |
 | **Note** | JiuwenSwarm's manifest is the more mature abstraction (serialisable input schemas with param/context source markers, reflective `factory_ref` resolution). AI4RnD's registries are flatter but carry the routing metadata JiuwenSwarm lacks. Merging them is a design task, not a port. |
@@ -259,18 +291,30 @@ verification and evidence layers.
 
 ---
 
-## Summary tally
+## Summary tally (component level)
 
 | Verdict | Components |
 |---|---|
 | **Reuse JiuwenSwarm** (6) | channels, task loop, skills runtime, sandbox/permissions, packaging, agent memory |
-| **Port from AI4RnD** (8) | evidence ledger, claim graph, citation spans, research evaluator + gate registry, gate ledger, verification gate, DAG scheduler, capability routing |
+| **Port from AI4RnD** (11) | evidence ledger, claim graph, citation spans, research evaluator + gate registry, gate ledger, verification gate, DAG scheduler, capability routing, **capability capsules**, **GEPA/RSI-1**, **durable queue + leases (`actor_*`)** |
 | **Adapt** (5) | run state machine, concurrency policy, Codex-bridge delegation pattern, contracted intake, observability honesty rules |
-| **Rewrite** (2) | status server UI, repair-DAG generalisation |
+| **Rewrite** (3) | status server UI, repair-DAG generalisation, **the grounding check (precision 0.25 — must not be ported)** |
 | **Drop** (4) | tmux dispatch, coordinator polling loop, pane leases, shell installer |
-| **Conflict** (1) | operator model — needs deliberate merge, not a port |
+| **Conflict** (1) | operator model — a merge of vocabularies, not a port |
+| **Build** (7 surfaces) | RSI 2, 4, 5, 6, 7, 8 + entailment |
 
-The shape of the answer: **JiuwenSwarm wins every execution-layer contest; AI4RnD wins
-every correctness-layer contest.** The only genuine architectural conflict is the operator
-model, and it is a conflict of *vocabulary* — construction descriptors versus routing
-descriptors — rather than of mechanism.
+**The shape of the answer, revised.** JiuwenSwarm wins every execution-layer contest.
+AI4RnD wins every correctness-*architecture* contest — but not every correctness-*implementation*
+contest, because its central grounding gate does not work and its capsule and RSI layers are
+disconnected.
+
+Two caveats that Revision 1 did not carry:
+
+- "Reuse JiuwenSwarm's permissions" now requires repairing the built-in rule loading first
+  (V-4), and cannot deliver per-operator policy (V-6).
+- "Port AI4RnD's evaluators" must exclude the grounding judgement (V-12), which needs
+  replacing rather than moving.
+
+The feature-level view — which is the one that should drive planning — is in
+[14-reuse-vs-build-map.md](14-reuse-vs-build-map.md): **69 port · 27 build · 23 reuse-JW ·
+21 adapt · 2 defer.**

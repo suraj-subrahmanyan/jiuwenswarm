@@ -1,308 +1,308 @@
 # Recommended Target Architecture
 
-**Option D — Hybrid.** JiuwenSwarm owns execution; a standalone research service owns
-truth; a thin, mostly out-of-tree layer joins them.
+**Option D — Hybrid.** JiuwenSwarm is the interaction and execution foundation. AI4RnD owns
+the workflow, the capability model and the improvement loop.
+
+Re-derived against the complete 142-feature product; see
+[07-architecture-options.md](07-architecture-options.md) for why the six alternatives lose.
 
 ---
 
-## 1. The target
+## 1. Target architecture
 
 ```mermaid
 flowchart TB
-    subgraph USERS["Users"]
-        U1["Web UI"]
-        U2["TUI / Desktop"]
-        U3["IM channels"]
-        U4["Cron / scheduled"]
+    subgraph U["Users"]
+        UI["Web · TUI · Desktop · CLI · IM channels · cron"]
     end
 
-    subgraph JW["JiuwenSwarm — owns execution, identity, delivery"]
-        GW["Gateway<br/>channels · E2A normalisation · slash commands"]
-        AS["AgentServer<br/>WS RPC · session · skills · memory"]
-        DA["DeepAgent<br/>ReAct + task loop · swarm members · sub-agents"]
-        PERM["Permission engine<br/>tiered policy"]
-        SBX["jiuwenbox<br/>bwrap · cgroup · network policy"]
-        SESS[("Session store<br/>+ memory index")]
+    subgraph JW["JiuwenSwarm — interaction + execution foundation · 23 features"]
+        GW["Gateway · channels · E2A normalisation"]
+        AS["AgentServer · session · skills · memory index"]
+        DA["DeepAgent · team members · sub-agents"]
+        PERM["Permission engine"]
+        SBX["jiuwenbox · bwrap · cgroup · network policy"]
     end
 
-    subgraph GLUE["Integration layer — new, small"]
-        RAIL["ResearchToolkitRail<br/>OUT-OF-TREE plugin<br/>&lt;workspace&gt;/extensions/research/rail.py"]
-        EXT["research extension<br/>IN-TREE: RPC handlers + node-exec callback"]
+    subgraph GL["Integration layer — thin, mostly out-of-tree"]
+        RAIL["ResearchToolkitRail<br/><i>verified V-2</i>"]
+        ADPT["Execution adapter<br/><i>~10-line core patch</i>"]
     end
 
-    subgraph SVC["Research service — owns evidence, claims, verdicts"]
-        API["HTTP API (loopback + token)"]
-        RUN["Run orchestrator<br/>declarative state machine"]
-        ROUTER["Capability router<br/>hard gate · honest stall"]
-        DAG["DAG scheduler<br/>validation · layering · write-scope exclusion"]
-        OPS["Research operators<br/>contract · questions · retrieve · span ·<br/>evidence · claim · blueprint · cite"]
-        GATES["Gate registry<br/>grounding · authority · diversity ·<br/>coverage · closeout"]
-        REPAIR["Repair planner"]
-        GL[("Gate ledger<br/>append-only")]
-        EL[("Evidence ledger · claim graph<br/>citation spans")]
-        BUNDLE[("Run bundle<br/>content-hashed artifacts")]
+    subgraph AI["AI4RnD services — 90 features"]
+        direction TB
+        subgraph FRONT["Compile"]
+            INT["Intention compiler<br/>intent · scope · ambiguity · constraints"]
+            CON["Task contract<br/>versioned + hashed"]
+            PLAN["Planner<br/>decompose → TaskGraph → validate"]
+        end
+        subgraph EXECP["Orchestrate"]
+            SCHED["DAG scheduler<br/>readiness · write-scope batching"]
+            ROUTE["Capability router<br/>logical → physical binding"]
+            ADMIT["Admission · durable queue · leases"]
+        end
+        subgraph GOV["Govern"]
+            CAPS["Capsule registry<br/>contract · effects · verification ·<br/>operator_compatibility"]
+            OPS["Operator registries<br/>logical + physical"]
+            EVAL["Evaluator suite<br/>6 families"]
+            LED["Gate ledger + evidence ledger<br/>append-only · writer-attributed"]
+        end
+        subgraph LEARN["Improve"]
+            RSI["RSI loop"]
+        end
     end
 
-    U1 & U2 & U3 & U4 --> GW --> AS --> DA
+    subgraph FLEET["Physical operators — heterogeneous"]
+        JWA["JiuwenSwarm agents<br/><i>governed</i>"]
+        API["API models"]
+        BROW["Browser operators"]
+        HOST["Remote hosts"]
+    end
+
+    UI --> GW --> AS --> DA
     DA -.mounts.-> RAIL
     DA --> PERM --> SBX
-    AS --- SESS
-    RAIL -->|"HTTP: start · status · evidence · report"| API
-    API --> RUN --> DAG --> ROUTER
-    ROUTER -->|"execute bounded node packet"| EXT
-    EXT -->|"dispatch to capability-matched member"| DA
-    DA -->|"artifacts + provenance"| API
-    RUN --> OPS --> EL
-    RUN --> GATES --> GL
-    GATES -->|fail| REPAIR --> DAG
-    EL --> BUNDLE
-    GL --> BUNDLE
+    RAIL -->|"start · status · evidence · report"| INT
+    INT --> CON --> PLAN --> SCHED
+    CAPS --> ROUTE
+    OPS --> ROUTE
+    SCHED --> ROUTE --> ADMIT
+    ADMIT -->|"bounded work packet"| ADPT
+    ADPT --> DA
+    DA --> JWA
+    ADMIT --> API & BROW & HOST
+    JWA & API & BROW & HOST -->|"artifacts + provenance"| LED
+    LED --> EVAL --> LED
+    LED --> RSI
+    RSI -.->|"promote / rollback"| CAPS
+    RSI -.->|"promote / rollback"| OPS
+    RSI -.->|"promote / rollback"| PLAN
+    RSI -.->|"promote / rollback"| EVAL
 ```
 
 ---
 
-## 2. Ownership — the decisive table
+## 2. Ownership boundaries
 
-| Concern | Owner | Rationale |
+| Concern | Owner | Why |
 |---|---|---|
-| User intent capture, channels, delivery | **JiuwenSwarm** | 9 IM connectors + web/TUI/desktop/ACP/A2A already exist; nothing to gain by rebuilding |
-| Conversational state, session rewind, compaction | **JiuwenSwarm** | mature, and research state must *not* live here |
-| Agent identity, skills, memory | **JiuwenSwarm** | skill format is already compatible; evolution and Symphony come free |
-| Tool execution, permissions, sandboxing | **JiuwenSwarm** | the only system with a permission engine and OS-level isolation |
-| Model configuration and cost accounting | **JiuwenSwarm** | one source of truth; avoids the Option-C split |
-| Conversational task planning | **JiuwenSwarm** | task-loop planning is adequate for chat-shaped work |
-| **Research planning** (contract, question graph, physical plan) | **Research service** | needs to be a validated artifact, not model context |
-| **DAG scheduling and capability routing** | **Research service** | must sit above the agent loop to choose which agent runs what |
-| **Evidence, claims, citations** | **Research service** | must be immutable and content-hashed; incompatible with compaction |
-| **Quality gates and verdicts** | **Research service** | JiuwenSwarm has no gate concept |
-| **Repair planning** | **Research service** | operates on gate verdicts |
-| **Final report assembly and closeout** | **Research service** | prose must be compiled from verified claims, not generated freely |
-| Presenting results to the user | **JiuwenSwarm** | via `swarm.send_file`, chat, and a web view |
+| Channels, intake transport, delivery | **JiuwenSwarm** | 9 IM + web/TUI/desktop/ACP/A2A already exist |
+| Conversational state, session rewind, compaction | **JiuwenSwarm** | mature; and research state must *not* live here |
+| Skills, agent memory index | **JiuwenSwarm** | `MemoryIndexManager` 1,224 LOC; skills are capsule *ingredients* |
+| Tool execution, permissions, sandboxing | **JiuwenSwarm** | only system with a permission engine and OS isolation |
+| Packaging, installers, UI shell | **JiuwenSwarm** | signed desktop apps, pip, TUI |
+| **Intention compilation, task contracts** | **AI4RnD** | must be a validated artifact, not model context |
+| **Planning + TaskGraph** | **AI4RnD** | must be validated before dispatch |
+| **DAG scheduling, capability routing, admission, leases** | **AI4RnD** | must sit *above* agents to choose which agent runs what |
+| **Capsules + operator registries** | **AI4RnD** | versioned, certified, promotable — cannot live in an upstream package |
+| **Evaluators, evidence, gate ledger** | **AI4RnD** | JiuwenSwarm has no gate concept |
+| **RSI** | **AI4RnD** | must own the artifact tree it mutates |
+| **Per-operator permission policy** | **AI4RnD router** | V-6: JiuwenSwarm has 2 roles and global policy — cannot express it |
 
-**One-line rule:** *JiuwenSwarm decides how work happens. The research service decides
-whether the result is true.*
+**One-line rule.** *JiuwenSwarm decides how a unit of work is safely executed. AI4RnD decides
+what work exists, who may do it, whether the result is true, and what the system should
+learn from it.*
 
 ---
 
-## 3. What to reuse, port, and build
+## 3. Capsules, Operators and TaskGraph in the target
 
-### Reuse from JiuwenSwarm, unchanged
+The abstraction stack from
+[00-intended-product-model.md](00-intended-product-model.md) §2 is preserved intact, with
+JiuwenSwarm appearing only at the bottom as *one kind of physical operator*.
 
-Gateway and all channel connectors · E2A protocol · AgentServer and session management ·
-`DeepAgent` task loop · rails lifecycle · sub-agent delegation · skill system and the five
-registries · Symphony skill retrieval · memory index · tiered permission engine ·
-jiuwenbox sandbox · cron scheduler · MCP · packaging and desktop distribution.
-
-### Port from AI4RnD
-
-| Component | Source | Effort |
-|---|---|---|
-| Evidence ledger + schemas + hashing + ids | `harness/lib/research/{schemas,storage,hashing,ids}.py`, `evidence/` | **Low** — stdlib + sqlite3, no Solar coupling |
-| Citation span verification | `research/evidence/citation_span.py` | Low |
-| Research evaluator + gate registry | `research/evaluator.py`, `research/survey/gates/` | **Medium** — 1,673 LOC, some path coupling |
-| Gate ledger | `lib/gate_ledger.py` | Low — single self-contained module |
-| Verification gate (writer ≠ verifier) | `lib/verification_gate.py` | Low |
-| DAG scheduler (algorithm) | `lib/graph_scheduler.py` | **High** — 4,189 LOC; keep the algorithm, rewrite the I/O layer |
-| Capability router | `graph_scheduler.py` assignment loop + `config/*-operators.json` | **Low** — ~150 lines + two JSON schemas |
-| Run state machine (as data) | `config/coordinator-state-machine.json` | Low |
-| Survey pipeline | `research/survey/` | Medium |
-
-### Adapt
-
-- **Contracted intake** — fail-closed on unknown workflow id, into the service API.
-- **Codex-bridge delegation pattern** — bounded packets, tier classification, token budget,
-  circuit breaker — as the contract for the node-exec callback.
-- **Honest-state UI rules** — never a filled progress bar for a stalled run; show stalls
-  through the blocked node's raw reason tokens.
-- **Concurrency policy** — per-operator `max_parallel` / `singleton`, write-scope exclusion.
-- **Skills** — migrate AI4RnD research skills to JiuwenSwarm's model-invoked convention.
-
-### Build new
-
-1. `ResearchToolkitRail` — the out-of-tree plugin (see §4).
-2. Research service HTTP API and process supervision.
-3. The node-exec callback contract and its in-tree handler.
-4. Real entailment checking to replace `_jaccard` token overlap
-   ([05-capability-matrix.md](05-capability-matrix.md) §Missing, item 2).
-5. Contradiction search and contradiction-coverage gating.
-6. The research ontology (entity/claim vocabulary with alias resolution).
-7. The optimizer — logical plan → physical operator plan.
-8. A JiuwenSwarm web view for run state, DAG and gate verdicts.
-
-### Drop
-
-`coordinator.sh` · `solar-harness.sh` dispatch · tmux `send-keys` carrier · pane leases ·
-pane doctor/hygiene · `status-server.py` (14,400 LOC) · the shell installer ·
-`--dangerously-skip-permissions` worker launch · the `*_closeout.py` sprint artifacts.
-
----
-
-## 4. The integration layer in detail
-
-### 4.1 `ResearchToolkitRail` — out-of-tree, works today
-
-Installed at `<agent_workspace>/extensions/research/rail.py`, discovered by `RailManager`,
-hot-toggleable [E-J09]:
-
-```python
-class ResearchToolkitRail(DeepAgentRail):
-    """Expose the research service to the agent as tools."""
-    priority: int = 60
-
-    def init(self, agent):
-        for tool in self._build_tools():           # HTTP client wrappers
-            agent.ability_manager.add_ability(tool.card, tool)   # [E-J10]
-
-    def uninit(self, agent):
-        for tool in self._tools:
-            agent.ability_manager.remove_ability(tool.card.name)
+```mermaid
+flowchart LR
+    CAP["<b>Capsule</b><br/>governed capability<br/>11-section contract"] -->|"contains"| CON["<b>Contract</b><br/>typed I/O · pre/postconditions ·<br/>invariants · required evidence"]
+    CON -->|"realised by"| LOP["<b>Logical operator</b><br/>DAG-callable · required capabilities ·<br/>write scope · completion conditions"]
+    LOP -->|"bound by router"| POP["<b>Physical operator</b>"]
+    POP --> O1["JiuwenSwarm agent<br/>(permissions + sandbox apply)"]
+    POP --> O2["API model"]
+    POP --> O3["Browser operator"]
+    POP --> O4["Remote host"]
 ```
 
-Tool surface, deliberately reference-returning (see §5.3):
+**Binding rules preserved from AI4RnD** (verified working, `graph_scheduler:2290-2400`):
+capability match is a hard gate that is never relaxed; skills are a preference with a
+liveness net; a node with no capable operator **stalls honestly** with
+`no_matching_worker` plus the missing-capability list, and is never force-assigned.
 
-| Tool | Returns |
-|---|---|
-| `research_start(topic, depth_tier, profile)` | `run_id` |
-| `research_status(run_id)` | phase, node states, stall reasons, gate summary |
-| `research_evidence(run_id, query)` | evidence **ids** + short summaries |
-| `research_claims(run_id, section?)` | claim ids, verification status, confidence |
-| `research_gate_report(run_id)` | per-gate verdicts and P0 issues |
-| `research_report(run_id, format)` | a file path, delivered via `swarm.send_file` |
-| `research_cancel(run_id)` | acknowledgement |
-
-Also uses `before_task_iteration` to surface run progress into the agent's context, and
-`after_tool_call` to detect research-relevant signals.
-
-### 4.2 In-tree `research` extension — the small patch
-
-`jiuwenswarm/extensions/research/` with `extension.yaml` + `extension.py`, registering RPC
-handlers `research.execute_node`, `research.node_status`, `research.cancel_node`.
-
-Plus, to make them reachable from outside the process:
-
-- `jiuwenswarm/common/schema/message.py` — add `RESEARCH_*` members to `ReqMethod`
-- `jiuwenswarm/server/runtime/agent_adapter/interface.py` — add a `_RESEARCH_METHODS`
-  frozenset and a dispatch branch mirroring `_handle_symphony_request` [E-J08]
-
-**~10 lines across 2 files, plus one new directory.** Better still, generalise it: a
-`_handle_extension_request` that dispatches any registered method under a reserved
-namespace prefix. That is a genuine upstream contribution and removes the patch entirely.
-
-### 4.3 The node-exec callback contract
-
-The hard design problem. Constraints, borrowed from the Codex bridge:
-
-| Property | Requirement |
-|---|---|
-| Bounded | a work packet carries an explicit goal, input artifact refs, output schema and token budget — never "research the topic" [E-A14] |
-| Governed | executes as a normal JiuwenSwarm tool call: permission engine, sandbox, model config all apply |
-| Idempotent | keyed by `(run_id, node_id, attempt)`; re-delivery must not duplicate work |
-| Cancellable | maps to `chat.interrupt` / `abort` on the executing agent |
-| Non-re-entrant | a node-exec agent must not be able to call `research_start` — enforced by a permission rule, not convention |
-| Attributed | the response carries the executing member id, model, provider and timings, recorded as a route record in the gate ledger [E-A10] |
-| Budgeted | per-run token and call ceilings with a circuit breaker, as the Codex bridge does |
+**Added by the capsule layer:** `effects` (read/write/execute/network/cost) and
+`operator_compatibility` (`preferred` / `forbidden`) become router inputs, and
+`required_guard_capsules` gate admission. This is the mechanism that lets a capsule declare
+"this capability may never touch the network" and have it enforced at binding time rather
+than trusted at runtime.
 
 ---
 
-## 5. Boundary rules — the non-negotiables
+## 4. The RSI feedback loop
 
-### 5.1 Evidence never lives in the session
+The loop the brief requires, mapped onto owned components:
 
-Research artifacts live in the service's store. The session holds `run_id` in metadata and
-nothing more. Rationale: JiuwenSwarm compacts context and supports session rewind including
-file restoration; evidence must survive both
-([06-integration-challenges.md](06-integration-challenges.md) §8).
+```mermaid
+flowchart TB
+    EXEC["<b>Execution evidence</b><br/>route records · artifacts · traces<br/><i>gate ledger + evidence ledger</i>"]
+    EVAL["<b>Evaluation</b><br/>6 evaluator families<br/>+ operator capability profiling"]
+    CAND["<b>Improvement candidate</b><br/>versioned proposal<br/><i>GEPA propose · trajectory mining ·<br/>failure_miner clusters</i>"]
+    ISO["<b>Isolated testing + benchmarking</b><br/>sandboxed run · holdout set ·<br/>golden set · replay · A/B<br/><i>budget caps enforced</i>"]
+    POL["<b>Frozen-policy check</b><br/>candidate may not relax<br/>secrets · git_push · destructive_shell ·<br/>payment · external_api_write"]
+    DEC{"<b>Approve?</b><br/>evaluator verdict<br/>+ HITL for high-risk"}
+    PROMO["<b>Promotion</b><br/>version bump · registry update"]
+    REJ["<b>Rejection</b><br/>recorded with reason"]
+    TGT["<b>Updated artifact</b><br/>Capsule · Operator definition ·<br/>binding policy · TaskGraph pattern ·<br/>evaluator rubric · model policy · prompt"]
+    MON["<b>Post-promotion monitoring</b><br/>regression detection"]
+    RB["<b>Rollback</b>"]
 
-### 5.2 The gate ledger is the only source of node status
+    EXEC --> EVAL --> CAND --> ISO --> POL --> DEC
+    DEC -->|approved| PROMO --> TGT --> MON
+    DEC -->|rejected| REJ
+    MON -->|regression| RB --> TGT
+    MON -->|stable| EXEC
+    REJ -.->|"becomes a hard case"| EXEC
+    TGT -.->|"next run uses new version"| EXEC
+```
 
-Node status is a **projection** of the append-only ledger, never a directly written field
-[E-A10]. Preserve writer attribution on every transition. This is AI4RnD's best state-design
-idea and costs nothing to keep.
+**What already exists for this** (V-13): `gepa_optimizer` implements
+propose→run→review→promote→rollback with dry-run default, mandatory
+`--max-evals`/`--max-spend`/`--max-walltime`, promotion-target restriction, and
+`hard_policy_checker` enforcing the frozen-policy box above. `evolution_engine` implements
+scorecard/recommend/promote/demote. `failure_miner` clusters failures into candidates.
+**None of it is wired.** Stage 4 wires it; it is not a from-scratch build.
 
-### 5.3 Tools return references, not bulk evidence
+**What must be built:** RSI surfaces 2, 4, 5, 6, 7, 8 (routing optimisation, DAG/organisation
+search, judge calibration and reward modelling, memory/retrieval learning, model weights,
+curriculum and credit assignment). Six of eight.
 
-`research_evidence` returns ids and one-line summaries. If the model needs a span it asks
-for that span by id. Prevents compaction from silently destroying citation integrity.
+**Safety invariants for the loop** — non-negotiable:
 
-### 5.4 Writer ≠ verifier is enforced by routing, not by prompt
-
-The capability router must be able to exclude the writing member from evaluating its own
-node. Today AI4RnD checks this after the fact [E-A11]; the target should make it
-unsatisfiable by construction — an evaluation node's candidate set excludes the writer's
-actor id.
-
-### 5.5 Honest stalling is preserved
-
-When no capability-matched worker exists, the run stalls with `no_matching_worker` and the
-missing capability list, and the UI shows the stall as a stall [E-A02], [E-A06]. No
-force-assignment; no synthesised progress.
-
-### 5.6 The LLM never owns run state
-
-`LLM proposes. Schemas constrain. Code validates. Gates decide. Artifacts preserve.`
-[E-A14] Applied here: agents produce artifacts; the service validates and records them.
-An agent cannot mark its own node passed.
+1. RSI may propose changes to any artifact; it may **never** promote without an evaluator
+   verdict plus, for high-risk classes, a human verdict recorded in the gate ledger.
+2. The frozen-policy set is not RSI-modifiable. A candidate that relaxes a safety policy is
+   rejected before it reaches testing.
+3. Every promotion is versioned and reversible, with the pre-promotion version retained.
+4. RSI runs against **isolated** copies. It never mutates a live registry in place.
+5. Every promotion and rollback is a gate-ledger record with writer attribution.
 
 ---
 
-## 6. Why this is preferable
+## 5. Request and evidence flow, end to end
 
-**Against a fork (E).** Forking buys control of 340k LOC while leaving the runtime that
-matters — `openjiuwen`, holding `DeepAgent`, rails, the permission engine and the manifest
-framework — as an external pinned pre-1.0 dependency. It is the larger cost for the smaller
-half of the problem.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User (any channel)
+    participant JW as JiuwenSwarm
+    participant R as ResearchToolkitRail
+    participant IC as Intention compiler
+    participant PL as Planner
+    participant SC as Scheduler + router
+    participant AD as Execution adapter
+    participant AG as JiuwenSwarm agent (operator)
+    participant EV as Evaluators
+    participant GL as Gate ledger
+    participant RS as RSI
 
-**Against in-tree (B).** Places a fast-moving research codebase inside a pre-1.0 project's
-release cadence, lint standard and documentation conventions, with permanent merge conflicts
-in exactly the three files upstream refactors most.
+    U->>JW: "Is technique X worth pursuing for our product?"
+    JW->>R: research_start(...)
+    R->>IC: POST /runs
+    IC->>IC: classify lane · scope · ambiguity · constraints
+    alt ambiguous
+        IC-->>R: clarification questions
+        R-->>U: ask (via JiuwenSwarm UX)
+    end
+    IC->>PL: versioned + hashed task contract
+    PL->>PL: decompose → TaskGraph → validate ("compiles implies dispatchable")
+    PL->>SC: TaskGraph
+    loop each ready node
+        SC->>SC: readiness · write-scope batching
+        SC->>SC: capability match (HARD gate) + capsule effects/compatibility
+        alt no capable operator
+            SC->>GL: stall record · no_matching_worker + missing capabilities
+            Note over SC,GL: run stalls honestly — never force-assigned
+        else bound
+            SC->>AD: bounded work packet (goal, input refs, output schema, budget, idempotency key)
+            AD->>AG: governed dispatch
+            AG->>JW: tool calls → permission engine → sandbox
+            AG-->>AD: artifacts + provenance
+            AD->>GL: route record (provider, model, operator, exit code, timings)
+        end
+    end
+    SC->>EV: node + run artifacts
+    EV->>EV: conformance · engineering · perf/cost · security/IP · evidence/factuality · lifecycle
+    EV->>GL: verdicts (writer ≠ verifier enforced by the router)
+    alt gate fails
+        EV->>SC: repair DAG
+    end
+    GL-->>R: run status · gate dossier · evidence index
+    R-->>U: deliverable + "claim C014 rests on span [120,180) of source S3"
+    GL->>RS: execution evidence
+    RS->>RS: propose → isolated test → policy check → approve/reject → promote/rollback
+```
 
-**Against pure extension points (A).** A Rail sits *inside* the agent loop; the DAG
-scheduler and capability router must sit *above* it. A cannot host them. But A is the
-correct *first stage* of D.
+---
 
-**Against pure service (C).** Leaves research operators executing LLM calls outside
-JiuwenSwarm's permission engine, sandbox, model config and cost accounting — for research
-that fetches and parses untrusted web content, that is the wrong side of the boundary.
+## 6. Boundary rules — non-negotiable
 
-**Against separation (F).** Leaves AI4RnD single-user, single-machine, with
-`--dangerously-skip-permissions` workers and a substrate whose failure modes fill a
-nine-entry post-mortem document.
+### 6.1 Evidence never lives in the session
+Research artifacts live in AI4RnD's store; the JiuwenSwarm session holds only `run_id`.
+JiuwenSwarm compacts context and supports session rewind with file restoration; evidence must
+survive both.
+
+### 6.2 Tools return references, not bulk evidence
+`research_evidence` returns ids plus one-line summaries. The model reasons over ids; the
+service resolves them. Prevents compaction from silently destroying citation integrity.
+
+### 6.3 Node status is a projection of the gate ledger
+Never a directly written field. Preserve writer attribution on every transition — AI4RnD's
+best state-design idea, and it costs nothing to keep.
+
+### 6.4 Writer ≠ verifier is enforced in the AI4RnD router
+**Changed from the previous revision.** V-6 established that JiuwenSwarm has only
+`leader`/`teammate` with a single global permission policy, so this cannot be delegated. The
+router must exclude the writing operator's actor id from the evaluation node's candidate set,
+making self-grading *unroutable* rather than merely detected afterwards.
+
+### 6.5 The LLM never owns run state
+`LLM proposes. Schemas constrain. Code validates. Gates decide. Artifacts preserve.` An
+operator produces artifacts; the service validates and records them. No operator marks its
+own node passed.
+
+### 6.6 Capsule effects are enforced at binding, not trusted at runtime
+A capsule declaring `effects.network: none` must not be bound to an operator with network
+access. This is the capsule layer earning its keep over a skill.
+
+### 6.7 JiuwenSwarm's built-in security rules must be repaired before production
+V-4: `get_builtin_security_rules()` returns **0** in a stock install, and `rm -rf /` resolves
+to ALLOW under a permissive baseline. Either ship `builtin_rules.yaml` into the openjiuwen
+package path, or have the integration load JiuwenSwarm's copy explicitly. **Do not assume the
+guardrail layer is active.**
 
 ---
 
 ## 7. What to build first
 
-Ordered by evidence value per unit of effort. Full detail in
-[09-implementation-plan.md](09-implementation-plan.md).
+1. **ResearchToolkitRail + evidence core** — no core changes; mechanism already verified.
+2. **Real entailment for feature 70** — promoted from late hardening to Stage 1 by V-12.
+3. **Extract AI4RnD services with an HTTP API** — proves the ownership boundary.
+4. **Wire the unwired**: capsules, operators, actor queue/leases, TaskGraph persistence — 19
+   modules, ~8k LOC, already tested.
+5. **Execution adapter + callback** — the only step touching JiuwenSwarm's core tree.
+6. **Wire GEPA; build the remaining RSI surfaces.**
 
-1. **`ResearchToolkitRail` + evidence ledger as a library.** No core changes. Proves the
-   Rail seam carries real tools, and puts grounded, citation-verified research in front of
-   users through JiuwenSwarm's existing channels. This is the highest-information,
-   lowest-cost experiment available.
-2. **Extract the research core into a service with an HTTP API.** Proves the boundary and
-   makes runs long-lived and observable.
-3. **Port the capability router.** Small, self-contained, and delivers a capability
-   JiuwenSwarm lacks entirely.
-4. **Port the DAG scheduler and gate ledger.** The largest single porting job.
-5. **The node-exec callback and the in-tree extension.** Only after 1–4 prove the
-   architecture, since this is the only step that touches the core tree.
+Full staging in [09-implementation-plan.md](09-implementation-plan.md).
 
-## 8. Evidence required before committing to the full integration
+---
 
-Do not proceed past Stage 1 without these. Each is a falsifiable check with a defined
-failure response.
+## 8. Evidence that would change the recommendation
 
-| # | Question | How to answer | If it fails |
-|---|---|---|---|
-| E1 | Can a Rail plugin register tools on a live agent and survive a restart? | build a minimal `rail.py`, install it, call the tool, restart, call again | Option D collapses to Option B or E — reassess entirely |
-| E2 | Does `openjiuwen`'s `DeepAgentRail` / `ability_manager` API match what the in-tree rails use? | inspect the installed `openjiuwen` package (was **not** possible in this analysis — see [10](10-risks-assumptions-open-questions.md) §L1) | adapt the plugin to the real API; cost rises but architecture holds |
-| E3 | Does the evidence ledger run standalone outside the Solar tree? | `PYTHONPATH` import, run `init`/`add-source`/`extract`/`ledger` against a temp DB | port cost rises materially |
-| E4 | Do research tool results survive `/compact` and session rewind intact? | run a research session, compact, rewind, re-query by id | tighten §5.3 or store run refs outside the session |
-| E5 | Can the permission engine express "this agent may not start a research run"? | write a `permissions.rules` entry, verify the deny | enforce non-re-entrancy in the service instead |
-| E6 | How much of `graph_scheduler.py` is genuinely Solar-coupled? | dependency audit of the 4,189 LOC | if >50%, rewrite the scheduler rather than port |
-| E7 | Does JiuwenSwarm's `openJiuwen-DeepSearch` skill overlap enough to matter? | compare outputs on a fixed topic against the AI4RnD pipeline | if it is close, the value case for the whole integration weakens — this is the most important commercial check |
-| E8 | Is `_jaccard`-based grounding good enough to claim verification? | run the evaluator against a labelled set with known unsupported claims | if precision is poor, real entailment must move into Stage 1, not Stage 4 |
+| # | Question | Would flip to |
+|---|---|---|
+| G1 | Can the execution callback be made bounded, idempotent and cancellable against a real `DeepAgent`? | **Option G** (defer JiuwenSwarm) if not |
+| G2 | Does an out-of-tree Rail survive agent-cache invalidation and agent-server restart? | Option G if not — V-2 verified registration, **not** lifecycle persistence |
+| G3 | Does the two-role limit (V-6) block per-operator governance even with router-side enforcement? | Option E (fork) if the router cannot compensate |
+| G4 | Is upstream willing to accept a generic extension-RPC passthrough? | carries a permanent patch if not — tolerable |
+| G5 | Does `openjiuwen` 0.1.x churn break the Rail API within a release cycle? | Option G if the seam proves unstable |
+| G6 | Is the tmux cockpit a genuine user requirement rather than an implementation artifact? | changes the physical-operator model materially |
 
-**E7 and E8 are the two that could change the recommendation.** E7 tests whether the
-integration is worth doing at all; E8 tests whether AI4RnD's central claim — that its
-output is verified — currently holds.
+G1 and G2 are the decisive pair and are testable in Stage 1–2 — before any core-tree change
+and before the expensive ports begin.
