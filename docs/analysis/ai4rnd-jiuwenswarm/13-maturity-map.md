@@ -1,5 +1,16 @@
 # Maturity Map
 
+> **Revision 4 amendment.** Three maturity judgements changed after executing the runtime rather
+> than reading it. `agent_evolving` moves from *active substrate* to **implemented-but-unwired**:
+> `Trainer.train` needs an agent implementing `get_operators()` and exactly one class in openjiuwen
+> does, while JiuwenSwarm imports only the experience-archive and tool-description-optimizer parts.
+> `GraphMemory` is **implemented-but-unwired** — zero references anywhere in JiuwenSwarm. The
+> built-in shell guardrail tier is **scaffolded-but-orphaned**: JiuwenSwarm ships and installs an
+> 86-line `builtin_rules.yaml` that no code reads back, and openjiuwen's loader refuses user
+> directories. See [15-correction-log.md](15-correction-log.md) §9 and
+> [V-25 / V-27](12-verification-appendix.md).
+
+
 What exists, in what state, on each side. Classifications are from
 [V-8](12-verification-appendix.md#v-8--ai4rnd-module-maturity-by-execution) (executed
 import/wiring/test probe over 48 modules) plus source reading, mapped onto the 142-feature

@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,7 +35,7 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Product / traceability/142-feature-matrix.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#legend">Legend</a><a class="l2" href="#roll-up">Roll-up</a><a class="l3" href="#workflow-ingestion">Workflow › Ingestion</a><a class="l3" href="#workflow-requirement-compilation">Workflow › Requirement compilation</a><a class="l3" href="#workflow-search-ideation">Workflow › Search &amp; ideation</a><a class="l3" href="#workflow-idea-identification-screening-opportunity-selection">Workflow › Idea identification / screening / opportunity selection</a><a class="l3" href="#workflow-generate-technical-claims-hypothesis">Workflow › Generate technical claims &amp; hypothesis</a><a class="l3" href="#workflow-poc-implementation">Workflow › POC implementation</a><a class="l3" href="#workflow-benchmarking">Workflow › Benchmarking</a><a class="l3" href="#workflow-evaluation">Workflow › Evaluation</a><a class="l3" href="#workflow-delivery">Workflow › Delivery</a><a class="l3" href="#foundation-capability-capsule">Foundation › Capability capsule</a><a class="l3" href="#foundation-operators">Foundation › Operators</a><a class="l3" href="#foundation-evaluator">Foundation › Evaluator</a><a class="l3" href="#foundation-foundational-models">Foundation › Foundational models</a><a class="l3" href="#foundation-rsi">Foundation › RSI</a><a class="l3" href="#foundation-data-foundations">Foundation › Data foundations</a><a class="l3" href="#foundation-harness-core">Foundation › Harness Core</a><a class="l3" href="#foundation-intention-compilers">Foundation › Intention compilers</a><a class="l3" href="#foundation-planner">Foundation › Planner</a><a class="l3" href="#foundation-builder">Foundation › Builder</a><a class="l3" href="#vertical-visibility-statistics">Vertical › Visibility / Statistics</a><a class="l3" href="#vertical-installer-cli-webapp">Vertical › Installer &amp; CLI &amp; Webapp</a><a class="l3" href="#vertical-ui">Vertical › UI</a><a class="l3" href="#vertical-account-management">Vertical › Account management</a><a class="l3" href="#vertical-message-channels">Vertical › Message Channels</a><a class="l3" href="#vertical-system-configurations">Vertical › System Configurations</a></nav><h1 id="142-feature-traceability-matrix"><a class="anchor" href="#142-feature-traceability-matrix" aria-hidden="true">#</a>142-Feature Traceability Matrix</h1>
 <p>Controlling set: every Level-2 row of <code>AI4RnD Feature List.xlsx</code> (Workflow 54 + Foundation 65 + Vertical 23 = 142).</p>
 <p>Machine-readable copy: <a href="../traceability/142-feature-matrix.csv"><code>142-feature-matrix.csv</code></a>.</p>

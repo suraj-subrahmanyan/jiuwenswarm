@@ -1,5 +1,14 @@
 # Verdict: Custom TaskGraph versus Core Workflow / SwarmFlow Reuse
 
+> **Revision 4 amendment.** The verdict below — AI4RnD keeps a logical plan, not a scheduler —
+> survives. What changed is *when* the AI4RnD-side scheduling logic can be retired. Executing the
+> runtime found that resume is not reachable from the agent surface, `agent_type` is silently
+> ignored, an unknown model silently substitutes, and a failed step returns `None` while the run
+> reports success. Retirement is therefore **per capability, against a passing test** — architecture
+> option C — not up front. See [15-correction-log.md](15-correction-log.md) §9 and
+> [07-architecture-options.md](07-architecture-options.md).
+
+
 **Question.** Does AI4RnD need its own DAG scheduler, or can existing Jiuwen mechanisms carry
 the work?
 
@@ -19,7 +28,7 @@ was wrong.
 ```mermaid
 flowchart LR
     LP["<b>Logical plan</b><br/>research semantics<br/>questions · dependencies ·<br/>acceptance · evidence owed<br/><br/><b>AI4RnD owns</b>"]
-    CMP["<b>Compiler</b><br/>plan → executable form<br/><br/><b>AI4RnD owns</b><br/>(small, ~800 LOC)"]
+    CMP["<b>Compiler</b><br/>plan → executable form<br/><br/><b>AI4RnD–Jiuwen Integration owns</b>"]
     RT["<b>Runtime graph</b><br/>readiness · batching · retries ·<br/>checkpoints · resume · admission<br/><br/><b>openjiuwen owns</b>"]
     LP --> CMP --> RT
 ```
@@ -179,7 +188,13 @@ scheduler:
 3. **Evidence + gate recording** — after a step, capture artifacts and write a gate-ledger
    record. ~200 LOC, ported from `gate_ledger` + `verification_gate`.
 
-**Total AI4RnD runtime code: ~450 LOC**, against ~5,200 LOC in Revision 2's port list.
+**Revision 4 withdraws the ~450 LOC figure.** It was extrapolated from reading, before the
+runtime was executed. Executing it found work that estimate did not cover: resume is not
+reachable from the agent surface, `agent_type` is ignored, an unknown model silently
+substitutes, and a failed step returns `None` while the run reports success
+([15 §9](15-correction-log.md)). The surviving AI4RnD-owned runtime responsibilities are the
+list above; their cost is stated as work items with acceptance criteria in
+[09-implementation-plan.md](09-implementation-plan.md), not as a line count.
 
 ---
 
@@ -228,4 +243,4 @@ What would overturn this verdict:
 | Still need a separate logical TaskGraph? | **Yes** — semantic only |
 | Is it also a second scheduler? | **No** |
 | What is duplicated if AI4RnD builds one? | ~85% of `graph_scheduler`, all of `actor_*` — roughly 4,700 LOC |
-| What survives as AI4RnD runtime code? | capability routing, write-scope exclusion, evidence/gate recording — **~450 LOC** |
+| What survives as AI4RnD runtime code? | capability routing with honest stall, write-scope exclusion, evidence and gate recording, and a run-state authority that does not trust the engine's completion signal |

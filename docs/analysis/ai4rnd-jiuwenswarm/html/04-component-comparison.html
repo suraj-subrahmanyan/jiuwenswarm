@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,7 +35,7 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Systems / 04-component-comparison.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#component-map">Component map</a><a class="l2" href="#1-entry-surface-and-channels">1. Entry surface and channels</a><a class="l2" href="#2-control-plane-task-loop">2. Control plane / task loop</a><a class="l2" href="#3-sprint-run-state-machine">3. Sprint / run state machine</a><a class="l2" href="#4-dag-scheduling">4. DAG scheduling</a><a class="l2" href="#5-capability-routing">5. Capability routing</a><a class="l2" href="#5b-capability-capsules-new-component-rev-2">5b. Capability Capsules ⭐ new component, Rev 2</a><a class="l2" href="#5c-rsi-controlled-self-improvement-new-component-rev-2">5c. RSI / controlled self-improvement ⭐ new component, Rev 2</a><a class="l2" href="#6-operator-model">6. Operator model</a><a class="l2" href="#7-worker-dispatch">7. Worker dispatch</a><a class="l2" href="#8-artifact-store">8. Artifact store</a><a class="l2" href="#9-gate-ledger">9. Gate ledger</a><a class="l2" href="#10-verification-gate">10. Verification gate</a><a class="l2" href="#11-evidence-ledger">11. Evidence ledger</a><a class="l2" href="#12-claim-graph">12. Claim graph</a><a class="l2" href="#13-quality-gates-research-evaluator">13. Quality gates / research evaluator</a><a class="l2" href="#14-repair-dag">14. Repair DAG</a><a class="l2" href="#15-skills">15. Skills</a><a class="l2" href="#16-knowledge-base">16. Knowledge base</a><a class="l2" href="#17-observability-surface">17. Observability surface</a><a class="l2" href="#18-sandbox-and-permissions">18. Sandbox and permissions</a><a class="l2" href="#19-concurrency-control">19. Concurrency control</a><a class="l2" href="#20-distribution-and-packaging">20. Distribution and packaging</a><a class="l2" href="#summary-tally-component-level">Summary tally (component level)</a></nav><h1 id="component-by-component-comparison"><a class="anchor" href="#component-by-component-comparison" aria-hidden="true">#</a>Component-by-Component Comparison</h1>
 <blockquote><p><strong>Revision 2 note.</strong> This document compares the two systems <em>as they exist</em>. The feature-level mapping against the <strong>intended product</strong> is in <a href="traceability-142-feature-matrix.html"><code>traceability/142-feature-matrix.md</code></a> and summarised in <a href="14-reuse-vs-build-map.html">14-reuse-vs-build-map.md</a>, which supersedes the summary tally at the end of this document.</p>
 <p>Three verdicts below changed after execution:</p>

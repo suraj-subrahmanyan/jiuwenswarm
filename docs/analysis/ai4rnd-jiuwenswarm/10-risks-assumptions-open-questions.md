@@ -234,7 +234,7 @@ were discovered by execution in this revision, and neither is visible from readi
 | R17 | `Trainer` cannot host AI4RnD subjects (A16 wrong) | Medium | Medium | Q27; fallback is AI4RnD's own GEPA, already built |
 | R18 | Two evolution loops (JW skill evolution + AI4RnD governance) conflict on one skill | Medium | Medium | Q30; governance applies only to capsule-bound skills |
 | R19 | In-process project contends with AgentServer | Low–Med | Medium | A17 / Option 8 step 2 |
-| R20 | The compiler becomes the new complexity sink | **Medium** | Medium | keep it ~800 LOC; if it grows past ~2k, reconsider |
+| R20 | The compiler becomes the new complexity sink | **Medium** | Medium | hold it to one responsibility — plan shape to mechanism choice; if it starts making semantic decisions, that logic belongs in the Planner |
 | R6 | Grounding cannot be made trustworthy | Medium | **High** | **eased** — `llm_as_judge` + judge calibration exist |
 | R10 | Guardrail gap ships to production | Medium | High | unchanged — Stage 2 exit gate |
 
@@ -249,6 +249,6 @@ were discovered by execution in this revision, and neither is visible from readi
 | SwarmFlow is the right default compilation target | **Medium** | plausible; F4 untested |
 | AI4RnD is "mode + persistent project + registry" | **Medium-High** | follows from the 142-feature scope |
 | Execution mechanism must not be user-facing | **High** | upstream already hides it (config flag + team projection) |
-| ~450 LOC of AI4RnD runtime code suffices | **Medium** | derived from the capability gap, not built |
+| ~450 LOC of AI4RnD runtime code suffices | **Withdrawn** | Revision 4 executed the runtime and found four unreachable surfaces the estimate did not cover ([15 §9](15-correction-log.md)) |
 | 14-month estimate | **Low-Medium** | structural, not empirical |
 

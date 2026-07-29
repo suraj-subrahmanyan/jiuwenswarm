@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,8 +35,9 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Product / 00-intended-product-model.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-what-ai4rnd-is-meant-to-be">1. What AI4RnD is meant to be</a><a class="l2" href="#2-the-central-abstraction-stack">2. The central abstraction stack</a><a class="l3" href="#2-1-a-capability-capsule-is-not-a-renamed-skill">2.1 A Capability Capsule is not a renamed skill</a><a class="l3" href="#2-2-operators-are-the-dag-s-execution-vocabulary">2.2 Operators are the DAG's execution vocabulary</a><a class="l3" href="#2-3-evaluators-are-operators-too">2.3 Evaluators are operators too</a><a class="l2" href="#3-rsi-controlled-self-improvement-across-eight-surfaces">3. RSI — controlled self-improvement across eight surfaces</a><a class="l2" href="#4-data-foundations-seven-graphs-plus-memory">4. Data foundations — seven graphs plus memory</a><a class="l2" href="#5-harness-core-what-the-execution-substrate-must-provide">5. Harness Core — what the execution substrate must provide</a><a class="l2" href="#6-what-the-workbook-itself-marks-as-unsettled">6. What the workbook itself marks as unsettled</a><a class="l2" href="#7-scale-of-the-target-versus-what-exists">7. Scale of the target versus what exists</a></nav><h1 id="the-intended-ai4rnd-product"><a class="anchor" href="#the-intended-ai4rnd-product" aria-hidden="true">#</a>The Intended AI4RnD Product</h1>
+<blockquote><p><strong>Revision 4 amendment.</strong> The workbook was re-read directly with <code>openpyxl</code> in this revision and reconciles exactly: 9 + 10 + 6 = <strong>25 L1 groups</strong>, 54 + 65 + 23 = <strong>142 L2 features</strong>. A position-by-position check against the Revision 3 traceability CSV found <strong>zero mismatches</strong> — the row set was already correct. What was missing was per-row <em>ownership</em>, which is now in <a href="20-feature-implementation-ownership.html">20-feature-implementation-ownership.md</a>. Capability Capsules are <strong>not</strong> workflow templates: all 42 manifests carry <code>applicability</code>, <code>contract</code>, <code>composition</code>, <code>effects</code>, <code>bindings</code>, <code>verification</code>, <code>operator_compatibility</code> and <code>provenance</code> (<a href="12-verification-appendix.html">V-28</a>).</p></blockquote>
 <p>Derived from <code>AI4RnD Feature List.xlsx</code> (142 Level-2 rows), the architecture specifications in <code>Stellven/AI4Research-A</code>, the schemas and contracts in <code>Stellven/AI4Research</code>, and the workbook's own design notes.</p>
 <p><strong>This document defines the target.</strong> Everything else in this analysis measures the two codebases against it. The previous revision of this analysis modelled AI4RnD as "a research report generator with an evidence ledger". That was wrong — it described one lane of a much larger product.</p>
 <hr>

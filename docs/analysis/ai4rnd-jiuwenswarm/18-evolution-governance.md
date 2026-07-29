@@ -1,5 +1,16 @@
 # Governed Recursive Improvement
 
+> **Revision 4 amendment.** The governance design below stands; the reuse assumption under it does
+> not. `Trainer.train(agent, ...)` requires an agent implementing `get_operators()`, and exactly one
+> class in openjiuwen implements it (`ReactAgentEvolve`). JiuwenSwarm imports only
+> `EvolutionStore`, the experience services, `InMemoryTrajectoryRegistry` and the tool-description
+> optimizer family; `Trainer`, `Updater`, `Operator` and `agent_rl` are never imported by the
+> application. Of the eight RSI surfaces, **one — text artifacts — is genuinely wired on both
+> sides**; the rest require binding work. Revision 3's "only one of eight is absent" is corrected in
+> [08-recommended-architecture.md](08-recommended-architecture.md) §6 and
+> [V-27](12-verification-appendix.md).
+
+
 Not "an agent rewriting itself". A concrete ten-step loop, most of which openjiuwen already
 implements.
 

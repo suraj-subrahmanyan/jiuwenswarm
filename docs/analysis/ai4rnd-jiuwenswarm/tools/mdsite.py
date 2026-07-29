@@ -16,6 +16,7 @@ OUT.mkdir(exist_ok=True)
 DOCS = [
     ("README.md",                         "Overview & verdict",        "Start"),
     ("15-correction-log.md",              "Correction log",            "Start"),
+    ("20-feature-implementation-ownership.md", "Feature ownership matrix", "Decision"),
     ("16-jiuwen-execution-mechanisms.md", "Jiuwen execution mechanisms","Evidence"),
     ("17-taskgraph-verdict.md",           "TaskGraph verdict",         "Decision"),
     ("19-product-layers-and-ux.md",       "Product layers & UX",       "Decision"),
@@ -51,6 +52,11 @@ CHIP = {
     # disposition
     "REUSE-JW": "ok", "PORT": "accent", "ADAPT": "warn", "BUILD": "bad",
     "DEFER": "neutral", "UPSTREAM": "neutral", "SERVICE": "neutral",
+    # Revision 4 implementation decisions
+    "REUSE": "ok", "CONFIGURE": "ok", "EXTEND": "accent", "UNRESOLVED": "warn",
+    # Revision 4 preservation-gate verdicts
+    "PRESERVED": "ok", "PRESERVED WITH ADAPTATION": "warn",
+    "NEW BUILD REQUIRED": "bad", "DROPPED": "bad",
     # maturity
     "ACTIVE": "ok", "IMPL-UNWIRED": "accent", "SCAFFOLD": "warn",
     "SPEC": "warn", "ABSENT": "bad",
@@ -500,7 +506,7 @@ MARK = ('<svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none
 
 def sidebar(active: str) -> str:
     p = [f'<div class="brand">{MARK}<h1>AI4RnD &times; JiuwenSwarm</h1></div>',
-         '<p class="rev">Architecture review &middot; Rev 3</p>']
+         '<p class="rev">Architecture review &middot; Rev 4</p>']
     for sec in SECTIONS:
         p.append(f'<div class="navsec">{sec}</div>')
         for src, title, s in DOCS:
@@ -509,7 +515,7 @@ def sidebar(active: str) -> str:
             on = " on" if SLUG[src] == active else ""
             p.append(f'<a class="doc{on}" href="{SLUG[src]}">{html.escape(title)}</a>')
     p.append('<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>'
-             'AI4Research @ d35c511<br>142 features &middot; 19 experiments</div>')
+             'AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div>')
     return "\n".join(p)
 
 
@@ -576,8 +582,9 @@ for idx, (src, title, sec) in enumerate(DOCS):
 
 # ---------------------------------------------------------------- index page
 DESC = {
- "README.md":"The question, the verdict, and the seven findings that drive Revision 3.",
- "15-correction-log.md":"What Revision 2 assumed too early, and why. Severity-rated.",
+ "README.md":"The question, the verdict, and what executing the runtime changed in Revision 4.",
+ "15-correction-log.md":"What each revision assumed too early, and why. Severity-rated.",
+ "20-feature-implementation-ownership.md":"All 142 workbook outcomes: semantic owner, runtime implementer, persistence, verification, surface, decision.",
  "16-jiuwen-execution-mechanisms.md":"Bottom-up map of all five Jiuwen graph/state mechanisms.",
  "17-taskgraph-verdict.md":"Definitive answer: AI4RnD keeps a plan, not a scheduler.",
  "19-product-layers-and-ux.md":"What kind of product this is, what users select, who owns state.",

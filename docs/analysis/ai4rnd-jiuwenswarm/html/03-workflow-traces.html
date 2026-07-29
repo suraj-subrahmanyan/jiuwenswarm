@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,7 +35,7 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Systems / 03-workflow-traces.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-how-work-enters">1. How work enters</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#2-how-tasks-are-planned">2. How tasks are planned</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#3-how-agents-or-workers-are-selected">3. How agents or workers are selected</a><a class="l3" href="#jiuwenswarm-role-and-configuration">JiuwenSwarm — role and configuration</a><a class="l3" href="#ai4rnd-capability-matching">AI4RnD — capability matching</a><a class="l2" href="#4-how-tools-are-executed">4. How tools are executed</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#5-where-intermediate-state-is-stored">5. Where intermediate state is stored</a><a class="l2" href="#6-how-results-are-verified">6. How results are verified</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#7-failure-cancellation-recovery">7. Failure, cancellation, recovery</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#8-end-to-end-comparison">8. End-to-end comparison</a></nav><h1 id="workflow-traces"><a class="anchor" href="#workflow-traces" aria-hidden="true">#</a>Workflow Traces</h1>
 <p>Seven questions traced through both systems: how work enters, how it is planned, how a worker is chosen, how tools execute, where intermediate state lives, how results are verified, and what happens on failure, cancellation and recovery.</p>
 <p>Evidence tags resolve in <a href="11-evidence-appendix.html">11-evidence-appendix.md</a>.</p>

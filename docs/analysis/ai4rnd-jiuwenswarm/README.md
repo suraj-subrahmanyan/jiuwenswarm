@@ -1,32 +1,120 @@
-# AI4RnD on JiuwenSwarm — Architecture Evaluation (Revision 3)
+# AI4RnD on JiuwenSwarm — Architecture Evaluation (Revision 4)
 
-**Question.** What is the best way to build the complete intended AI4RnD product using
-JiuwenSwarm / openJiuwen as its foundation?
+**Question.** How can the complete intended AI4RnD product — all 142 outcomes in
+`AI4RnD Feature List.xlsx` — be built using JiuwenSwarm and OpenJiuwen as its application and
+execution foundation?
 
-**Answer. AI4RnD is a mode, plus a persistent project subsystem, plus a workspace capability
-registry — and it writes no scheduler.**
+**Answer. AI4RnD is a first-class application surface on the JiuwenSwarm platform**: a persistent
+project subsystem with its own semantic control plane, a workspace capability registry, and a
+governed evolution loop — compiled **progressively** onto OpenJiuwen execution mechanisms.
 
-Revision 3 reopened the decision after inspecting parts of openjiuwen that earlier revisions
-never opened. openjiuwen contains a Pregel graph engine, a workflow engine, SwarmFlow
-(deterministic, journalled, resumable), admission control, and a complete self-evolution
-framework. Revision 2 recommended porting ~5,200 LOC of scheduler, queue and lease code that
-already exists one layer down.
+**Architecture option C.** [Options](07-architecture-options.md) ·
+[recommended target](08-recommended-architecture.md) ·
+[row-by-row ownership](20-feature-implementation-ownership.md).
 
-**The corrected shape:** AI4RnD owns *meaning* — the logical research plan, capability routing,
-evidence, gates, capsules and evolution governance. Jiuwen owns *execution* — readiness,
-batching, checkpointing, resume, admission, background work and cancellation. A compiler
-(~800 LOC) turns the plan into a SwarmFlow script or a Core Workflow. The only AI4RnD runtime
-code is a ~450-LOC step wrapper.
+---
 
-| | Revision 2 | Revision 3 |
+## The rule this revision enforces
+
+**The product definition is held constant while implementation architectures are compared.**
+
+DeepAgent, SwarmFlow, Core Workflow and Dynamic Team are **execution mechanisms inside the
+product**, not competing versions of it. None of them implements the nine R&D workflow lanes,
+Capability Capsules, logical and physical Operators, scientific evaluators, eight RSI surfaces,
+seven typed graph domains, Harness Core, Intention Compilers, Planner, Builder, or any of the
+visibility, installation, UI, account, channel and configuration outcomes. Alone, each implements
+**0 of 142**.
+
+An option is a complete architecture only if it preserves all 142 outcomes.
+
+| Verdict | A | B | C ★ | D | E |
+|---|---:|---:|---:|---:|---:|
+| PRESERVED | 70 | 76 | 76 | 58 | 82 |
+| PRESERVED WITH ADAPTATION | 12 | 6 | 6 | 23 | 0 |
+| NEW BUILD REQUIRED | 58 | 58 | 58 | 57 | 58 |
+| UNRESOLVED | 2 | 2 | 2 | 3 | 2 |
+| **DROPPED** | **0** | **0** | **0** | **1** | **0** |
+
+**Option D fails**: it drops `FN-19 Model Routing & Selection`, because an unknown model name
+silently substitutes the default and D leaves no AI4RnD-side layer to catch it.
+
+**The number that matters most barely moves.** `NEW BUILD REQUIRED` is 57–58 under every option —
+58 outcomes exist in neither system. No architecture choice avoids them.
+
+---
+
+## What Revision 4 changed
+
+Revision 3 read the OpenJiuwen execution stack. **Revision 4 executed it.** Four surfaces that read
+as reusable are not yet reachable:
+
+| # | Finding | Class |
 |---|---|---|
-| Shape | separate service with its own scheduler | mode → project subsystem → compiles to Jiuwen |
-| AI4RnD runtime code | ~5,200 LOC ported | **~450 LOC** |
-| RSI surfaces to build | 6 of 8 | **1 of 8** |
-| JiuwenSwarm coverage of 142 features | 20 FULL / 72 NONE | **23 FULL / 62 NONE** |
-| Time to complete product | ~19–20 months | **~12–14 months** |
+| 1 | The leader-facing `swarmflow` tool advertises `resume_id` and **rejects it at invoke** — engine replay works, but no agent can trigger it | EXEC |
+| 2 | A failed agent step returns **`None` after its retries and the run reports success** | EXEC |
+| 3 | `agent_type` is validated, forwarded, and **read by no backend** | EXEC |
+| 4 | An unknown model name **silently substitutes** the default worker model | SRC |
+| 5 | JiuwenSwarm installs an 86-line `builtin_rules.yaml` that **nothing reads back**; openjiuwen's loader refuses user directories and loads **0 rules** | EXEC |
+| 6 | `Trainer.train` needs `get_operators()`; **exactly one class in openjiuwen implements it**. Of eight RSI surfaces, **one is wired**, not seven | EXEC |
 
-Full account: **[15-correction-log.md](15-correction-log.md)**.
+| | Revision 3 | Revision 4 |
+|---|---|---|
+| Architecture answer | "mode + project subsystem + registry" | **first-class application surface**, option **C** |
+| Migration stance | retire the AI4RnD scheduler up front | retire it **per capability, against a passing test** |
+| Options compared | 8 triples mixing mechanisms with architectures | **5 complete-product options**; mechanisms excluded |
+| Product-preservation check | none | **142 × 5**, D fails |
+| RSI surfaces absent | 1 of 8 | **1 of 8 wired** |
+| Effort language | "~450 LOC", "~12–14 months" | **withdrawn** — work items with acceptance criteria |
+
+Two Revision 3 open spikes closed favourably: Core Workflow **does** accept a runtime-computed
+fan-out (F2), and a stock install **does** configure a persistent sqlite checkpointer (F3).
+
+Full account: **[15-correction-log.md](15-correction-log.md) §9**.
+
+---
+
+## The workbook is the controlling source
+
+Read directly with `openpyxl` in this revision:
+
+| Sheet | Plane | L1 groups | L2 features |
+|---|---|---:|---:|
+| Workflow Features | Workflow | 9 | 54 |
+| Foundation Features | Foundation | 10 | 65 |
+| Vertical Features | Vertical | 6 | 23 |
+| **Total** | | **25** | **142** |
+
+Checked position-by-position against the Revision 3 CSV: **0 mismatches**. The row set was already
+right. What was missing was ownership — who defines a feature's meaning, who runs it, who stores
+it, who validates it, and where the user sees it.
+
+| Ownership | Rows |
+|---|---:|
+| **Semantically owned by AI4RnD Core** | 118 |
+| Semantically owned by JiuwenSwarm Application | 19 |
+| External / New Product Work | 4 |
+| Unresolved | 1 |
+| | |
+| **Runtime** — AI4RnD Core | 53 |
+| Runtime — AI4RnD–Jiuwen Integration | 32 |
+| Runtime — JiuwenSwarm Application | 27 |
+| Runtime — OpenJiuwen Runtime | 25 |
+
+**That divergence is the architecture.** 118 rows are AI4RnD's to define; only 53 are its to run.
+
+---
+
+## Capability Capsules are not templates
+
+Verified: all **42** capsule manifests carry the same eight-section body — `applicability`,
+`contract`, `composition`, `effects`, `bindings`, `verification`, `operator_compatibility`,
+`provenance`. The registry holds 35 entries (32 capability, 1 guard, 2 resource), 30 stable, 5
+draft. A JiuwenSwarm *skill* carries a name, a description and a prompt.
+
+The five levels stay distinct: **Capsule** (governed reusable capability) → **Contract** (promise
+for this request) → **TaskGraph** (project-specific plan) → **Logical Operator** (stable callable
+action) → **Physical Operator** (actual executor). Capsules shape, constrain, observe and improve
+executions; they never hide the concrete DAG.
 
 ---
 
@@ -34,11 +122,11 @@ Full account: **[15-correction-log.md](15-correction-log.md)**.
 
 | Read this | For |
 |---|---|
-| **[15 Correction log](15-correction-log.md)** | what changed and why |
-| **[16 Jiuwen execution mechanisms](16-jiuwen-execution-mechanisms.md)** | the bottom-up map earlier revisions lacked |
-| **[17 TaskGraph verdict](17-taskgraph-verdict.md)** | custom scheduler vs Core Workflow / SwarmFlow |
-| **[19 Product layers & UX](19-product-layers-and-ux.md)** | what kind of product this is, and what users select |
-| **[08 Recommended architecture](08-recommended-architecture.md)** | the target |
+| **[20 Feature implementation ownership](20-feature-implementation-ownership.md)** | all 142 rows, decided |
+| **[07 Architecture options](07-architecture-options.md)** | five complete-product options and the gate |
+| **[08 Recommended architecture](08-recommended-architecture.md)** | the target, ten layers, boundary rules |
+| **[15 Correction log §9](15-correction-log.md)** | what executing the runtime changed |
+| **[12 Verification appendix](12-verification-appendix.md)** | every probe, command and output |
 
 ---
 
@@ -46,27 +134,29 @@ Full account: **[15-correction-log.md](15-correction-log.md)**.
 
 | # | Document | Contents |
 |---|---|---|
-| 00 | [Intended product model](00-intended-product-model.md) | 142 features; Capsule→Contract→Step stack; RSI scope |
+| 00 | [Intended product model](00-intended-product-model.md) | 142 features; Capsule→Contract→Operator stack; RSI scope |
 | 01 | [JiuwenSwarm architecture](01-jiuwenswarm-architecture.md) | current state, corrected by execution |
 | 02 | [AI4RnD architecture](02-ai4rnd-architecture.md) | current state incl. dormant and unwired code |
 | 03 | [Workflow traces](03-workflow-traces.md) | entry → planning → routing → execution → verification |
 | 04 | [Component comparison](04-component-comparison.md) | component-by-component verdicts |
 | 05 | [Capability matrix](05-capability-matrix.md) | provided / partial / extensible / missing |
 | 06 | [Integration challenges](06-integration-challenges.md) | conflicts and blockers |
-| 07 | [Architecture options](07-architecture-options.md) | **rewritten** — 8 options as (entry, control plane, execution) triples |
-| 08 | [Recommended architecture](08-recommended-architecture.md) | **rewritten** — ten layers, ownership, RSI loop |
-| 09 | [Staged path](09-implementation-plan.md) | **rewritten** — 7 stages, ~14 months |
-| 10 | [Risks & open questions](10-risks-assumptions-open-questions.md) | incl. Revision 3 reversals |
+| 07 | [Architecture options](07-architecture-options.md) | **Rev 4** — five complete-product options + preservation gate |
+| 08 | [Recommended architecture](08-recommended-architecture.md) | **Rev 4** — ten layers, ownership, capsules, RSI |
+| 09 | [Staged path](09-implementation-plan.md) | **Rev 4** — six phases, work items, no month estimates |
+| 10 | [Risks & open questions](10-risks-assumptions-open-questions.md) | incl. withdrawn assumptions |
 | 11 | [Evidence appendix](11-evidence-appendix.md) | source references |
-| 12 | [Verification appendix](12-verification-appendix.md) | **19 experiments**, commands and results |
+| 12 | [Verification appendix](12-verification-appendix.md) | **29 experiments**, commands and results |
 | 13 | [Maturity map](13-maturity-map.md) | active / unwired / scaffold / spec / absent |
-| 14 | [Reuse-vs-build map](14-reuse-vs-build-map.md) | per-feature sourcing |
-| **15** | [**Correction log**](15-correction-log.md) | what Revision 2 got wrong |
-| **16** | [**Jiuwen execution mechanisms**](16-jiuwen-execution-mechanisms.md) | bottom-up map of all five graph/state mechanisms |
-| **17** | [**TaskGraph verdict**](17-taskgraph-verdict.md) | definitive answer on custom scheduler vs reuse |
-| **18** | [**Evolution governance**](18-evolution-governance.md) | governed RSI loop over `agent_evolving` |
-| **19** | [**Product layers & UX**](19-product-layers-and-ux.md) | product model, user controls, state ownership |
-| — | [142-feature matrix](traceability/142-feature-matrix.md) · [CSV](traceability/142-feature-matrix.csv) | row-by-row |
+| 14 | [Reuse-vs-build map](14-reuse-vs-build-map.md) | superseded for sourcing by doc 20 |
+| 15 | [Correction log](15-correction-log.md) | **Rev 4 §9** — what execution changed |
+| 16 | [Jiuwen execution mechanisms](16-jiuwen-execution-mechanisms.md) | bottom-up map of all five mechanisms |
+| 17 | [TaskGraph verdict](17-taskgraph-verdict.md) | custom scheduler vs reuse |
+| 18 | [Evolution governance](18-evolution-governance.md) | governed RSI over `agent_evolving` |
+| 19 | [Product layers & UX](19-product-layers-and-ux.md) | product model, user controls, state ownership |
+| **20** | [**Feature implementation ownership**](20-feature-implementation-ownership.md) | **all 142 rows: owner · runtime · persistence · verification · surface** |
+| — | [Ownership CSV](traceability/142-feature-implementation-ownership.csv) · [Preservation gate CSV](traceability/142-feature-preservation-gate.csv) | machine-readable |
+| — | [142-feature matrix](traceability/142-feature-matrix.md) · [CSV](traceability/142-feature-matrix.csv) | Revision 3 coverage view |
 | — | [Diagrams](diagrams/README.md) | 27 diagrams |
 
 ### Rendered HTML
@@ -76,16 +166,18 @@ network, no build step. Open either file directly in a browser.
 
 | Artifact | What it is |
 |---|---|
-| [`html/index.html`](html/index.html) | **navigable site** — 23 pages, sidebar, per-page contents, prev/next, light & dark |
-| [`ai4rnd-architecture-review.html`](ai4rnd-architecture-review.html) | **single-file edition** — everything on one page, 660 KB, for archiving or printing |
+| [`html/index.html`](html/index.html) | **navigable site** — sidebar, per-page contents, prev/next, light & dark |
+| [`ai4rnd-architecture-review.html`](ai4rnd-architecture-review.html) | **single-file edition** — everything on one page, for archiving or printing |
 
-All 63 Mermaid diagrams render inline from a vendored copy of the renderer
-(`html/vendor/mermaid.min.js`), themed to the same tokens as the text. Markdown remains the
-source of truth; the HTML is generated from it:
+All Mermaid diagrams render inline from a vendored copy of the renderer
+(`html/vendor/mermaid.min.js`), themed to the same tokens as the text. Markdown and CSV remain the
+source of truth; the HTML is generated from them:
 
 ```
-python3 tools/mdsite.py .     # -> html/  (23 pages + index + style.css)
-python3 tools/onepage.py .    # -> ai4rnd-architecture-review.html
+python3 tools/gen_ownership.py .   # -> traceability/*.csv  (from the workbook)
+python3 tools/gen_doc20.py .       # -> 20-feature-implementation-ownership.md
+python3 tools/mdsite.py .          # -> html/
+python3 tools/onepage.py .         # -> ai4rnd-architecture-review.html
 ```
 
 Colours come from AI4Research's own `DESIGN.md`: Huawei black / white / red, red rationed as a
@@ -93,98 +185,20 @@ signal, amber for blocked, quiet ink for done.
 
 ---
 
-## The seven findings that drive Revision 3
-
-1. **openjiuwen has a durable DAG engine.** Pregel supersteps, channel `snapshot`/`restore`,
-   `BarrierMessage`, `GraphInterrupt`, `_is_resume`, plus `Checkpointer`/`Storage`.
-   ([V-15](12-verification-appendix.md))
-
-2. **SwarmFlow is a deterministic, journalled, resumable workflow engine.** Scripts are ordinary
-   Python with a pure-literal `META`; the loader bans `time`/`random`/`uuid`/`datetime.now`
-   because a WAL-backed `Journal` memoises calls by signature and replays on resume. Admission
-   control, background execution, pause/resume and abort come with it.
-   ([V-16](12-verification-appendix.md))
-
-3. **openjiuwen has a self-evolution framework.** `Operator` tunable handles with freeze
-   markers, `Case`/`EvaluatedCase` datasets, `exact_match` + `llm_as_judge` metrics, `Trainer`
-   with candidate selection on a validation set, snapshot/restore rollback, `Updater` with
-   multi-dimensional credit assignment, and PPO-based RL. Revision 2 said six of eight RSI
-   surfaces were absent from both systems; **one is.**
-   ([V-17](12-verification-appendix.md))
-
-4. **"Operator" means opposite things in the two systems.** openjiuwen: *"Operator is NOT an
-   executable unit"* — it is a tunable-parameter handle. AI4RnD: an executable work unit.
-   Revision 3 renames AI4RnD's to **Step** and **Runner**. ([V-18](12-verification-appendix.md))
-
-5. **Execution mechanism must never be a user choice.** SwarmFlow is already a config flag
-   inside team mode, with phases projected into the existing team UI as `team.task` /
-   `team.member`. "Auto Route" is `WorkflowController.intent_detection`. These are internal
-   mechanisms; the compiler picks them. ([19 §2](19-product-layers-and-ux.md))
-
-6. **Only three capabilities have no Jiuwen equivalent** — capability routing with honest
-   stall, write-scope conflict exclusion, and typed contracts/evidence on nodes. They are worth
-   ~450 LOC, not ~5,200. ([16 §9](16-jiuwen-execution-mechanisms.md))
-
-7. **A mode alone cannot hold the product.** A JiuwenSwarm mode is an agent assembly profile
-   cached by `(mode, sub_mode, project_dir)`. It cannot own multi-day state, an evidence ledger
-   that survives `/compact`, or a cross-project capability registry. Hence mode **plus**
-   project subsystem **plus** registry. ([19 §1](19-product-layers-and-ux.md))
-
----
-
-## Recommended architecture at a glance
-
-```mermaid
-flowchart LR
-    subgraph JW["JiuwenSwarm + openjiuwen — execution"]
-        M["Research mode · channels · session"]
-        E["Core Workflow · SwarmFlow · Team<br/>Pregel · Checkpointer · admission"]
-        P["permissions · sandbox"]
-    end
-    subgraph AI["AI4RnD — meaning"]
-        PR["Project control plane"]
-        PL["Logical plan (artifact)"]
-        CO["Compiler ~800 LOC"]
-        WR["Step wrapper ~450 LOC<br/>routing · write-scope · evidence"]
-        GV["Capsules · gates · evolution governance"]
-    end
-    M --> PR --> PL --> CO --> E
-    E --> WR --> GV
-    E --> P
-    GV -.->|promote / rollback| GV
-```
-
-*JiuwenSwarm and openjiuwen decide how work runs safely. AI4RnD decides what work exists, who
-may do it, whether the result is true, and what the system learns.*
-
-**~4.5 months to first trustworthy user value; ~14 months to substantial completeness.** No
-core-tree change is required at any stage.
-
----
-
-## The three cheapest experiments that could disprove this
-
-| # | Experiment | Cost | Disproves |
-|---|---|---|---|
-| **F2** | Build a Core Workflow conditional router returning a runtime-computed `list[Hashable]` and run it | ~1 day | that AI4RnD plans compile to Core Workflow |
-| **F4** | Compile three real AI4RnD plans to SwarmFlow scripts and run `load_workflow_source` | ~1 day | that the determinism lint is compatible with research |
-| **Q27** | Register a non-agent subject (a capsule) as an openjiuwen `Operator` and run `Trainer.train` on it | ~2 days | that RSI can be reused rather than rebuilt |
-
-If F2 **and** F4 both fail, the recommendation reverts toward Revision 2's separate service.
-If Q27 fails, Stage 5 grows from 8 weeks back toward 16.
-
----
-
 ## Reading the evidence
 
 `V-n` refers to a verification experiment in
 [12-verification-appendix.md](12-verification-appendix.md); `[E-Jxx]` / `[E-Axx]` to source
-references in [11-evidence-appendix.md](11-evidence-appendix.md). Claims are labelled **EXEC**
-(executed here), **SRC** (source-read), **DOC** (documented), **INF** (inferred).
+references in [11-evidence-appendix.md](11-evidence-appendix.md).
 
-Across the 142-row matrix: **74 features rest on executed evidence, 66 on source reading, 2 on
-documentation.**
+Claims are labelled **EXEC** (executed in this environment), **SRC** (source-read), **DOC**
+(documented), **INF** (inferred). Across the 142-row ownership matrix: **34 EXEC · 69 SRC · 6 DOC ·
+33 INF**. Every `INF` row is one where the analysis asserts an absence or a design intent it could
+not execute against.
 
-Not executed, and why: no live agent conversation, no real model call, no sandbox enforcement
-test — all require credentials or kernel privileges the safeguards exclude. Stage 0 closes the
-remaining gaps.
+Six reuse claims are labelled **UNVERIFIED** — all Windows and macOS packaging rows, which cannot
+be built in this environment.
+
+Not executed, and why: no live model call, no live team runtime, no sandbox enforcement test, no
+platform installer build. All require credentials, kernel privileges or host platforms the
+safeguards exclude.

@@ -1,7 +1,11 @@
-# Correction Log — Revision 3
+# Correction Log — Revisions 3 and 4
 
 What earlier revisions assumed too early, and what the evidence now says. Prior documents are
-preserved unchanged except for pointers; nothing has been destructively replaced.
+preserved in git history; nothing has been destructively replaced.
+
+**Revision 4 corrections are in [§9](#9-revision-4--what-executing-the-runtime-changed) onward.**
+Revision 3's corrections (§1–§8) stand except where §9 supersedes them, and each superseded item
+says so explicitly.
 
 ---
 
@@ -205,3 +209,144 @@ dependency's package tree and search by *capability* (checkpoint, resume, barrie
 journal, reward, candidate) rather than by *brand name*. That is what produced
 [16-jiuwen-execution-mechanisms.md](16-jiuwen-execution-mechanisms.md), and it is the document
 Revision 2 should have opened with.
+
+---
+
+## 9. Revision 4 — what executing the runtime changed
+
+Revision 3 read the OpenJiuwen execution stack and concluded it could be reused almost wholesale.
+Revision 4 **executed** it. The stack is real, but four surfaces that read as reusable are not yet
+reachable, and one Revision 3 claim about the evolution framework was substantially too generous.
+
+Every item below was produced by a probe run in this environment. Commands and outputs:
+[12-verification-appendix.md](12-verification-appendix.md).
+
+### 9.1 SwarmFlow resume is advertised and then refused
+
+**Revision 3 said:** SwarmFlow brings "pause/resume and abort with it", counted as free reuse.
+
+**Executed:** the leader-facing `swarmflow` tool declares five parameters — `script_path`,
+`script`, `name`, `resume_id`, `args` — and rejects two of them at invoke time:
+
+```
+resume_id only    success=False  error='resume_id' is not supported yet; provide 'script_path' or inline 'script'
+name only         success=False  error='name' is not supported yet; provide 'script_path' or inline 'script'
+```
+
+The engine's journal replay genuinely works — a second run re-executed only the failed step, a
+third executed nothing at all. But **no agent can trigger it.** `_relaunch` is a control-plane
+call, deliberately not a tool. Resume therefore needs integration work; it is not free.
+
+**Effect:** `FN-43` gains three implementation slices and Option D's resumability verdict moves to
+UNRESOLVED.
+
+### 9.2 A failed step returns `None` and the run reports success
+
+**Executed:** with a backend raising on `step-B`, the engine retried, emitted `agent_failed`, and
+the workflow **returned `{'a': 'result(step-A)', 'b': None}` as a successful run.** Source
+confirms: after `rt.retries + 1` attempts, `agent()` returns `None`.
+
+For a product whose gates decide whether a scientific claim holds, "the run completed" is not
+evidence that its steps did. **Boundary rule 4** in the recommended architecture exists because of
+this probe.
+
+### 9.3 `agent_type` is validated, forwarded, and ignored
+
+**Executed:** the engine rejects an unknown option key with a precise error —
+
+```
+WorkflowError: unknown option(s) ['totally_unknown_key']; allowed: ['agent_type', 'isolation', 'label', 'model', 'phase', 'schema', 'timeout']
+```
+
+— and forwards `agent_type` to the backend. But `grep agent_type` across
+`openjiuwen/agent_teams/workflow/backends/` returns nothing, and no backend declares
+`KNOWN_OPTIONS`. So a typo raises loudly while a real-but-unimplemented knob passes silently.
+Named `agent_type` execution is **not wired**.
+
+### 9.4 An unknown model name silently substitutes a different model
+
+**Source-verified:** `resolve_member_model` returns `None` when the named group is absent from the
+pool (`allocator.py` 417–423); `TeamWorkerBackend._resolve_model` then falls back to the worker
+base spec's model. No error, no warning.
+
+This is the finding that **fails Option D**. A research product cannot silently run a step on a
+substitute model. `FN-19` is the one DROPPED row under D.
+
+### 9.5 The built-in guardrail rules file is orphaned
+
+**Revision 3 said:** openjiuwen ships no `builtin_rules.yaml`, so ship one into its package path.
+
+**Executed:** `get_builtin_security_rules()` returns `0` and logs
+`builtin_rules_missing package_path=.../openjiuwen/harness/resources/builtin_rules.yaml` — the
+directory does not exist. But JiuwenSwarm **does** ship an 86-line `builtin_rules.yaml` and copies
+it to `~/.jiuwenswarm/config/` at workspace init. A search across the whole JiuwenSwarm tree, in
+every file type, finds only the two files that *write* that copy. **Nothing reads it back**, and
+openjiuwen's loader explicitly refuses to look in user or environment directories.
+
+Revision 3's remedy was aimed at the wrong package. The real defect is an orphaned file.
+
+### 9.6 The evolution framework has exactly one subject
+
+**Revision 3 said:** "Revision 2 said six of eight RSI surfaces were absent from both systems;
+**one is.**"
+
+**Executed:** `Trainer.train(agent, ...)` requires an agent implementing `get_operators()`.
+`grep 'def get_operators'` across all of openjiuwen returns **one** implementor,
+`ReactAgentEvolve`. JiuwenSwarm imports only the experience-archive services and the
+tool-description optimizer family from `agent_evolving`; `Trainer`, `Updater`, `Operator` and
+`agent_rl` are never imported by the application.
+
+Revision 3's count was too generous. The substrate exists and is well built, but binding an AI4RnD
+subject to it is `ADAPT`, not `REUSE`. Surface 1 is genuinely wired on both sides; the rest need
+work. Corrected per-surface in
+[08-recommended-architecture.md](08-recommended-architecture.md) §6.
+
+### 9.7 Two Revision 3 open questions are now closed — favourably
+
+| Question | Revision 3 | Revision 4 |
+|---|---|---|
+| F2 — can Core Workflow express runtime-computed fan-out? | open spike | **Yes, executed.** `add_conditional_connection` accepted a router returning a computed `list[str]` and the run completed. Caveat: the router is invoked with **no arguments**, so width must come from a closure or channel read. |
+| F3 — is a persistent checkpointer available in a stock install? | open spike | **Yes, source-verified.** `ensure_persistent_checkpointer()` creates a sqlite `PersistenceCheckpointer` and sets it as the process default. |
+
+### 9.8 The row set was right; the columns were wrong
+
+The Revision 3 traceability CSV was checked row-by-row against the workbook this revision. All 142
+rows match in order and wording, with **zero mismatches**. What was missing was not features but
+*decisions*: the old matrix recorded coverage and disposition, never who owns a feature's meaning,
+who runs it, who stores it, who validates it, or where the user sees it. That is what
+[20-feature-implementation-ownership.md](20-feature-implementation-ownership.md) adds.
+
+### 9.9 Effort is no longer stated in lines of code
+
+Revision 3 quantified the target as "~450 LOC step wrapper" and "~800 LOC compiler", and the plan
+as "~12–14 months". Those numbers were extrapolated from reading, not measured, and §9.1–9.4 show
+the extrapolation missed real work.
+
+**All LOC and month estimates are withdrawn.** Effort is now expressed as work items with
+acceptance criteria. Measured line counts of *existing* code are still cited — those are facts
+about what exists, not predictions about what it costs to replace.
+
+### 9.10 Summary of what changed
+
+| | Revision 3 | Revision 4 |
+|---|---|---|
+| Architecture answer | "mode + project subsystem + registry" | **first-class application surface**, option **C** |
+| Migration stance | retire the AI4RnD scheduler up front | retire it **per capability, against a passing test** |
+| Options compared | 8 triples, mixing mechanisms with architectures | **5 complete-product options**, mechanisms excluded by definition |
+| Product-preservation check | none | **142 rows × 5 options**, D fails |
+| RSI surfaces absent | 1 of 8 | **1 of 8 wired**; the rest need binding work |
+| Effort language | LOC and month estimates | work items with acceptance criteria |
+| Guardrail finding | openjiuwen packaging gap | **orphaned file** in JiuwenSwarm |
+
+### 9.11 Why these errors happened, and the process fix
+
+Revision 3 fixed the previous failure — searching by brand name instead of capability — and then
+made the adjacent one: **it treated "the code exists and reads correctly" as "the capability is
+reachable."** A schema that advertises `resume_id`, an option whitelist that accepts `agent_type`,
+a resolver that returns `None`, and a rules file that is copied into place all *look* like working
+features from the source.
+
+**Process fix applied in Revision 4:** before recording any capability as `REUSE`, invoke it. If it
+cannot be invoked in this environment, the row is labelled `SRC` or `UNVERIFIED` and never `EXEC`.
+Six reuse claims in the matrix carry `UNVERIFIED` for exactly this reason — all six are Windows and
+macOS packaging rows that cannot be built here.

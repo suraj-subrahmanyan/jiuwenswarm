@@ -1,5 +1,14 @@
 # Product Layers, What Users Select, and Evolution Visibility
 
+> **Revision 4 amendment.** The layer model and the "users select objective and depth, never a
+> mechanism" rule both stand. The product framing is sharpened: AI4RnD is a **first-class
+> application surface** on the JiuwenSwarm platform — a persistent project subsystem with its own
+> semantic control plane, capability registry and governed evolution loop — not "a mode". Ownership
+> counts across all 142 outcomes: 118 semantically owned by AI4RnD Core, 19 by JiuwenSwarm
+> Application, 4 External/New, 1 Unresolved. See
+> [20-feature-implementation-ownership.md](20-feature-implementation-ownership.md).
+
+
 The question Revision 2 never asked: **what kind of product is AI4RnD?**
 
 ---
@@ -106,7 +115,7 @@ Three reasons, each evidenced:
 | 1 | **Product surface** | JiuwenSwarm | Research mode in the existing mode picker; project list; all 9 IM channels + web + TUI + desktop |
 | 2 | **Project / control plane** | **AI4RnD** | persistent project record: contract, plan, run history, evidence, gates, artifacts, budget. Hosted on `NativeHarness` (start/stop/pause/abort/subscribe) |
 | 3 | **Logical plan** | **AI4RnD** | semantic DAG — questions, dependencies, `required_capabilities`, `write_scope`, `acceptance`, `evidence_required`, `gate_refs`, `capsule_ref`. Artifact, not runtime |
-| 4 | **Execution compilation** | **AI4RnD** (~800 LOC) | plan → Core Workflow / SwarmFlow script / Team excursion |
+| 4 | **Execution compilation** | **AI4RnD–Jiuwen Integration** | plan → Core Workflow / SwarmFlow script / Team excursion / code mode |
 | 5 | **Workers / runners** | JiuwenSwarm + openjiuwen | DeepAgent members, sub-agents, tools, MCP, API models — selected by AI4RnD's capability router (~150 LOC) |
 | 6 | **Evidence & evaluation** | **AI4RnD** | evidence ledger, claim graph, citation spans, 6 evaluator families, gate ledger with writer attribution |
 | 7 | **Capability registry** | **AI4RnD** | capsules with contract / effects / verification / operator_compatibility; versions; guard capsules |

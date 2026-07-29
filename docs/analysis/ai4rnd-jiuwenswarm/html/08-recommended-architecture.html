@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,119 +35,120 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
-<main><div class="crumb">Decision / 08-recommended-architecture.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-target">1. Target</a><a class="l2" href="#2-the-ten-layers-and-who-owns-each">2. The ten layers and who owns each</a><a class="l2" href="#3-reuse-versus-build-by-layer">3. Reuse-versus-build, by layer</a><a class="l2" href="#4-compilation-the-decision-the-compiler-makes">4. Compilation — the decision the compiler makes</a><a class="l2" href="#5-the-rsi-loop-in-the-target">5. The RSI loop in the target</a><a class="l2" href="#6-boundary-rules">6. Boundary rules</a><a class="l2" href="#7-what-to-build-first">7. What to build first</a><a class="l2" href="#8-evidence-that-would-change-this">8. Evidence that would change this</a></nav><h1 id="recommended-target-architecture-revision-3"><a class="anchor" href="#recommended-target-architecture-revision-3" aria-hidden="true">#</a>Recommended Target Architecture — Revision 3</h1>
-<p><strong>AI4RnD is a mode plus a persistent project subsystem plus a workspace capability registry.</strong></p>
-<p>Not only a mode. Not a separate application. Not a service with its own scheduler.</p>
-<p>The Revision 2 version of this document is preserved in git history at <code>dc5de41</code>. What changed and why: <a href="15-correction-log.html">15-correction-log.md</a>.</p>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Decision / 08-recommended-architecture.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-target">1. Target</a><a class="l2" href="#2-the-ten-layers-and-who-owns-each">2. The ten layers and who owns each</a><a class="l2" href="#3-capability-capsules-are-the-product-s-capability-identity">3. Capability Capsules are the product's capability identity</a><a class="l3" href="#the-five-level-stack-kept-distinct">The five-level stack, kept distinct</a><a class="l2" href="#4-boundary-rules">4. Boundary rules</a><a class="l2" href="#5-data-foundations-one-store-typed-projections">5. Data foundations — one store, typed projections</a><a class="l2" href="#6-governed-rsi-across-all-eight-surfaces">6. Governed RSI across all eight surfaces</a><a class="l3" href="#the-promotion-path">The promotion path</a><a class="l2" href="#7-what-to-build-first">7. What to build first</a><a class="l2" href="#8-evidence-that-would-change-this-recommendation">8. Evidence that would change this recommendation</a></nav><h1 id="recommended-target-architecture-revision-4"><a class="anchor" href="#recommended-target-architecture-revision-4" aria-hidden="true">#</a>Recommended Target Architecture — Revision 4</h1>
+<p><strong>AI4RnD is a first-class application surface on the JiuwenSwarm platform: a persistent project subsystem with its own semantic control plane, a workspace capability registry, and a governed evolution loop — compiled progressively onto OpenJiuwen execution mechanisms.</strong></p>
+<p>Not "a mode". Not a runtime choice. Not a research-report workflow.</p>
+<p><strong>Architecture option: C — progressive TaskGraph compilation.</strong> <a href="07-architecture-options.html">Options and preservation gate</a> · <a href="20-feature-implementation-ownership.html">row-by-row ownership</a>.</p>
+<p><strong>What changed from Revision 3.</strong> Revision 3 answered "mode + project subsystem + registry" and recommended retiring AI4RnD's scheduler immediately for a "~450 LOC step wrapper". Executing the runtime in this revision found four gaps that estimate did not account for. The shape survives; the migration discipline and the effort language do not. See <a href="15-correction-log.html">15-correction-log.md</a>.</p>
 <hr>
 <h2 id="1-target"><a class="anchor" href="#1-target" aria-hidden="true">#</a>1. Target</h2>
 <div class="fig"><pre class="mermaid">flowchart TB
-    subgraph SURF[&quot;1 · Product surface — JiuwenSwarm&quot;]
-        MODE[&quot;Research mode&lt;br/&gt;(alongside Chat · Code · Team)&quot;]
-        CHAN[&quot;Channels · session · skills · memory&quot;]
-        VIEWS[&quot;Project view · plan inspector · evidence browser ·&lt;br/&gt;gate dossier · Improvements inbox&quot;]
+    subgraph SURF[&quot;1 · Product surface — JiuwenSwarm Application&quot;]
+        CHAN[&quot;Channels · Gateway · sessions · workspace&quot;]
+        SHELL[&quot;UI shell · installer · model and provider config · settings&quot;]
+        VIEWS[&quot;Project view · plan inspector · evidence browser ·&lt;br/&gt;gate dossier · capability registry · Improvements inbox&quot;]
     end
 
-    subgraph PROJ[&quot;2 · Project control plane — AI4RnD, on NativeHarness&quot;]
-        PREC[&quot;Project record&lt;br/&gt;contract · budget · status · run history&quot;]
-        PLAN[&quot;3 · Logical plan (artifact)&lt;br/&gt;questions · deps · required_capabilities ·&lt;br/&gt;write_scope · acceptance · evidence_required&quot;]
-        COMP[&quot;4 · Compiler (~800 LOC)&quot;]
+    subgraph PROJ[&quot;2 · Project control plane — AI4RnD Core&quot;]
+        PREC[&quot;Project record&lt;br/&gt;Contract · budget · status · run history&quot;]
+        IC[&quot;3 · Intention Compiler&lt;br/&gt;intent · scope · ambiguity · constraints · acceptance&quot;]
+        PLAN[&quot;4 · Planner → logical TaskGraph&lt;br/&gt;questions · deps · required capabilities ·&lt;br/&gt;write scope · acceptance · evidence owed&quot;]
     end
 
-    subgraph EXEC[&quot;5 · Execution — openjiuwen&quot;]
-        CW[&quot;Core Workflow&lt;br/&gt;fixed-shape phases&quot;]
-        SF[&quot;SwarmFlow&lt;br/&gt;dynamic fan-out · journal · admission&quot;]
-        TM[&quot;Team&lt;br/&gt;open-ended excursions&quot;]
-        RT[&quot;Pregel · Checkpointer · ConcurrencyGovernor ·&lt;br/&gt;BackgroundTaskController&quot;]
+    subgraph REG[&quot;5 · Capability registry — AI4RnD Core&quot;]
+        CAPS[&quot;Capability Capsules&lt;br/&gt;applicability · contract · composition · effects ·&lt;br/&gt;bindings · verification · operator_compatibility · provenance&quot;]
+        LOP[&quot;Logical Operators&lt;br/&gt;stable callable actions&quot;]
+        POP[&quot;Physical Operators&lt;br/&gt;concrete executors&quot;]
     end
 
-    subgraph WRAP[&quot;AI4RnD step wrapper (~450 LOC)&quot;]
-        ROUTE[&quot;capability routing&lt;br/&gt;+ honest stall&quot;]
-        SCOPE[&quot;write-scope admission&quot;]
-        CAP[&quot;evidence capture&lt;br/&gt;+ gate verdict&quot;]
+    subgraph INT[&quot;6 · Integration layer — AI4RnD–Jiuwen&quot;]
+        COMP[&quot;Compiler: plan → execution mechanism&quot;]
+        BIND[&quot;Capability binding&lt;br/&gt;honest stall on no match&quot;]
+        FACT[&quot;Execution facts → evidence · state · gates&quot;]
     end
 
-    subgraph RUN[&quot;6 · Runners&quot;]
-        MEM[&quot;DeepAgent members · sub-agents&quot;]
-        TOOL[&quot;tools · MCP · API models&quot;]
-        PERM[&quot;permission engine → jiuwenbox&quot;]
+    subgraph EXEC[&quot;7 · Execution — OpenJiuwen Runtime&quot;]
+        CW[&quot;Core Workflow / Pregel&lt;br/&gt;lifecycle stages · checkpoints · human turns&quot;]
+        SF[&quot;SwarmFlow&lt;br/&gt;fan-out · panels · loops · journal · admission&quot;]
+        DA[&quot;DeepAgent · Dynamic Team · code mode / worktree · tools&quot;]
     end
 
-    subgraph GOV[&quot;7-8 · Capability registry + evolution governance — AI4RnD&quot;]
-        REG[&quot;Capsule registry&lt;br/&gt;contract · effects · verification ·&lt;br/&gt;operator_compatibility · versions · guards&quot;]
-        LED[&quot;Evidence ledger · claim graph ·&lt;br/&gt;gate ledger (append-only, writer-attributed)&quot;]
-        EVO[&quot;Governance: proposal → isolated test →&lt;br/&gt;frozen-rule check → approval → promote/rollback&quot;]
-        OJE[&quot;openjiuwen agent_evolving&lt;br/&gt;Trainer · Updater · Operator · EvolutionStore&quot;]
+    subgraph GOV[&quot;8 · Evidence and governance — AI4RnD Core&quot;]
+        EV[&quot;Evidence ledger · claim graph · citation spans&quot;]
+        GATE[&quot;Gate ledger — append-only, writer-attributed&quot;]
+        EVAL[&quot;Six evaluator families&quot;]
     end
 
-    MODE --&gt; PREC --&gt; PLAN --&gt; COMP
-    CHAN --&gt; MODE
-    COMP --&gt; CW &amp; SF &amp; TM
-    CW &amp; SF &amp; TM --&gt; RT
-    CW &amp; SF &amp; TM --&gt; WRAP
-    REG --&gt; ROUTE
-    WRAP --&gt; MEM &amp; TOOL
-    MEM &amp; TOOL --&gt; PERM
-    CAP --&gt; LED
-    LED --&gt; EVO
-    EVO --&gt; OJE
-    EVO -.-&gt;|promote / rollback| REG
-    LED --&gt; VIEWS
-    EVO --&gt; VIEWS</pre></div>
+    subgraph DATA[&quot;9 · Data foundations — AI4RnD Core&quot;]
+        STORE[&quot;One authoritative store&quot;]
+        PROJ7[&quot;Seven typed graph projections + memory + TaskGraph lifecycle&quot;]
+    end
+
+    subgraph RSI[&quot;10 · Governed RSI — AI4RnD Core over agent_evolving&quot;]
+        PROP[&quot;Improvement proposals&quot;]
+        APPR[&quot;Risk class · frozen-policy check · approval&quot;]
+        ROLL[&quot;Promotion · monitoring · rollback&quot;]
+    end
+
+    CHAN --&gt; PREC --&gt; IC --&gt; PLAN --&gt; COMP
+    REG --&gt; BIND
+    COMP --&gt; BIND --&gt; EXEC
+    EXEC --&gt; FACT --&gt; GOV
+    GOV --&gt; DATA
+    DATA --&gt; RSI
+    RSI -.-&gt;|governed change| REG
+    RSI -.-&gt;|governed change| GOV
+    VIEWS -.-&gt; PROJ
+    VIEWS -.-&gt; GOV
+    VIEWS -.-&gt; RSI</pre></div>
 <hr>
 <h2 id="2-the-ten-layers-and-who-owns-each"><a class="anchor" href="#2-the-ten-layers-and-who-owns-each" aria-hidden="true">#</a>2. The ten layers and who owns each</h2>
-<div class="tw"><table><thead><tr><th>#</th><th>Layer</th><th>Owner</th><th>Concretely</th></tr></thead><tbody><tr><td>1</td><td>Product surface</td><td><strong>JiuwenSwarm</strong></td><td>Research mode; project views rendered by the web UI; all existing channels</td></tr><tr><td>2</td><td>Project / control plane</td><td><strong>AI4RnD</strong></td><td>persistent project on <code>NativeHarness</code> — start/stop/pause/abort/subscribe already provided</td></tr><tr><td>3</td><td>Logical plan</td><td><strong>AI4RnD</strong></td><td>semantic artifact, versioned, diffable. <strong>Not a runtime graph</strong></td></tr><tr><td>4</td><td>Execution compilation</td><td><strong>AI4RnD</strong> (~800 LOC)</td><td>plan → SwarmFlow script (default) / Core Workflow (static) / Team (open-ended)</td></tr><tr><td>5</td><td>Workers / runners</td><td><strong>JiuwenSwarm + openjiuwen</strong></td><td>DeepAgent members, sub-agents, tools, MCP, API models</td></tr><tr><td>6</td><td>Evidence &amp; evaluation</td><td><strong>AI4RnD</strong></td><td>evidence ledger, claim graph, citation spans, 6 evaluator families, gate ledger</td></tr><tr><td>7</td><td>Capability registry</td><td><strong>AI4RnD</strong></td><td>capsules with contract/effects/verification/compatibility, versioned</td></tr><tr><td>8</td><td>Evolution governance</td><td><strong>AI4RnD governance over openjiuwen machinery</strong></td><td>proposal + approval + promotion; <code>Trainer</code>/<code>Updater</code>/<code>Operator</code>/<code>EvolutionStore</code> underneath</td></tr><tr><td>9</td><td>Persistence</td><td><strong>split</strong></td><td>conversation → JW session · execution → openjiuwen checkpoint/journal · meaning → AI4RnD stores</td></tr><tr><td>10</td><td>Observability</td><td><strong>JiuwenSwarm surfaces, AI4RnD data</strong></td><td>project view, plan inspector with collapsed diagnostics, Improvements inbox</td></tr></tbody></table></div>
-<p><strong>The rule:</strong> <em>JiuwenSwarm and openjiuwen decide how work runs safely. AI4RnD decides what work exists, who may do it, whether the result is true, and what the system learns.</em></p>
+<div class="tw"><table><thead><tr><th>#</th><th>Layer</th><th>Semantic owner</th><th>Runtime implementer</th><th>Persistence authority</th><th>Verification authority</th></tr></thead><tbody><tr><td>1</td><td>Product surface, channels, shell, config</td><td>JiuwenSwarm Application</td><td>JiuwenSwarm Application</td><td>JiuwenSwarm config + session store</td><td>Platform tests</td></tr><tr><td>2</td><td>Project control plane</td><td>AI4RnD Core</td><td>AI4RnD Core</td><td>AI4RnD project store</td><td>Contract acceptance</td></tr><tr><td>3</td><td>Intention Compiler</td><td>AI4RnD Core</td><td>AI4RnD Core</td><td>AI4RnD Contract record</td><td>Contract completeness checks</td></tr><tr><td>4</td><td>Planner and logical TaskGraph</td><td>AI4RnD Core</td><td>AI4RnD Core</td><td>AI4RnD TaskGraph store</td><td>Validation + feasibility</td></tr><tr><td>5</td><td>Capability registry (Capsules, Operators)</td><td>AI4RnD Core</td><td>AI4RnD Core</td><td>AI4RnD capsule + operator registry</td><td>Certification + conformance</td></tr><tr><td>6</td><td>Integration and compilation</td><td>AI4RnD Core</td><td>AI4RnD–Jiuwen Integration</td><td>AI4RnD run index</td><td>Compilation tests</td></tr><tr><td>7</td><td>Execution</td><td>AI4RnD Core defines <em>what</em>; OpenJiuwen defines <em>how</em></td><td>OpenJiuwen Runtime</td><td>Jiuwen checkpointer + SwarmFlow journal</td><td>Runtime invariants</td></tr><tr><td>8</td><td>Evidence and gates</td><td>AI4RnD Core</td><td>AI4RnD Core</td><td>AI4RnD evidence + gate ledgers</td><td>Evaluator families, writer ≠ verifier</td></tr><tr><td>9</td><td>Data foundations</td><td>AI4RnD Core</td><td>AI4RnD Core</td><td>One authoritative store, typed projections</td><td>Schema + provenance conformance</td></tr><tr><td>10</td><td>Governed RSI</td><td>AI4RnD Core</td><td>AI4RnD–Jiuwen Integration</td><td>AI4RnD improvement store + EvolutionStore</td><td>Approval gate + frozen-policy check</td></tr></tbody></table></div>
+<p>Counts across all 142 rows: <strong>118 semantically owned by AI4RnD Core</strong>, 19 by JiuwenSwarm Application, 4 by External/New product work, 1 Unresolved. Runtime ownership divides very differently — 53 AI4RnD Core, 32 Integration, 27 JiuwenSwarm Application, 25 OpenJiuwen Runtime. <strong>That divergence is the architecture.</strong></p>
 <hr>
-<h2 id="3-reuse-versus-build-by-layer"><a class="anchor" href="#3-reuse-versus-build-by-layer" aria-hidden="true">#</a>3. Reuse-versus-build, by layer</h2>
-<div class="tw"><table><thead><tr><th>Layer</th><th>Reuse</th><th>Build</th><th>Size</th></tr></thead><tbody><tr><td>Product surface</td><td>mode picker, channels, session, web UI shell</td><td>project views, plan inspector, Improvements inbox</td><td>UI work</td></tr><tr><td>Control plane</td><td><code>NativeHarness</code> lifecycle</td><td>project record + run history</td><td>~1,200 LOC</td></tr><tr><td>Logical plan</td><td>—</td><td>plan schema + validator (port <code>plan_validator</code> semantics)</td><td>~1,000 LOC</td></tr><tr><td>Compilation</td><td>—</td><td>plan → SwarmFlow / Core Workflow emitter</td><td>~800 LOC</td></tr><tr><td>Scheduling</td><td><strong>Pregel · Core Workflow · SwarmFlow · journal · checkpoint · admission · background · cancel</strong></td><td>nothing</td><td><strong>0</strong></td></tr><tr><td>Step wrapper</td><td>—</td><td>capability routing (~150) · write-scope (~100) · evidence capture (~200)</td><td>~450 LOC</td></tr><tr><td>Runners</td><td>DeepAgent, sub-agents, tools, MCP, permissions, sandbox</td><td>runner capability declarations</td><td>~200 LOC</td></tr><tr><td>Evidence &amp; evaluation</td><td><code>llm_as_judge</code> as the entailment substrate</td><td>evidence ledger, claims, spans, gates (port), <strong>real entailment (build)</strong></td><td>~3,000 LOC</td></tr><tr><td>Capability registry</td><td>Jiuwen resource registry (referenced, not duplicated)</td><td>capsule registry (port, 1,351 LOC exists)</td><td>~1,500 LOC</td></tr><tr><td>Evolution governance</td><td><code>Trainer</code>, <code>Updater</code>, <code>Operator</code>, <code>EvolutionStore</code>, metrics, RL</td><td>proposal type, approval gate, risk classes, inbox, version pinning</td><td>~1,500 LOC</td></tr></tbody></table></div>
-<p><strong>Total new/ported AI4RnD code: ~9,650 LOC</strong>, against ~25,000 in Revision 2.</p>
-<p><strong>Deleted from the plan entirely:</strong> <code>graph_scheduler</code> port (4,189), <code>actor_*</code> port (1,051), the execution-callback contract, and four RSI surfaces Revision 2 thought were absent.</p>
+<h2 id="3-capability-capsules-are-the-product-s-capability-identity"><a class="anchor" href="#3-capability-capsules-are-the-product-s-capability-identity" aria-hidden="true">#</a>3. Capability Capsules are the product's capability identity</h2>
+<p>A Capsule is not a workflow template and not a renamed skill. Verified in this revision: all 42 manifests in the AI4Research tree carry the same eight-section body.</p>
+<div class="tw"><table><thead><tr><th>Capsule section</th><th>Present</th><th>What it governs</th></tr></thead><tbody><tr><td><code>applicability</code></td><td>42/42</td><td>task types, positive and negative signals — discovery and eligibility</td></tr><tr><td><code>contract</code></td><td>42/42</td><td>inputs, outputs, preconditions, postconditions, invariants</td></tr><tr><td><code>composition</code></td><td>42/42</td><td>consumes, produces, compatible_with, incompatible_with, requires_after</td></tr><tr><td><code>effects</code></td><td>42/42</td><td>read, write, execute, network, cost, risk — the permission boundary</td></tr><tr><td><code>bindings</code></td><td>42/42</td><td>skills, MCP capabilities, data refs, secret refs, required guard capsules</td></tr><tr><td><code>verification</code></td><td>42/42</td><td>self_check, external_verifier, pass_conditions</td></tr><tr><td><code>operator_compatibility</code></td><td>42/42</td><td>preferred and forbidden physical executors</td></tr><tr><td><code>provenance</code></td><td>42/42</td><td>owner, creation, source phase, compiler</td></tr></tbody></table></div>
+<p>The registry holds 35 (32 capability, 1 guard, 2 resource), 30 stable and 5 draft, 35 carrying a <code>default_operator_profile</code>. A JiuwenSwarm <em>skill</em> carries a name, a description and a prompt. The gap is not naming.</p>
+<p><strong>What the capsule schema does not yet carry</strong>, and must: planning strategies, benchmarks, performance history, version promotion and rollback, and RSI target declarations. Those are the <code>BUILD</code> items in <code>FN-05</code>.</p>
+<h3 id="the-five-level-stack-kept-distinct"><a class="anchor" href="#the-five-level-stack-kept-distinct" aria-hidden="true">#</a>The five-level stack, kept distinct</h3>
+<div class="tw"><table><thead><tr><th>Level</th><th>What it is</th><th>Lifetime</th></tr></thead><tbody><tr><td><strong>Capsule</strong></td><td>Governed reusable capability identity</td><td>Independent of any request</td></tr><tr><td><strong>Contract</strong></td><td>The promise made for <em>this</em> request</td><td>One request</td></tr><tr><td><strong>TaskGraph</strong></td><td>The project-specific plan</td><td>One project</td></tr><tr><td><strong>Logical Operator</strong></td><td>A stable callable action a DAG node invokes directly</td><td>Independent</td></tr><tr><td><strong>Physical Operator</strong></td><td>The actual executor</td><td>One binding</td></tr></tbody></table></div>
+<p>Capsules <strong>shape, constrain, observe and improve</strong> executions. They never hide the concrete DAG. A DAG node calls a Logical Operator directly; the Capsule governs which Physical Operator may serve it, under which effects, verified by which evaluators.</p>
+<blockquote><p><strong>Naming.</strong> <code>openjiuwen/core/operator/base.py</code> states: <em>"Operator is NOT an executable unit."</em> OpenJiuwen's <code>Operator</code> is a tunable-parameter handle for evolution. AI4RnD's Operator is an executable unit. Inside integration code the AI4RnD concept must carry a different name, or the collision will produce wrong bindings.</p></blockquote>
 <hr>
-<h2 id="4-compilation-the-decision-the-compiler-makes"><a class="anchor" href="#4-compilation-the-decision-the-compiler-makes" aria-hidden="true">#</a>4. Compilation — the decision the compiler makes</h2>
-<div class="fig"><pre class="mermaid">flowchart TB
-    N[&quot;plan node&quot;] --&gt; Q1{&quot;shape known&lt;br/&gt;before running?&quot;}
-    Q1 --&gt;|no, depends on data| SF[&quot;&lt;b&gt;SwarmFlow&lt;/b&gt;&lt;br/&gt;emit into a parallel/loop block&quot;]
-    Q1 --&gt;|yes| Q2{&quot;genuinely&lt;br/&gt;open-ended?&quot;}
-    Q2 --&gt;|yes| TM[&quot;&lt;b&gt;Team excursion&lt;/b&gt;&lt;br/&gt;bounded, contract in, artifacts out&quot;]
-    Q2 --&gt;|no| Q3{&quot;needs human&lt;br/&gt;interrupt mid-node?&quot;}
-    Q3 --&gt;|yes| CW[&quot;&lt;b&gt;Core Workflow&lt;/b&gt;&lt;br/&gt;questioner_comp + GraphInterrupt&quot;]
-    Q3 --&gt;|no| CW
-    SF &amp; CW &amp; TM --&gt; WS[&quot;write-scope check:&lt;br/&gt;conflicting nodes never emitted&lt;br/&gt;into the same parallel group&quot;]</pre></div>
-<p>Write-scope exclusion is solved <strong>at compile time</strong> — the compiler simply does not put two conflicting steps in one <code>parallel(...)</code>. That converts the last scheduling concern into a code-generation invariant, and is why no runtime scheduler is needed (<a href="17-taskgraph-verdict.html">17 §8</a>).</p>
-<p><strong>SwarmFlow is the default.</strong> Research is data-dependent: you do not know how many sources you will find. Core Workflow is used for fixed-shape phases (intake, contract confirmation, closeout) where interrupt-driven human confirmation matters.</p>
+<h2 id="4-boundary-rules"><a class="anchor" href="#4-boundary-rules" aria-hidden="true">#</a>4. Boundary rules</h2>
+<ol><li><strong>The product definition never moves.</strong> Execution mechanism changes ownership, never outcomes.</li><li><strong>The user selects objective and depth. Never a mechanism.</strong> Execution mechanism is a read-only diagnostic in the UI.</li><li><strong>The compiler chooses the mechanism</strong>, per sub-plan, from the plan's shape — not from a mode flag and not from user intent.</li><li><strong>AI4RnD never trusts a completion signal it did not verify.</strong> A SwarmFlow run whose step returned <code>None</code> after retries is a failed step, not a completed one.</li><li><strong>A capability that cannot be bound stalls.</strong> It never falls back to the nearest available executor, the nearest model, or a default agent type.</li><li><strong><code>effects</code> are enforced at binding time.</strong> A capsule declaring <code>network: none</code> cannot bind to a network-capable runner.</li><li><strong>Writer ≠ verifier</strong>, enforced at candidate-set construction, not by convention.</li><li><strong>Write-scope conflicts are excluded at compile time</strong>, so conflicting steps are never emitted into one parallel group.</li><li><strong>The gate ledger is append-only and writer-attributed.</strong> Status is a projection, never a mutable field.</li><li><strong>Evidence outlives the session.</strong> The evidence ledger is not session-scoped, because the SwarmFlow journal is.</li><li><strong>RSI changes nothing without a proposal, a risk class, a frozen-policy check and an approval.</strong></li><li><strong>In-flight runs pin capsule versions.</strong> A promotion never changes a running project.</li></ol>
 <hr>
-<h2 id="5-the-rsi-loop-in-the-target"><a class="anchor" href="#5-the-rsi-loop-in-the-target" aria-hidden="true">#</a>5. The RSI loop in the target</h2>
+<h2 id="5-data-foundations-one-store-typed-projections"><a class="anchor" href="#5-data-foundations-one-store-typed-projections" aria-hidden="true">#</a>5. Data foundations — one store, typed projections</h2>
+<p>The workbook names nine Data Foundation outcomes. <strong>Do not build nine databases.</strong></p>
+<div class="tw"><table><thead><tr><th>Outcome</th><th>Recommended realisation</th></tr></thead><tbody><tr><td>Persistent Memory &amp; Context Retrieval</td><td>Jiuwen checkpointer + context rail, extended with research retrieval</td></tr><tr><td>Concept / Dataset / Code / Policy / Workflow / Trace / Memory graphs</td><td><strong>Typed projections over one authoritative event-sourced store</strong>, each with its own schema, provenance and lifecycle</td></tr><tr><td>TaskGraph Persistence &amp; Lifecycle</td><td>AI4RnD TaskGraph store, project-scoped — explicitly <em>not</em> session-scoped</td></tr></tbody></table></div>
+<p>Verified: none of the seven graph names appears anywhere in the AI4RnD tree, and openjiuwen's <code>GraphMemory</code> is referenced zero times in JiuwenSwarm. All eight graph rows are <code>BUILD</code>, under every architecture option.</p>
+<p>The session-scoping point is not academic. The SwarmFlow journal path is <code>{team}/sessions/{session_id}/workflows/{name}</code> — a new session resolves a new journal and replays nothing. A multi-week research project must not depend on it for continuity.</p>
+<hr>
+<h2 id="6-governed-rsi-across-all-eight-surfaces"><a class="anchor" href="#6-governed-rsi-across-all-eight-surfaces" aria-hidden="true">#</a>6. Governed RSI across all eight surfaces</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Surface</th><th>Existing contribution</th><th>What remains</th></tr></thead><tbody><tr><td>1</td><td>Text artifacts</td><td>GEPA optimizer (AI4RnD) + tool-description optimizer (imported by JiuwenSwarm)</td><td>Governed promotion. <strong>The only surface wired on both sides.</strong></td></tr><tr><td>2</td><td>Runtime / resource routing</td><td>none found in either tree</td><td>Whole surface</td></tr><tr><td>3</td><td>Capsules and physical Operators</td><td>Capsules exist; no RSI target declaration</td><td>Bind capsules as evolution subjects</td></tr><tr><td>4</td><td>DAG and agent organisation</td><td>none</td><td>Whole surface</td></tr><tr><td>5</td><td>Evaluators, rewards, Contracts, governance</td><td>GEPA <code>hard_policy_checker.py</code>; <code>agent_evolving</code> metrics</td><td>Frozen-policy guard in the promotion path</td></tr><tr><td>6</td><td>Memory, retrieval, evidence</td><td>Evidence ledger exists</td><td>Retrieval learning; memory graph</td></tr><tr><td>7</td><td>Model policies and weights</td><td><code>agent_rl</code> (PPO/verl) exists, unreachable from the app</td><td><strong>DEFER</strong> — cost and infrastructure, not capability</td></tr><tr><td>8</td><td>Data, benchmarks, curriculum, observability</td><td>Benchmarks exist, not curriculum-managed</td><td>Hard-case mining into the benchmark set</td></tr></tbody></table></div>
+<p><strong>Correction to Revision 3.</strong> Revision 3 said only one of eight surfaces was absent because <code>agent_evolving</code> supplies the rest. Executing against it shows <code>Trainer.train</code> requires an agent implementing <code>get_operators()</code>, and <strong>exactly one class in openjiuwen implements it</strong> (<code>ReactAgentEvolve</code>). JiuwenSwarm imports only the experience-archive and tool-description-optimizer parts. The framework is real, but today its only subject is one ReAct agent's tunables. Reuse here is <code>ADAPT</code>, not <code>REUSE</code>.</p>
+<h3 id="the-promotion-path"><a class="anchor" href="#the-promotion-path" aria-hidden="true">#</a>The promotion path</h3>
 <div class="fig"><pre class="mermaid">flowchart LR
-    RUN[&quot;runs&quot;] --&gt; LED[&quot;gate ledger&lt;br/&gt;+ trajectory store&quot;]
-    LED --&gt; SIG[&quot;signal/from_eval&lt;br/&gt;failure clusters&quot;]
-    SIG --&gt; PROP[&quot;ImprovementProposal&lt;br/&gt;&lt;i&gt;AI4RnD — new&lt;/i&gt;&quot;]
-    PROP --&gt; CAND[&quot;Updater.process&lt;br/&gt;→ candidates&quot;]
-    CAND --&gt; ISO[&quot;isolated run&lt;br/&gt;Trainer.forward + sandbox&quot;]
-    ISO --&gt; SEL[&quot;_select_best_candidate_on_val&lt;br/&gt;vs fixed evaluation set&quot;]
-    SEL --&gt; FRZ[&quot;frozen-rule check&lt;br/&gt;Operator freeze + policy checker&quot;]
-    FRZ --&gt; APP{&quot;approval&lt;br/&gt;auto / human&quot;}
-    APP --&gt;|yes| PROMO[&quot;promote&lt;br/&gt;EvolutionStore + capsule version&quot;]
-    APP --&gt;|no| REJ[&quot;reject (recorded)&quot;]
-    PROMO --&gt; MON[&quot;monitor&quot;] --&gt;|regression| RB[&quot;rollback&lt;br/&gt;_restore_operators_state&quot;]
-    RB --&gt; PROMO
-    MON --&gt;|stable| RUN
-    REJ -.-&gt;|hard case| LED
-    PROMO --&gt; INBOX[&quot;Improvements inbox&lt;br/&gt;candidate vs current · evidence ·&lt;br/&gt;affected capabilities · version history&quot;]</pre></div>
-<p>Blue-sky elements are only the proposal object and the approval gate. Everything else binds to <code>agent_evolving</code> — detail and reuse table in <a href="18-evolution-governance.html">18-evolution-governance.md</a>.</p>
-<hr>
-<h2 id="6-boundary-rules"><a class="anchor" href="#6-boundary-rules" aria-hidden="true">#</a>6. Boundary rules</h2>
-<p>Carried forward from Revision 2 where still valid, revised where not.</p>
-<div class="tw"><table><thead><tr><th>#</th><th>Rule</th><th>Status</th></tr></thead><tbody><tr><td>6.1</td><td>Evidence never lives in the session; the session holds <code>project_id</code> only</td><td>unchanged</td></tr><tr><td>6.2</td><td>Research tools return <strong>references</strong>, not bulk evidence</td><td>unchanged</td></tr><tr><td>6.3</td><td>Node status is a <strong>projection</strong> of the append-only gate ledger</td><td>unchanged</td></tr><tr><td>6.4</td><td>Writer ≠ verifier enforced <strong>in AI4RnD's router</strong>, not delegated to JiuwenSwarm</td><td>unchanged — V-6</td></tr><tr><td>6.5</td><td>Honest stalling: <code>no_matching_worker</code> + missing capabilities; never force-assign</td><td>unchanged</td></tr><tr><td>6.6</td><td>The LLM never owns run state</td><td>unchanged</td></tr><tr><td>6.7</td><td>Capsule <code>effects</code> enforced at <strong>binding time</strong></td><td>unchanged</td></tr><tr><td>6.8</td><td>JiuwenSwarm's built-in guardrails must be repaired before production (V-4)</td><td>unchanged</td></tr><tr><td><strong>6.9</strong></td><td><strong>AI4RnD writes no scheduler, queue, lease manager or retry engine</strong></td><td><strong>new</strong></td></tr><tr><td><strong>6.10</strong></td><td><strong>Execution mechanism is never a user choice</strong> — read-only diagnostic</td><td><strong>new</strong></td></tr><tr><td><strong>6.11</strong></td><td><strong>In-flight runs pin capsule versions</strong> so a promotion cannot change a running project</td><td><strong>new</strong></td></tr><tr><td><strong>6.12</strong></td><td><strong>"Operator" means openjiuwen's evolution-parameter handle.</strong> AI4RnD's executable units are <strong>Steps</strong> (logical) and <strong>Runners</strong> (physical)</td><td><strong>new</strong></td></tr></tbody></table></div>
+    S[&quot;Run evidence&quot;] --&gt; P[&quot;Improvement proposal&lt;br/&gt;subject · claim · measurement&quot;]
+    P --&gt; R[&quot;Risk classification&quot;]
+    R --&gt; F[&quot;Frozen-policy check&lt;br/&gt;reject if it relaxes a frozen rule&quot;]
+    F --&gt; E[&quot;Evaluation on a held-out set&quot;]
+    E --&gt; A[&quot;Human approval&lt;br/&gt;Improvements inbox&quot;]
+    A --&gt; PR[&quot;Promotion — versioned&quot;]
+    PR --&gt; M[&quot;Monitoring&quot;]
+    M --&gt;|regression| RB[&quot;Rollback&quot;]
+    M --&gt;|holds| K[&quot;Keep&quot;]</pre></div>
+<p>Every promotion is versioned, evidence-backed and reversible. A user must be able to answer <em>what changed · why · is it better</em> from the inbox alone.</p>
 <hr>
 <h2 id="7-what-to-build-first"><a class="anchor" href="#7-what-to-build-first" aria-hidden="true">#</a>7. What to build first</h2>
-<ol><li><strong>Research mode + project skeleton</strong> — mode entry, project record on <code>NativeHarness</code>, project view. No compilation yet.</li><li><strong>SwarmFlow compilation for one objective</strong> (literature review), with the step wrapper doing capability routing and evidence capture.</li><li><strong>Real entailment</strong>, using <code>llm_as_judge</code> as the substrate — the correctness fix V-12 requires.</li><li><strong>Capsule registry wired</strong> — the 1,351 LOC that already exists, plus <code>effects</code> enforcement in the router.</li><li><strong>Improvements inbox</strong> over <code>Trainer</code>/<code>Updater</code> with the proposal + approval gate.</li></ol>
-<p>Staging in <a href="09-implementation-plan.html">09-implementation-plan.md</a>.</p>
+<p>Ordered by what unblocks the most outcomes, not by what is easiest.</p>
+<ol><li><strong>Project subsystem and Contract</strong> — 37 rows sit in phase P1 and most depend on a project record existing.</li><li><strong>Compilation spikes</strong> — confirm the plan compiles before building on the assumption.</li><li><strong>Evidence lane with calibrated entailment</strong> — the grounding check measured 0.25 precision. The product's central claim does not hold until this is replaced and the replacement is measured.</li><li><strong>Capability registry and binding with honest stall</strong> — closes the routing gaps that make Option D fail.</li><li><strong>The 58 never-built outcomes</strong>, in workbook order.</li></ol>
+<p>Staging: <a href="09-implementation-plan.html">09-implementation-plan.md</a>.</p>
 <hr>
-<h2 id="8-evidence-that-would-change-this"><a class="anchor" href="#8-evidence-that-would-change-this" aria-hidden="true">#</a>8. Evidence that would change this</h2>
-<div class="tw"><table><thead><tr><th>#</th><th>Question</th><th>Flips to</th></tr></thead><tbody><tr><td>F2</td><td>Can Core Workflow express runtime-determined fan-out?</td><td>SwarmFlow-only; then Option 5</td></tr><tr><td>F4</td><td>Does SwarmFlow's determinism lint block required research patterns?</td><td>Core Workflow; then Option 5</td></tr><tr><td>F3</td><td>Is a persistent Checkpointer backend available in a default install?</td><td>AI4RnD-side run store</td></tr><tr><td>F5</td><td>Can write-scope exclusion be solved at compile time?</td><td>narrow parallel-group scheduler</td></tr><tr><td>F6</td><td>Does in-process project state contend under load?</td><td>isolate the store (Option 8 step 2)</td></tr><tr><td>G2</td><td>Does a Rail survive agent-cache invalidation and restart?</td><td>affects the mode rail</td></tr></tbody></table></div>
-<p>F2 and F4 cost about a day each and are the first work in Stage 0. They are the cheapest experiments that could disprove this recommendation.</p></article><div class="pager"><a href="07-architecture-options.html"><div class="d">← Previous</div><div class="t">Architecture options</div></a><a class="nx" href="18-evolution-governance.html"><div class="d">Next →</div><div class="t">Evolution governance</div></a></div></main>
+<h2 id="8-evidence-that-would-change-this-recommendation"><a class="anchor" href="#8-evidence-that-would-change-this-recommendation" aria-hidden="true">#</a>8. Evidence that would change this recommendation</h2>
+<div class="tw"><table><thead><tr><th>If this proves true</th><th>Then</th></tr></thead><tbody><tr><td>Core Workflow cannot express the outer lifecycle with checkpoints and human turns</td><td>C degrades toward A</td></tr><tr><td>SwarmFlow's determinism lint blocks real research sub-plans</td><td>Compile everything to Core Workflow</td></tr><tr><td>The routing, resume and failure-signal gaps close upstream</td><td>C's mature form becomes D, and D stops dropping a row</td></tr><tr><td>A capsule cannot be registered as an evolution subject</td><td>RSI surfaces 3–6 grow substantially</td></tr><tr><td>Users genuinely want one-shot runs, not projects</td><td>Layer 2 shrinks to a session extension</td></tr></tbody></table></div></article><div class="pager"><a href="07-architecture-options.html"><div class="d">← Previous</div><div class="t">Architecture options</div></a><a class="nx" href="18-evolution-governance.html"><div class="d">Next →</div><div class="t">Evolution governance</div></a></div></main>
 </div>
 <button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
 <script src="vendor/mermaid.min.js"></script>

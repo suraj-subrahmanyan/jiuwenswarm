@@ -1,0 +1,1335 @@
+[
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "1. Request Capture",
+  "l2_desc": "Receives the user’s question, instruction, desired outcome, and requested deliverable as an intake candidate without prematurely treating it as a formal requirement.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "2. Qualified Channel Signal Intake",
+  "l2_desc": "Accepts a V-05-qualified Slack or internal-tool clue with its permitted context, sensitivity, relevance, and provenance; raw channel traffic remains outside Workflow.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "3. User-Supplied Material Import",
+  "l2_desc": "Imports documents, uploads, pasted content, datasets, and explicit file, repository, or URL references supplied by the user; related-source discovery belongs to Search & Ideation.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "4. Intake Context Binding",
+  "l2_desc": "Binds the candidate to the authorized user, session, workspace, project, originating signal, and explicitly selected prior artifacts needed for interpretation.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "5. Real-Time Intake Deduplication & Cleaning",
+  "l2_desc": "Canonicalizes incoming candidates, filters malformed or noisy content, and merges replays, exact duplicates, and near-duplicates while preserving meaningful revisions and independent corroboration.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "6. Intake Provenance Registration",
+  "l2_desc": "Records origin, identity, version, timestamp, access path, acquisition mode, and transformations for every accepted intake input.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Ingestion",
+  "l1_desc": "Entry: Unstructured user inputs, including a natural-language request and user-supplied materials such as PDF, Markdown, office documents, datasets, code repositories, URLs, or pasted content. \n\nExit: A source-linked raw requirement inventory, where each raw requirement points back to the user's natural-language request or supplied input material that expressed it.",
+  "l2_raw": "7. Intake Qualification",
+  "l2_desc": "Checks accessibility, authorization, readability, and minimum completeness, then emits a qualified intake package or an explicit rejection or quarantine reason.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "1. Intent Interpretation",
+  "l2_desc": "Determines the user’s actual problem, desired change, audience, decision, and deliverable without selecting an opportunity or solution.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "2. Context Scoping",
+  "l2_desc": "Resolves applicable context, affected entities, time horizon, inclusions, exclusions, and the boundary of the decision to support.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "3. Ambiguity Resolution",
+  "l2_desc": "Finds missing information, conflicting instructions, undefined terms, and consequential assumptions and resolves them through focused questions or explicit defaults.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "4. Constraint Resolution",
+  "l2_desc": "Identifies and reconciles authorization, scope, time, cost, data, safety, policy, tool, environment, and output-format constraints with the user’s intended outcome.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "5. Requirement Prioritization",
+  "l2_desc": "Separates mandatory outcomes, preferences, tradeable qualities, dependencies, exclusions, and deferred requests.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "6. Acceptance Definition",
+  "l2_desc": "Defines observable success criteria, proof obligations, decision thresholds, failure conditions, and stopping rules.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Requirement compilation",
+  "l1_desc": "Entry: A list of raw requirements.\nExit: A confirmed research and ideation brief containing interpreted objectives, scope, constraints, priorities, acceptance criteria, evidence requirements, and permitted ideation directions.",
+  "l2_raw": "7. Requirement Contract Confirmation",
+  "l2_desc": "Assembles a versioned contract with executable task semantics, presents consequential interpretations, and records user confirmation or authorized assumptions.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "1. Search Strategy Formation",
+  "l2_desc": "Turns the requirement contract into technical themes, source families, queries, time horizons, counter-signals, diversity goals, and coverage targets.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "2. Multi-Source Signal Discovery",
+  "l2_desc": "Uses parallel research agents to search open-source projects, papers, patents, standards, experts, think tanks, industry reports, big-tech dynamics, technical communities, the open web, and authorized internal history.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "3. Source Qualification",
+  "l2_desc": "Screens discovered material for intent relevance, authority, recency, independence, incentives, duplication, access limits, and potential bias.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "4. Technical Signal Extraction",
+  "l2_desc": "Extracts claims, data, methods, mechanisms, results, benchmarks, limitations, failures, dependencies, adoption signals, and unresolved questions.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "5. Signal Organization",
+  "l2_desc": "Normalizes signals, binds provenance, clusters related findings, and maps convergence, divergence, dependencies, and opposing viewpoints.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "6. Trend & Gap Analysis",
+  "l2_desc": "Detects momentum, decay, contradictions, bottlenecks, missing capabilities, abandoned directions, and technical white spaces.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "7. Idea Generation",
+  "l2_desc": "Expands a diverse candidate set from signal clusters, gaps, adjacencies, cross-domain transfers, and contrarian combinations while retaining initial supporting and opposing evidence.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Search & ideation",
+  "l1_desc": "Entry: The permitted ideation directions in the confirmed research and ideation brief.\nExit: An evidence-grounded candidate idea set, with source-linked supporting and opposing observations, claims, data, methods, results, technical signals, coverage, and known limitations.",
+  "l2_raw": "8. Search Coverage Review",
+  "l2_desc": "Tests source-family, technical, geographic, temporal, viewpoint, and counter-evidence coverage before the candidate space is allowed to narrow.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "1. Candidate Consolidation",
+  "l2_desc": "Combines parallel search outputs, resolves semantic duplicates, and preserves variants whose assumptions, evidence, or opportunity boundaries materially differ.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "2. Idea Identification",
+  "l2_desc": "Converts meaningful signal combinations and gaps into discrete candidate ideas with a recognizable technical or user value proposition.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "3. Idea Card Formation",
+  "l2_desc": "Forms the governing Idea Card with the candidate’s opportunity, relevance, linked evidence, assumptions, novelty, uncertainty, risks, and open questions; evidence formation is part of this card.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "4. Opportunity Definition",
+  "l2_desc": "States the unmet need, technical bottleneck, missing capability, unserved user, or unexploited combination that makes the idea actionable.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "5. Technical Opportunity Screening",
+  "l2_desc": "Screens novelty, evidence maturity, reachable data, known mechanisms, technical feasibility, and the existence of a credible verification path.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "6. Strategic Opportunity Screening",
+  "l2_desc": "Screens user or company value, timing, defensibility, strategic fit, adoption, safety, legal exposure, dependencies, and resource implications.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Idea identification / screening / opportunity selection",
+  "l1_desc": "Entry: The evidence-grounded candidate idea set.\nExit: A list of opportunity cards, each a structured record containing one opportunity and its relevant information, formed by synthesizing, screening, and consolidating related ideas.",
+  "l2_raw": "7. Opportunity Portfolio Prioritization",
+  "l2_desc": "Ranks and selects a bounded, diverse opportunity portfolio using transparent criteria and records why other directions were deferred or rejected.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Generate technical claims & hypothesis",
+  "l1_desc": "Entry: The list of opportunity cards.\nExit: Testable technical claims, one or more competing or complementary hypotheses, and a verification-ready POC design defining metrics, evidence requirements, success and failure criteria, constraints, and required resources.",
+  "l2_raw": "1. Research Question & Technical Claim Formation",
+  "l2_desc": "turn passed opportunity to specific research questions and testable technical claims, clarify research object, expected effects and applicable situations.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Generate technical claims & hypothesis",
+  "l1_desc": "Entry: The list of opportunity cards.\nExit: Testable technical claims, one or more competing or complementary hypotheses, and a verification-ready POC design defining metrics, evidence requirements, success and failure criteria, constraints, and required resources.",
+  "l2_raw": "2. Claim, Evidence, Data & Method Modeling",
+  "l2_desc": "Set up claim, data, means of measuring, approaches, and the relationship between baseline and missing evidence",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Generate technical claims & hypothesis",
+  "l1_desc": "Entry: The list of opportunity cards.\nExit: Testable technical claims, one or more competing or complementary hypotheses, and a verification-ready POC design defining metrics, evidence requirements, success and failure criteria, constraints, and required resources.",
+  "l2_raw": "3. Hypothesis Pool & Mechanism Formation",
+  "l2_desc": "Form the hypothesis from opportunities, and form the mechanism to test the hypothesis.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Generate technical claims & hypothesis",
+  "l1_desc": "Entry: The list of opportunity cards.\nExit: Testable technical claims, one or more competing or complementary hypotheses, and a verification-ready POC design defining metrics, evidence requirements, success and failure criteria, constraints, and required resources.",
+  "l2_raw": "4. Falsifiability Screening & Hypothesis Contracting",
+  "l2_desc": "Determine if the hypothesis can be overthrowed by obtained data, or methods for the experiment. Also form the contract for testing the hypothesis",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Generate technical claims & hypothesis",
+  "l1_desc": "Entry: The list of opportunity cards.\nExit: Testable technical claims, one or more competing or complementary hypotheses, and a verification-ready POC design defining metrics, evidence requirements, success and failure criteria, constraints, and required resources.",
+  "l2_raw": "5. Verification-Ready POC Design",
+  "l2_desc": "Design the minimum viable verification plan. Define input, output, evidence requirements, index requirement for success, success/fail criteria, resource needed, restraints and verification steps.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "POC implementation",
+  "l1_desc": "Entry: The verification-ready POC design.\nExit: An implemented and testable POC artifact, in a domain-appropriate form, that realizes the POC design and is ready for benchmarking.",
+  "l2_raw": "1. POC Implementation Environment Preparation",
+  "l2_desc": "Setup the environment needed for the POC (dependencies, data, runtime, access permissions, compute resources and configs)",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "POC implementation",
+  "l1_desc": "Entry: The verification-ready POC design.\nExit: An implemented and testable POC artifact, in a domain-appropriate form, that realizes the POC design and is ready for benchmarking.",
+  "l2_raw": "2. POC Construction",
+  "l2_desc": "Construct the code, model, prompt, etc. for validating the POC.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "POC implementation",
+  "l1_desc": "Entry: The verification-ready POC design.\nExit: An implemented and testable POC artifact, in a domain-appropriate form, that realizes the POC design and is ready for benchmarking.",
+  "l2_raw": "3. POC Component Integration & Configuration",
+  "l2_desc": "Connect each part into a POC workable E2E, and prepare for the smoke test.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "POC implementation",
+  "l1_desc": "Entry: The verification-ready POC design.\nExit: An implemented and testable POC artifact, in a domain-appropriate form, that realizes the POC design and is ready for benchmarking.",
+  "l2_raw": "4. POC Functional Readiness Validation",
+  "l2_desc": "Perform smoke test run, make sure POC runs, outputs are in the right format, and faliures can be observed.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "POC implementation",
+  "l1_desc": "Entry: The verification-ready POC design.\nExit: An implemented and testable POC artifact, in a domain-appropriate form, that realizes the POC design and is ready for benchmarking.",
+  "l2_raw": "5. Testable POC Artifact Consolidation & Benchmark Handoff",
+  "l2_desc": "Organize final POC, config, dependencies, runtime, known constraints and necessary explanations, form an artifact that is benchmark-ready.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Benchmarking",
+  "l1_desc": "Entry: The implemented and testable POC artifact produced by POC implementation.\nExit: A benchmark result containing the measured outcomes, comparison context, run conditions, and known limitations.",
+  "l2_raw": "1. Benchmark Framing",
+  "l2_desc": "Define the claims to be compared, the runtime for the benchmark, baseline used, reference system, and version history.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Benchmarking",
+  "l1_desc": "Entry: The implemented and testable POC artifact produced by POC implementation.\nExit: A benchmark result containing the measured outcomes, comparison context, run conditions, and known limitations.",
+  "l2_raw": "2. Benchmark Protocol & Asset Preparation",
+  "l2_desc": "define workload, dataset, figures, repetitions, resource limits, methods for data collection, comparision rules, and reletive assets.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Benchmarking",
+  "l1_desc": "Entry: The implemented and testable POC artifact produced by POC implementation.\nExit: A benchmark result containing the measured outcomes, comparison context, run conditions, and known limitations.",
+  "l2_raw": "3. Benchmark Execution",
+  "l2_desc": "Run the benchmark according to the rules.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Benchmarking",
+  "l1_desc": "Entry: The implemented and testable POC artifact produced by POC implementation.\nExit: A benchmark result containing the measured outcomes, comparison context, run conditions, and known limitations.",
+  "l2_raw": "4. Metrics & Run Evidence Collection",
+  "l2_desc": "Collect benchmark results (index, log, run condition, status, faliure lgos, resource used, and provenance, to make sure result is trackable)",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Benchmarking",
+  "l1_desc": "Entry: The implemented and testable POC artifact produced by POC implementation.\nExit: A benchmark result containing the measured outcomes, comparison context, run conditions, and known limitations.",
+  "l2_raw": "5. Comparative Result Analysis & Benchmark Result Packaging",
+  "l2_desc": "Compare POC and baseline, organize info and form benchmark result.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Evaluation",
+  "l1_desc": "",
+  "l2_raw": "1. Evaluation Scope & Evidence Assembly",
+  "l2_desc": "Clarify the strategy and standard used for this evaluation, collect benchmark results, claims, and reletive evidence",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Evaluation",
+  "l1_desc": "",
+  "l2_raw": "2. Evidence Completeness & Provenance Review",
+  "l2_desc": "Check if evidence is complete, source tracable, completeness on key experiments, and existence of false materials",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Evaluation",
+  "l1_desc": "",
+  "l2_raw": "3. Experimental, Reasoning & External Validity Review",
+  "l2_desc": "Check experiment design, and if the result make sense in external world",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Evaluation",
+  "l1_desc": "",
+  "l2_raw": "4. Claim & Acceptance-Criteria Comparison",
+  "l2_desc": "Compare the benchmakr with technical claims, hypothesis and the original accept criteria",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Evaluation",
+  "l1_desc": "",
+  "l2_raw": "5. Verdict, Blocker & Residual-Risk Classification",
+  "l2_desc": "Tag the hypothesis as pass/fail/inconclusive/conditionally acceptable/etc.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Evaluation",
+  "l1_desc": "",
+  "l2_raw": "6. Refinement & Follow-Up Recording",
+  "l2_desc": "Note down the points that needs improvement, but no improvements are implemented in this step.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Delivery",
+  "l1_desc": "",
+  "l2_raw": "1. Delivery Planning & Evidence Handoff",
+  "l2_desc": "Define the target audience, delivery format, delivery content, evidence index, permission, and a handoff checklist",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Delivery",
+  "l1_desc": "",
+  "l2_raw": "2. User-Facing Deliverable Generation",
+  "l2_desc": "generate the report the user needs, including proposal, technical roadmap, investment recommendation, paper, poster, rebuttal or visualization, etc.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Delivery",
+  "l1_desc": "",
+  "l2_raw": "3. Deliverable, Reusable Asset & Knowledge Packaging",
+  "l2_desc": "Organize all the deliverables.",
+  "extra": []
+ },
+ {
+  "plane": "Workflow",
+  "sheet": "Workflow Features",
+  "l1": "Delivery",
+  "l1_desc": "",
+  "l2_raw": "4. Authorized Distribution, Knowledge Transfer & Lifecycle Closure",
+  "l2_desc": "Send the deliverable to the user, confirme acceptance, complete artifact transferring, save success/faliure experience, and close the current workflow lifecycle.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Capability capsule",
+  "l1_desc": "【中文注释】输入：workflow 对能力的需求、route/operator 声明和 evidence schema 期望；处理：声明能力边界、能力 ID、可路由条件和所需证据；输出：可查询/可匹配的 capability contract，以及 route 到 operator/schema 的一致性结果",
+  "l2_raw": "1. Capability Capsule Definition & Assembly",
+  "l2_desc": "Define the capsule’s contract, metadata, dependencies, resources, and executable entry points.",
+  "extra": [
+   "capability should do everything that skills can do, and share some mechanisms together."
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Capability capsule",
+  "l1_desc": "【中文注释】输入：workflow 对能力的需求、route/operator 声明和 evidence schema 期望；处理：声明能力边界、能力 ID、可路由条件和所需证据；输出：可查询/可匹配的 capability contract，以及 route 到 operator/schema 的一致性结果",
+  "l2_raw": "2. Capsule Governance, Certification & Registry Management",
+  "l2_desc": "Validate, certify, register, version, publish, suspend, deprecate, and audit capsules.",
+  "extra": [
+   "capability capsule: is a upgrade of skills -> capsule\nskill + rule + boundary + governance"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Capability capsule",
+  "l1_desc": "【中文注释】输入：workflow 对能力的需求、route/operator 声明和 evidence schema 期望；处理：声明能力边界、能力 ID、可路由条件和所需证据；输出：可查询/可匹配的 capability contract，以及 route 到 operator/schema 的一致性结果",
+  "l2_raw": "3. Capability Discovery, Scoring & Selection",
+  "l2_desc": "Find and rank eligible capsules by compatibility, policy, quality, cost, and performance.",
+  "extra": [
+   "reusable:\n- governable, cominable, verifiable\nis a medium for self-evolution"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Capability capsule",
+  "l1_desc": "【中文注释】输入：workflow 对能力的需求、route/operator 声明和 evidence schema 期望；处理：声明能力边界、能力 ID、可路由条件和所需证据；输出：可查询/可匹配的 capability contract，以及 route 到 operator/schema 的一致性结果",
+  "l2_raw": "4. Capsule Invocation & Composition",
+  "l2_desc": "Execute capsules with governed inputs and compose compatible capsules into reusable capabilities.",
+  "extra": [
+   "one capsule have multiple contracts inside???\nContract comes before operators\n参考‘十二项系统抽象的组合’"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Capability capsule",
+  "l1_desc": "【中文注释】输入：workflow 对能力的需求、route/operator 声明和 evidence schema 期望；处理：声明能力边界、能力 ID、可路由条件和所需证据；输出：可查询/可匹配的 capability contract，以及 route 到 operator/schema 的一致性结果",
+  "l2_raw": "5. Capability Capsule Evolution & Version Promotion",
+  "l2_desc": "Improve capsules from runtime evidence, validate candidates, and promote or roll back versions.",
+  "extra": [
+   "merge some of the leve l2 features that focus on capsule management"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Operators",
+  "l1_desc": "【中文注释】输入：任务 envelope、参数、上下文和证据引用；处理：由 logical/physical operator 执行或规划具体动作，并遵守 capability、side-effect 和 evidence 约束；输出：操作结果、typed evidence、sidecar artifact、日志或明确的 blocked/inconclusive 状态。",
+  "l2_raw": "1. 逻辑算子定义、组装与注册 — Logical Operator Definition, Assembly & Registration",
+  "l2_desc": "Creates a stable, DAG-callable logical operator definition: identity/version, inputs and outputs, required capabilities/capsules, side effects, write scope, evidence requirements, completion conditions, concurrency constraints and fallback semantics.",
+  "extra": [
+   "the level 2 for this level 1 feature is too broken refer to solar-harness:如何利用AI coding实现从洞察到规划。。。"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Operators",
+  "l1_desc": "【中文注释】输入：任务 envelope、参数、上下文和证据引用；处理：由 logical/physical operator 执行或规划具体动作，并遵守 capability、side-effect 和 evidence 约束；输出：操作结果、typed evidence、sidecar artifact、日志或明确的 blocked/inconclusive 状态。",
+  "l2_raw": "2. 算子准入、认证与治理 — Operator Qualification, Admission & Governance",
+  "l2_desc": "Determines whether a logical or physical operator may be enabled, promoted or deprecated. It consumes evaluator verdicts to check contract compliance, permissions, safety, reliability, independence and architectural boundaries.",
+  "extra": [
+   "参考十二条设计原则"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Operators",
+  "l1_desc": "【中文注释】输入：任务 envelope、参数、上下文和证据引用；处理：由 logical/physical operator 执行或规划具体动作，并遵守 capability、side-effect 和 evidence 约束；输出：操作结果、typed evidence、sidecar artifact、日志或明确的 blocked/inconclusive 状态。",
+  "l2_raw": "3. 逻辑—物理算子匹配、选择与绑定 — Logical-to-Physical Matching, Selection & Binding",
+  "l2_desc": "For the logical operator specified by a DAG node, filters eligible physical operators and ranks them using capabilities, capsule compatibility, permissions, health, host, quota, cost, latency, load and fallback policy.",
+  "extra": [
+   "如何定义逻辑算子：需求编译，绑定，。。。"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Operators",
+  "l1_desc": "【中文注释】输入：任务 envelope、参数、上下文和证据引用；处理：由 logical/physical operator 执行或规划具体动作，并遵守 capability、side-effect 和 evidence 约束；输出：操作结果、typed evidence、sidecar artifact、日志或明确的 blocked/inconclusive 状态。",
+  "l2_raw": "4. 物理算子与执行舰队管理 — Physical Operator & Execution Fleet Management",
+  "l2_desc": "Registers and manages API models, subscription agents, browser/Web operators, Code Agent panes, and local/remote environments as first-class physical operators. Maintains profiles, adapters, availability, health, capacity, quota, cost and concurrency state.",
+  "extra": [
+   "现在需要新加一个“如何添加逻辑算子”的feature"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Operators",
+  "l1_desc": "【中文注释】输入：任务 envelope、参数、上下文和证据引用；处理：由 logical/physical operator 执行或规划具体动作，并遵守 capability、side-effect 和 evidence 约束；输出：操作结果、typed evidence、sidecar artifact、日志或明确的 blocked/inconclusive 状态。",
+  "l2_raw": "5. 算子运行评估与能力画像 — Operator Runtime Evaluation & Capability Profiling",
+  "l2_desc": "Aggregates execution evidence into task-specific success, quality, latency, cost and failure profiles. These profiles support future binding decisions, qualification and evolution.",
+  "extra": [
+   "逻辑算子是封装好的功能，但可以指定执行者。例如，logical operators should be able to be called by the DAG",
+   "DAG generates the nodes of the workflow\nuser intent->requirement compilation->Capsule->research contract->planner->dag"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Operators",
+  "l1_desc": "【中文注释】输入：任务 envelope、参数、上下文和证据引用；处理：由 logical/physical operator 执行或规划具体动作，并遵守 capability、side-effect 和 evidence 约束；输出：操作结果、typed evidence、sidecar artifact、日志或明确的 blocked/inconclusive 状态。",
+  "l2_raw": "6. 评估器驱动的算子演进 — Evaluator-Driven Operator Evolution",
+  "l2_desc": "Produces versioned improvement candidates, tests and benchmarks them, compares quality/cost/risk trade-offs, and supports approval, promotion and rollback. It should evolve definitions, profiles and binding policies—not silently rewrite an operator through “reflection”.",
+  "extra": [
+   "6. Model Response Normalization\n\nConvert provider-specific text, structured output, tool calls, usage data, and errors into one standard response format.",
+   "打包的时候从外往里包，执行时从小往外打开。\nCapsule->contract->logical operator\n（例如：capsule仅仅是车辆维修，contract是不同车型的维修计划，operators是具体修理项的修理工具）"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Evaluator",
+  "l1_desc": "【中文注释】输入：证据 payload、运行结果、artifact、gate policy 和验收标准；处理：执行 schema/gate/quality/parity/lifecycle 检查；输出：PASS/FAIL/BLOCKED/INCONCLUSIVE verdict、reasons、warnings 和可审计 gate evidence。",
+  "l2_raw": "1. Contract, Schema & Artifact Conformance Evaluator",
+  "l2_desc": "Verifies input/output contracts, schemas, scopes, required artifacts, proof obligations, structural completeness, and admissibility of submitted evidence.",
+  "extra": [
+   "Evaluator is also a logical operator, but is an importatn one. Evaluator is in essence how to organize the chain of evidence"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Evaluator",
+  "l1_desc": "【中文注释】输入：证据 payload、运行结果、artifact、gate policy 和验收标准；处理：执行 schema/gate/quality/parity/lifecycle 检查；输出：PASS/FAIL/BLOCKED/INCONCLUSIVE verdict、reasons、warnings 和可审计 gate evidence。",
+  "l2_raw": "2. Engineering Correctness & Code Quality Evaluator",
+  "l2_desc": "Combines automated unit, integration, regression, smoke, and end-to-end testing with static analysis, type checking, linting, maintainability checks, and architecture-boundary validation.",
+  "extra": [
+   "evaluator have different pipeline for different things to be evaluated, and we should split them up. Split them up as level 2 features(参考pg25 of 跨领域大颗粒技术创新）HITL 在紫，橙，绿里面都有， 也可以看pg28"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Evaluator",
+  "l1_desc": "【中文注释】输入：证据 payload、运行结果、artifact、gate policy 和验收标准；处理：执行 schema/gate/quality/parity/lifecycle 检查；输出：PASS/FAIL/BLOCKED/INCONCLUSIVE verdict、reasons、warnings 和可审计 gate evidence。",
+  "l2_raw": "3. Performance, Cost & Benchmark Evaluator",
+  "l2_desc": "Measures quality, latency, throughput, resource usage, scalability, and cost, and compares results against defined baselines and regression thresholds.",
+  "extra": [
+   "compliance, 合规与知识产权test\nsecurity scan\nbenchmark\nstaic analysis\nautotest"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Evaluator",
+  "l1_desc": "【中文注释】输入：证据 payload、运行结果、artifact、gate policy 和验收标准；处理：执行 schema/gate/quality/parity/lifecycle 检查；输出：PASS/FAIL/BLOCKED/INCONCLUSIVE verdict、reasons、warnings 和可审计 gate evidence。",
+  "l2_raw": "4. Security, Privacy, Compliance & IP Evaluator",
+  "l2_desc": "Checks vulnerabilities, secrets, permissions, unsafe effects, sensitive-data exposure, regulatory and organizational policies, licenses, copyright, attribution, and permitted data use.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Evaluator",
+  "l1_desc": "【中文注释】输入：证据 payload、运行结果、artifact、gate policy 和验收标准；处理：执行 schema/gate/quality/parity/lifecycle 检查；输出：PASS/FAIL/BLOCKED/INCONCLUSIVE verdict、reasons、warnings 和可审计 gate evidence。",
+  "l2_raw": "5. Evidence, Factuality & Scientific Validity Evaluator",
+  "l2_desc": "Evaluates claim-to-evidence support, citation and source quality, reasoning consistency, reproducibility, experimental validity, uncertainty, and external plausibility.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Evaluator",
+  "l1_desc": "【中文注释】输入：证据 payload、运行结果、artifact、gate policy 和验收标准；处理：执行 schema/gate/quality/parity/lifecycle 检查；输出：PASS/FAIL/BLOCKED/INCONCLUSIVE verdict、reasons、warnings 和可审计 gate evidence。",
+  "l2_raw": "6. Lifecycle, Parity & Human Review Evaluator",
+  "l2_desc": "Verifies real execution, workflow completion, required gates, side effects, and feature or semantic parity; aggregates results and invokes attributable HITL review for high-risk, ambiguous, or policy-required decisions.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Foundational models",
+  "l1_desc": "【中文注释】输入：prompt、检索上下文、模型/provider 配置和模型证据请求；处理：调用或验证 LLM/Review LLM/模型命令的输出边界；输出：模型响应、review evidence、ranking/critique、provider 状态和不可用/不可信说明。",
+  "l2_raw": "1. Model Capability Registry",
+  "l2_desc": "Record declared and verified model capabilities such as modality, context size, tool use, structured output, cost class, and suitable tasks.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Foundational models",
+  "l1_desc": "【中文注释】输入：prompt、检索上下文、模型/provider 配置和模型证据请求；处理：调用或验证 LLM/Review LLM/模型命令的输出边界；输出：模型响应、review evidence、ranking/critique、provider 状态和不可用/不可信说明。",
+  "l2_raw": "2. Model Routing & Selection",
+  "l2_desc": "Match and select a model route using task needs, capability, quality, cost, policy, quota, and current health. Allow models to obtain tasks in their advantaged field",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Foundational models",
+  "l1_desc": "【中文注释】输入：prompt、检索上下文、模型/provider 配置和模型证据请求；处理：调用或验证 LLM/Review LLM/模型命令的输出边界；输出：模型响应、review evidence、ranking/critique、provider 状态和不可用/不可信说明。",
+  "l2_raw": "3. Model Usage Auditing",
+  "l2_desc": "Record model calls, routes, users, tokens, cost, quota consumption, and policy decisions for audit and accounting.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "1. Text-Based Artifacts (GEPA / MIPROv2 / TextGrad)",
+  "l2_desc": "Improves prompts, rules, and rubrics. Validate with holdout tasks, A/B tests, and regression checks.",
+  "extra": [
+   "RSI事实上是自演进的一套东西，参考PPT结构图里面的优化层\n\nxiamiande dong"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "2. Runtime and Resource Routing (Bayesian Optimization / Bandits / Cost-Aware RL)",
+  "l2_desc": "Optimizes model, tool, budget, retry, and concurrency decisions. Validate with traces, load tests, and cost–latency metrics.",
+  "extra": [
+   "GEPA的路径作为一个level 2 features，并且要有GEPA是什么的说明 （是解决文本化的自我改进）"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "3. Capability Capsules and Physical Operators (Trajectory Mining / Code Evolution / CEGIS)",
+  "l2_desc": "Improves reusable capability contracts and implementations. Validate with compatibility tests, sandbox runs, and performance benchmarks.",
+  "extra": [
+   "除了GEPA，还有voyager，让系统从成功执行中自动沉淀"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "4. DAG and Agent Organization (AFlow / MCTS / ADAS)",
+  "l2_desc": "Optimizes workflow structure, agent roles, and coordination. Validate with replay tests, simulations, and success–cost comparisons.",
+  "extra": [
+   "self-refine:运行时自我改进（参考ChatGPT AI4Research的pin chat）"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "5. Evaluator, Reward, Contract, and Governance (Judge Calibration / Reward Modeling / CEGIS)",
+  "l2_desc": "Improves acceptance rules, rewards, gates, and policies. Validate with golden sets, agreement rates, and violation tests.",
+  "extra": [
+   "Capability capsule self-improvement (by generating new skills when run)"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "6. Memory, Retrieval, and Evidence (Memory Learning / Self-RAG / Reranker Training)",
+  "l2_desc": "Improves storage, retrieval, citation, and evidence binding. Validate with recall, precision, citation accuracy, and provenance checks.",
+  "extra": [
+   "DAG/workflow self-improvement"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "7. Model Policies and Weights (SFT / LoRA / DPO / GRPO / Agent RL)",
+  "l2_desc": "Learns stronger planning, tool use, and evaluation behavior. Validate with holdout benchmarks, robustness tests, and regressions.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "RSI",
+  "l1_desc": "【中文注释】输入：失败运行、gate 拒绝原因、质量反馈、历史缺陷和 workflow 证据；处理：挖掘改进机会、生成 patch/proposal、更新工作流或策略建议；输出：workflow_evolution evidence、改进建议、候选补丁、学习记录和风险提示。",
+  "l2_raw": "8. Data, Benchmarks, Curriculum, and Observability (Active Learning / Hard-Case Mining / Credit Assignment)",
+  "l2_desc": "Improves task coverage, difficulty, data quality, and change attribution. Validate with coverage, contamination, trace, and ablation tests.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "1. Persistent Memory & Context Retrieval",
+  "l2_desc": "Store accepted facts, decisions, summaries, failures, lessons, and reusable context in durable memory; support indexing, retrieval, compression, expiration, and context assembly.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "2. Concept Graph Management",
+  "l2_desc": "Define and connect business concepts, entities, terminology, attributes, and semantic relationships.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "3. Dataset Graph Management",
+  "l2_desc": "Register datasets, schemas, fields, versions, sources, quality states, dependencies, and relationships to business concepts.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "4. Code Graph Management",
+  "l2_desc": "Model repositories, modules, APIs, functions, tests, configurations, dependencies, and their relationships to concepts, datasets, and runtime behavior.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "5. Policy Graph Management",
+  "l2_desc": "Represent permissions, approvals, security rules, compliance constraints, retention requirements, and policies governing data and actions.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "6. Workflow Graph Management",
+  "l2_desc": "Model reusable processes, SOPs, approval chains, workflow stages, transitions, and their required inputs, outputs, policies, and capabilities.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "7. Trace Graph Management",
+  "l2_desc": "Connect requests, plans, executions, operator decisions, tool calls, artifacts, evidence, evaluations, and state transitions into an auditable execution history.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "8. Memory Graph Management",
+  "l2_desc": "Represent relationships among remembered facts, decisions, experiences, failures, lessons, entities, workflows, and their originating evidence.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Data foundations",
+  "l1_desc": "【中文注释】输入：原始文档、wiki/memory/graph、证据 JSON、日志、checkpoint 和 artifact；处理：标准化、索引、关联、持久化和校验数据来源；输出：可检索数据层、evidence ledger、graph edges、artifact tree、provenance 和一致性状态。",
+  "l2_raw": "9. TaskGraph Persistence & Lifecycle Management",
+  "l2_desc": "Store and version executable TaskGraph specifications and their runtime state, including nodes, dependencies, scopes, gates, checkpoints, results, and closure records.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Harness Core",
+  "l1_desc": "【中文注释】输入：任务请求、runtime 状态、queue/lease、operator envelope、配置和审批状态；处理：调度、分发、恢复、状态管理和 evidence 写入；输出：sprint/runtime artifacts、dispatch results、status、logs、resume state 和失败/阻塞边界。",
+  "l2_raw": "1. Runtime Control Loop & Run Lifecycle Management",
+  "l2_desc": "Initialize run/sprint identity and configuration; drive the main control loop; maintain durable run/node state and status projections; close the run only when required nodes and gates are satisfied.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Harness Core",
+  "l1_desc": "【中文注释】输入：任务请求、runtime 状态、queue/lease、operator envelope、配置和审批状态；处理：调度、分发、恢复、状态管理和 evidence 写入；输出：sprint/runtime artifacts、dispatch results、status、logs、resume state 和失败/阻塞边界。",
+  "l2_raw": "2. Message Bus & Durable Task Queue",
+  "l2_desc": "Transport commands, events, and ready-node work with persistent queueing, priority, ordering, deduplication/idempotency, and backpressure.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Harness Core",
+  "l1_desc": "【中文注释】输入：任务请求、runtime 状态、queue/lease、operator envelope、配置和审批状态；处理：调度、分发、恢复、状态管理和 evidence 写入；输出：sprint/runtime artifacts、dispatch results、status、logs、resume state 和失败/阻塞边界。",
+  "l2_raw": "3. DAG Scheduler, TaskGraph Readiness & Operator Binding",
+  "l2_desc": "Validate the DAG, determine readiness from dependencies, gates and external waits, and form safe parallel batches using scope, effect, resource, and capacity constraints.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Harness Core",
+  "l1_desc": "【中文注释】输入：任务请求、runtime 状态、queue/lease、operator envelope、配置和审批状态；处理：调度、分发、恢复、状态管理和 evidence 写入；输出：sprint/runtime artifacts、dispatch results、status、logs、resume state 和失败/阻塞边界。",
+  "l2_raw": "4. Execution Admission, Lease & Concurrency Control",
+  "l2_desc": "Enforce approval, policy and availability checks; acquire/release/reap leases; prevent duplicate dispatch; and enforce concurrency, quota, exclusion, and capacity limits.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Harness Core",
+  "l1_desc": "【中文注释】输入：任务请求、runtime 状态、queue/lease、operator envelope、配置和审批状态；处理：调度、分发、恢复、状态管理和 evidence 写入；输出：sprint/runtime artifacts、dispatch results、status、logs、resume state 和失败/阻塞边界。",
+  "l2_raw": "5. Main Loop Dispatch & Runtime Supervision",
+  "l2_desc": "Consume an already-resolved operator binding, create the execution envelope/instruction, dispatch it to the runtime or host, monitor heartbeat/progress, and collect normalized results, handoffs, artifacts, and evidence references.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Harness Core",
+  "l1_desc": "【中文注释】输入：任务请求、runtime 状态、queue/lease、operator envelope、配置和审批状态；处理：调度、分发、恢复、状态管理和 evidence 写入；输出：sprint/runtime artifacts、dispatch results、status、logs、resume state 和失败/阻塞边界。",
+  "l2_raw": "6. Failure Recovery & Resumability",
+  "l2_desc": "Detect failed or stale execution, retry/requeue/compensate or terminate safely, recover expired leases, replay durable state, and resume without rerunning already-passed work.",
+  "extra": [
+   "planning and taskgraph generation (should belong to planner, not here)"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Intention compilers",
+  "l1_desc": "【中文注释】输入：自然语言意图、上下文、文件/仓库状态和用户约束；处理：解析、规范化、绑定 route/capability、生成任务合同或执行 envelope；输出：structured intent、任务图、acceptance criteria、执行边界和可测试输入。",
+  "l2_raw": "1. Intent Classification & Compilation Variant Selection",
+  "l2_desc": "Classify the request as implementation, full specification or research, and select the corresponding lane, output variant, priority and acceptance profile.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Intention compilers",
+  "l1_desc": "【中文注释】输入：自然语言意图、上下文、文件/仓库状态和用户约束；处理：解析、规范化、绑定 route/capability、生成任务合同或执行 envelope；输出：structured intent、任务图、acceptance criteria、执行边界和可测试输入。",
+  "l2_raw": "2. Goal, Scope and Context normalization",
+  "l2_desc": "Extract goals, parameters, priorities, success conditions, scope and non-goals, while collecting only the relevant repository, file, attachment and historical context.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Intention compilers",
+  "l1_desc": "【中文注释】输入：自然语言意图、上下文、文件/仓库状态和用户约束；处理：解析、规范化、绑定 route/capability、生成任务合同或执行 envelope；输出：structured intent、任务图、acceptance criteria、执行边界和可测试输入。",
+  "l2_raw": "3. Ambiguity Resolution & Readiness",
+  "l2_desc": "Detect missing, conflicting or unclear requirements; generate the minimum necessary clarification questions; determine whether the intent is ready for planning.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Intention compilers",
+  "l1_desc": "【中文注释】输入：自然语言意图、上下文、文件/仓库状态和用户约束；处理：解析、规范化、绑定 route/capability、生成任务合同或执行 envelope；输出：structured intent、任务图、acceptance criteria、执行边界和可测试输入。",
+  "l2_raw": "4. Constraint Compilation",
+  "l2_desc": "Convert budget, time, permission, data, security, quality and side-effect requirements into enforceable constraints, including what approvals will be required.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Intention compilers",
+  "l1_desc": "【中文注释】输入：自然语言意图、上下文、文件/仓库状态和用户约束；处理：解析、规范化、绑定 route/capability、生成任务合同或执行 envelope；输出：structured intent、任务图、acceptance criteria、执行边界和可测试输入。",
+  "l2_raw": "5. Task Contract & Acceptance Compilation",
+  "l2_desc": "Produce a stable, versioned task contract containing normalized inputs and outputs, objectives, constraints, acceptance criteria and required evidence.",
+  "extra": [
+   "task graph is a kind of contract. What other kind of contract?"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Planner",
+  "l1_desc": "【中文注释】输入：任务/研究合同、上下文、capability 可用性和约束；处理：拆解目标、安排步骤、定义依赖、选择验证路径和交付计划；输出：计划、TaskGraph、实验/报告计划、优先级和后续执行清单。",
+  "l2_raw": "1. Task Contract Decomposition",
+  "l2_desc": "Interpret the validated task contract, select an appropriate planning pattern, and split the goal into bounded work units with explicit objectives, inputs, outputs and completion conditions. Also generate the planning plan text artifact for RSI.",
+  "extra": [
+   "what are the planning strategy avaliable? Is it a template, or is it real time generated?"
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Planner",
+  "l1_desc": "【中文注释】输入：任务/研究合同、上下文、capability 可用性和约束；处理：拆解目标、安排步骤、定义依赖、选择验证路径和交付计划；输出：计划、TaskGraph、实验/报告计划、优先级和后续执行清单。",
+  "l2_raw": "2. TaskGraph Construction",
+  "l2_desc": "Compile the work units into a logical Plan IR/TaskGraph, defining dependencies, parent-child relationships, ordering, parallelizable branches and critical paths.",
+  "extra": [
+   "Acceptance, Evidence & Gate Planning\n\nMap contract requirements to node-level acceptance criteria, expected evidence, tests, evaluator requirements, human gates and stop or rollback conditions."
+  ]
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Planner",
+  "l1_desc": "【中文注释】输入：任务/研究合同、上下文、capability 可用性和约束；处理：拆解目标、安排步骤、定义依赖、选择验证路径和交付计划；输出：计划、TaskGraph、实验/报告计划、优先级和后续执行清单。",
+  "l2_raw": "3. TaskGraph Validation & Feasibility Analysis",
+  "l2_desc": "Validate schema completeness, missing dependencies, cycles, requirement coverage, scope conflicts, capability feasibility, risk, policy compliance and useful parallelism. Invalid or infeasible plans must be blocked or returned for clarification/replanning.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "1. Build Contract Interpretation",
+  "l2_desc": "Translate the task or build contract into implementation goals, interfaces, write scope, acceptance conditions, and prohibited changes.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "2. Build Preparation",
+  "l2_desc": "Prepare source material, dependencies, templates, data, workspace, toolchain, and pre-build readiness checks.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "3. Code Construction",
+  "l2_desc": "Create or modify deterministic source code, scripts, tests, and configuration to implement the required technical function.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "4. Model Construction",
+  "l2_desc": "Build, train, fine-tune, or assemble reproducible algorithmic, statistical, or machine-learning models.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "5. Experimental Asset Construction",
+  "l2_desc": "Build experiment code, data processing, instrumentation, environment descriptions, and run scripts.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "6. Benchmark Asset Construction",
+  "l2_desc": "Build benchmark datasets, harnesses, workloads, baselines, metric implementations, and comparison scripts.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "7. Verification Asset Construction",
+  "l2_desc": "Build unit, integration, and end-to-end tests, validators, fixtures, checklists, and verification scripts.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "8. Decision Artifact Construction",
+  "l2_desc": "Create opportunity cards, decision records, trade-off matrices, and recommendation packets for decision-making.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "9. Prototype Assembly",
+  "l2_desc": "Combine code, models, data, and interfaces into a bounded, runnable, and demonstrable proof of concept.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "10. Product Integration",
+  "l2_desc": "Integrate verified components into target product interfaces, data flows, and production-oriented operational boundaries.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "11. Defect Repair",
+  "l2_desc": "Use failure evidence to identify and repair code, configuration, contract, or integration defects and prevent regression.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "12. Build Evidence Generation",
+  "l2_desc": "Generate diffs, manifests, hashes, compile and test results, provenance, and acceptance evidence for the build.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "13. Report/Paper/Deliverable Construction",
+  "l2_desc": "Create and assemble human-facing reports, papers, slides, posters, rebuttals, and narrative delivery packages.",
+  "extra": []
+ },
+ {
+  "plane": "Foundation",
+  "sheet": "Foundation Features",
+  "l1": "Builder",
+  "l1_desc": "【中文注释】输入：计划、规格、代码/实验/报告目标、工具配置和审批结果；处理：构建代码、实验、报告、UI 或其他交付工件；输出：实现产物、变更、运行脚本、文档/报告、artifact bundle 和构建证据。",
+  "l2_raw": "14. Runtime Deliverable Construction",
+  "l2_desc": "Build executable or deployable services, packages, containers, workflow bundles, and deployment configuration.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Visibility / Statistics",
+  "l1_desc": "【中文注释】输入：运行日志、测试结果、状态、指标和 QA evidence；处理：汇总、统计、可视化并暴露给用户/维护者；输出：dashboard、status view、统计报表、command log、coverage summary 和健康状态。",
+  "l2_raw": "1. Workflow & Platform Status Visibility",
+  "l2_desc": "Show workflow progress, blockers, gates, budgets, and the health of hosts, providers, queues, data sources, and other platform components without changing authoritative runtime state.",
+  "extra": [
+   "可视化：图形化方式表达\n可见：从看不见到看得见\n\n<-- 这是artifact's status visibility",
+   "3. Opportunity & Innovation Portfolio Analytics\n\nAnalyze source coverage, signal momentum, opportunity maturity, risk, value, ranking, strategic fit, and portfolio diversity at both opportunity and portfolio levels.",
+   "4. Experiment & Evaluation Analytics\n\nAggregate experiment queues, variants, iteration history, failures, budget burn, baseline comparisons, uncertainty, regressions, reproducibility, and evaluation verdicts.",
+   "6. Evidence & Decision Reporting\n\nProduce and export source-backed reports containing evidence, provenance, metrics, evaluations, decisions, investment judgments, and capability references."
+  ]
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Visibility / Statistics",
+  "l1_desc": "【中文注释】输入：运行日志、测试结果、状态、指标和 QA evidence；处理：汇总、统计、可视化并暴露给用户/维护者；输出：dashboard、status view、统计报表、command log、coverage summary 和健康状态。",
+  "l2_raw": "2. Execution Trace Search & Inspection",
+  "l2_desc": "Search and inspect time-ordered requests, transitions, tool calls, approvals, failures, artifacts, decisions, and outcomes using filters for project, run, actor, and time range.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Visibility / Statistics",
+  "l1_desc": "【中文注释】输入：运行日志、测试结果、状态、指标和 QA evidence；处理：汇总、统计、可视化并暴露给用户/维护者；输出：dashboard、status view、统计报表、command log、coverage summary 和健康状态。",
+  "l2_raw": "3. Runtime status visibility",
+  "l2_desc": "Statistics like cpu usage, gpu usage, etc.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Visibility / Statistics",
+  "l1_desc": "【中文注释】输入：运行日志、测试结果、状态、指标和 QA evidence；处理：汇总、统计、可视化并暴露给用户/维护者；输出：dashboard、status view、统计报表、command log、coverage summary 和健康状态。",
+  "l2_raw": "4. Resource Usage, Cost & Capacity Management",
+  "l2_desc": "Report model, compute, token, tool, storage, data, quota, human-review, budget, cost, and capacity consumption by project, experiment, capability, and time.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Installer & CLI & Webapp",
+  "l1_desc": "【中文注释】输入：安装参数、组件选择、环境变量、CLI 命令和 webapp 构建/运行请求；处理：安装/验证/修复/更新/打包/启动；输出：安装 receipt、可用 CLI、webapp/status 服务、doctor 结果和可复现安装证据。",
+  "l2_raw": "1. Windows App",
+  "l2_desc": "Package, install, launch, update, repair, and uninstall the Windows desktop application and its supported runtime dependencies; guide first-run setup and authentication, preserve user data, and produce installation and health-check evidence.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Installer & CLI & Webapp",
+  "l1_desc": "【中文注释】输入：安装参数、组件选择、环境变量、CLI 命令和 webapp 构建/运行请求；处理：安装/验证/修复/更新/打包/启动；输出：安装 receipt、可用 CLI、webapp/status 服务、doctor 结果和可复现安装证据。",
+  "l2_raw": "2. MacOS App",
+  "l2_desc": "Package, install, launch, update, repair, and uninstall the macOS desktop application; guide first-run permissions, runtime and provider setup, preserve user data, and verify application and backend readiness.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Installer & CLI & Webapp",
+  "l1_desc": "【中文注释】输入：安装参数、组件选择、环境变量、CLI 命令和 webapp 构建/运行请求；处理：安装/验证/修复/更新/打包/启动；输出：安装 receipt、可用 CLI、webapp/status 服务、doctor 结果和可复现安装证据。",
+  "l2_raw": "3. MacOS CLI",
+  "l2_desc": "Install and operate the Solar CLI on macOS, including dependency checks, PATH and configuration initialization, provider-authentication readiness, status and doctor checks, backup and restore, update and repair, and uninstall.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Installer & CLI & Webapp",
+  "l1_desc": "【中文注释】输入：安装参数、组件选择、环境变量、CLI 命令和 webapp 构建/运行请求；处理：安装/验证/修复/更新/打包/启动；输出：安装 receipt、可用 CLI、webapp/status 服务、doctor 结果和可复现安装证据。",
+  "l2_raw": "4. Linux Cli",
+  "l2_desc": "Install and operate the Solar CLI on supported Linux distributions, including dependency and package-manager checks, runtime and configuration initialization, service startup, status and doctor checks, backup and restore, update and repair, and uninstall.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Installer & CLI & Webapp",
+  "l1_desc": "【中文注释】输入：安装参数、组件选择、环境变量、CLI 命令和 webapp 构建/运行请求；处理：安装/验证/修复/更新/打包/启动；输出：安装 receipt、可用 CLI、webapp/status 服务、doctor 结果和可复现安装证据。",
+  "l2_raw": "5. Web Application & Status Service",
+  "l2_desc": "Build, serve, configure, and health-check the browser-based application and status API; connect it to authentication, configuration, workflow state, runtime visibility, and artifact views across development and packaged deployments.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "UI",
+  "l1_desc": "【中文注释】输入：用户操作、runtime/status 数据、deliverable 列表和错误状态；处理：渲染页面、状态、表单、预览和交互反馈；输出：可理解的 UI 视图、错误/空态、可访问控件和交付物预览。",
+  "l2_raw": "1. CLI",
+  "l2_desc": "Provide a scriptable command-response interface for submitting work, inspecting status, managing lifecycle and configuration, and retrieving logs, artifacts, and evidence, with stable exit codes and human-readable or structured JSON output.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "UI",
+  "l1_desc": "【中文注释】输入：用户操作、runtime/status 数据、deliverable 列表和错误状态；处理：渲染页面、状态、表单、预览和交互反馈；输出：可理解的 UI 视图、错误/空态、可访问控件和交付物预览。",
+  "l2_raw": "2. GUI",
+  "l2_desc": "Provide a graphical desktop or web interface for task intake, setup and configuration, workflow and gate monitoring, approval, artifact and evidence inspection, and deliverable access, including loading, empty, error, and accessibility states.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "UI",
+  "l1_desc": "【中文注释】输入：用户操作、runtime/status 数据、deliverable 列表和错误状态；处理：渲染页面、状态、表单、预览和交互反馈；输出：可理解的 UI 视图、错误/空态、可访问控件和交付物预览。",
+  "l2_raw": "3. TUI",
+  "l2_desc": "Provide an interactive terminal interface for monitoring runs, TaskGraph nodes, agents or panes, queues, gates, logs, and resource state, and for issuing explicit authorized control actions through keyboard-driven views.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Account management",
+  "l1_desc": "【中文注释】输入：用户身份、凭证、授权状态、profile 和账号/配额信息；处理：检查认证、权限、隔离边界和敏感信息保护；输出：认证就绪状态、缺失凭证提示、权限边界和安全处理结果。",
+  "l2_raw": "1. Account Registration",
+  "l2_desc": "Create an individual product account with verified identity, accepted terms, and initial personal settings.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Account management",
+  "l1_desc": "【中文注释】输入：用户身份、凭证、授权状态、profile 和账号/配额信息；处理：检查认证、权限、隔离边界和敏感信息保护；输出：认证就绪状态、缺失凭证提示、权限边界和安全处理结果。",
+  "l2_raw": "2. Authentication & Session Security",
+  "l2_desc": "Support secure sign-in, sign-out, session establishment, reauthentication, recovery, session revocation, and suspicious-access visibility.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Account management",
+  "l1_desc": "【中文注释】输入：用户身份、凭证、授权状态、profile 和账号/配额信息；处理：检查认证、权限、隔离边界和敏感信息保护；输出：认证就绪状态、缺失凭证提示、权限边界和安全处理结果。",
+  "l2_raw": "3. User Profile Management",
+  "l2_desc": "Manage identity, expertise, role, research preferences, notification choices, accessibility choices, and default product behavior.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Account management",
+  "l1_desc": "【中文注释】输入：用户身份、凭证、授权状态、profile 和账号/配额信息；处理：检查认证、权限、隔离边界和敏感信息保护；输出：认证就绪状态、缺失凭证提示、权限边界和安全处理结果。",
+  "l2_raw": "4. Privacy & Personal Data Controls",
+  "l2_desc": "Let users inspect, export, retain, or delete personal settings and supplied data and manage consent for message-derived information.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Message Channels",
+  "l1_desc": "【中文注释】输入：任务事件、审批请求、通知、agent 消息和外部 channel 事件；处理：路由、记录、重试或阻塞消息流；输出：可审计消息、approval request、queue/status artifact、通知结果和失败说明。",
+  "l2_raw": "1. Wechat",
+  "l2_desc": "Accept user-authorized WeChat article links or copied content through the supported intake path; fetch and normalize permitted content, preserve provenance, deduplicate revisions, redact sensitive data, and dispatch qualified material to ingestion.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Message Channels",
+  "l1_desc": "【中文注释】输入：任务事件、审批请求、通知、agent 消息和外部 channel 事件；处理：路由、记录、重试或阻塞消息流；输出：可审计消息、approval request、queue/status artifact、通知结果和失败说明。",
+  "l2_raw": "2. Discord",
+  "l2_desc": "Connect an authorized Discord workspace through a bot or application, scope guild and channel permissions, ingest permitted messages as qualified signals, deliver approved notifications, preserve provenance, and support credential revocation and audit.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "Message Channels",
+  "l1_desc": "【中文注释】输入：任务事件、审批请求、通知、agent 消息和外部 channel 事件；处理：路由、记录、重试或阻塞消息流；输出：可审计消息、approval request、queue/status artifact、通知结果和失败说明。",
+  "l2_raw": "3. TMUX",
+  "l2_desc": "Register and operate tmux sessions and panes as controlled terminal and runtime surfaces, including ownership, attach and detach, pane-state and log inspection, notifications, recovery, and isolation between runs.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "System Configurations",
+  "l1_desc": "【中文注释】输入：配置文件、环境变量、provider keys、模型选择和 runtime 参数；处理：解析、校验、合并并应用配置；输出：有效 provider/runtime 配置、模型路由、缺失配置提示和安全的 secret/provider 边界。",
+  "l2_raw": "1. LLM Config",
+  "l2_desc": "Configure provider endpoints and credential references, register available models and aliases, assign role-specific model defaults, and validate the effective model-routing configuration without exposing raw secrets.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "System Configurations",
+  "l1_desc": "【中文注释】输入：配置文件、环境变量、provider keys、模型选择和 runtime 参数；处理：解析、校验、合并并应用配置；输出：有效 provider/runtime 配置、模型路由、缺失配置提示和安全的 secret/provider 边界。",
+  "l2_raw": "2. User Settings",
+  "l2_desc": "Manage persistent user-local preferences such as display identity, timezone, workspace and knowledge paths, runtime choice, search and reasoning options, UI behavior, and ingestion defaults, with validated configuration precedence.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "System Configurations",
+  "l1_desc": "【中文注释】输入：配置文件、环境变量、provider keys、模型选择和 runtime 参数；处理：解析、校验、合并并应用配置；输出：有效 provider/runtime 配置、模型路由、缺失配置提示和安全的 secret/provider 边界。",
+  "l2_raw": "3. Cost/Budget Settings",
+  "l2_desc": "Define and enforce token, call, monetary, compute, and storage budgets and quotas by provider, model, project, or task; track consumption, warn near limits, and block or reroute work when hard limits are reached.",
+  "extra": []
+ },
+ {
+  "plane": "Vertical",
+  "sheet": "Vertical Features",
+  "l1": "System Configurations",
+  "l1_desc": "【中文注释】输入：配置文件、环境变量、provider keys、模型选择和 runtime 参数；处理：解析、校验、合并并应用配置；输出：有效 provider/runtime 配置、模型路由、缺失配置提示和安全的 secret/provider 边界。",
+  "l2_raw": "4. Cluster setting",
+  "l2_desc": "Declare local and remote execution hosts, host types, addresses, lifecycle settings, heartbeat and probe rules, and capacity or concurrency limits, and expose the validated cluster topology to operator binding and scheduling.",
+  "extra": []
+ }
+]

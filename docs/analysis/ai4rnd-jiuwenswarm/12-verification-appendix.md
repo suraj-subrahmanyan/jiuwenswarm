@@ -665,8 +665,10 @@ where every Jiuwen mechanism scores ✗ and AI4RnD scores ✅:
 - capability routing with honest stall
 - write-scope conflict exclusion
 
-These are the entire justification for AI4RnD-owned runtime code — about **450 LOC**, against
-the ~5,200 LOC Revision 2 planned to port.
+These are the entire justification for AI4RnD-owned runtime code. Revision 3 sized that at
+"~450 LOC"; **Revision 4 withdraws the figure** — see V-21 to V-24, which found reachability gaps
+the estimate did not cover. The ~5,200 LOC Revision 2 planned to port is a measured count of
+existing AI4RnD code and stands as a fact about what exists.
 
 ---
 
@@ -692,3 +694,263 @@ the ~5,200 LOC Revision 2 planned to port.
 | `Trainer.train` on real cases | needs credentials and a golden set |
 | Write-scope admission prototype | design work, not yet built |
 
+
+---
+
+# Revision 4 experiments — V-20 to V-27
+
+Every experiment below was run in this environment against
+`openjiuwen 0.1.15.post3` in the `.venv-jw` virtual environment, and against the AI4Research tree
+at `d35c511`. Where a claim could not be executed it is labelled `SRC` and says so.
+
+---
+
+## V-20 (EXEC) — the workbook is the controlling source, read directly
+
+```
+openpyxl.load_workbook("AI4RnD Feature List.xlsx", data_only=True)
+```
+
+| Sheet | L1 groups | L2 rows |
+|---|---:|---:|
+| Workflow Features | 9 | 54 |
+| Foundation Features | 10 | 65 |
+| Vertical Features | 6 | 23 |
+| **Total** | **25** | **142** |
+
+Cross-check against the Revision 3 CSV, position by position, after stripping the numeric prefix
+and normalising case and punctuation: **0 mismatches across all 142 rows.** The prior row set was
+correct. See [15-correction-log.md](15-correction-log.md) §9.8.
+
+---
+
+## V-21 (EXEC) — the leader-facing SwarmFlow tool rejects `resume_id` and `name`
+
+```python
+t = SwarmflowTool(parent_agent=None, messager=None, team_name="t",
+                  model_resolver=None, concurrency_governor=None, language="en")
+```
+
+```
+declared params: ['args', 'name', 'resume_id', 'script', 'script_path']
+  no args              success=False error=one of 'script_path' / 'script' / 'name' / 'resume_id' is required
+  resume_id only       success=False error='resume_id' is not supported yet; provide 'script_path' or inline 'script'
+  name only            success=False error='name' is not supported yet; provide 'script_path' or inline 'script'
+  resume_id + name     success=False error='name' is not supported yet; provide 'script_path' or inline 'script'
+  inline script        success=False error=Swarmflow concurrency governor is not configured
+```
+
+**Finding.** Two of five advertised parameters are unimplemented. The tool is honest at runtime —
+it never silently no-ops — but an agent cannot resume a workflow. `_relaunch` is a control-plane
+call by design (`tool_swarmflow.py`: *"resume is a control-plane action, not a new tool_use decided
+by the LLM"*).
+
+The last line also shows admission is a hard precondition, not a queue: with no governor the tool
+refuses rather than running unmetered.
+
+---
+
+## V-22 (EXEC) — journal replay works, and a failed step degrades to `None`
+
+A two-step script (`step-A`, `step-B`) run three times against a backend that fails `step-B` on
+the first run only:
+
+| Run | Live backend calls | Result | Journal entries |
+|---|---|---|---|
+| 1 — `step-B` fails | `['step-A','step-B','step-B','step-B']` | `{'a': 'result(step-A)', 'b': None}` | 1 |
+| 2 — resume | `['step-B']` | `{'a': 'result(step-A)', 'b': 'result(step-B)'}` | 2 |
+| 3 — replay | `[]` | same | 2 |
+
+**Two findings.**
+
+1. **Resume and replay are genuine.** Run 2 re-executed only the failed step. Run 3 executed
+   nothing. This is real, verified reuse.
+2. **A failed step returns `None` and the run reports success.** After `rt.retries + 1` attempts
+   the engine emits `agent_failed` and `agent()` returns `None`
+   (`engine/primitives.py` ~line 362). Nothing propagates. For a gate that must decide whether a
+   claim holds, this is a correctness hazard: *the run completed* is not evidence that *its steps
+   did*.
+
+---
+
+## V-23 (EXEC) — `agent_type` is validated, forwarded, then ignored
+
+```
+backend saw t1  opts={'agent_type': 'researcher', 'label': 'typed'}
+backend saw t2  opts={'model': 'no-such-model-xyz', 'label': 'modelled'}
+result bogus:   WorkflowError: unknown option(s) ['totally_unknown_key'];
+                allowed: ['agent_type','isolation','label','model','phase','schema','timeout']
+```
+
+The engine fails fast on a typo and forwards `agent_type` faithfully. But
+`grep -rn agent_type openjiuwen/agent_teams/workflow/backends/` returns **nothing**, and no backend
+overrides `KNOWN_OPTIONS`. So `agent_type` reaches the production backend and is dropped.
+
+**Named `agent_type` execution is not wired.** A typo is louder than an unimplemented feature.
+
+---
+
+## V-24 (SRC) — unknown per-call model silently substitutes
+
+`openjiuwen/agent_teams/models/allocator.py`, `resolve_member_model`, lines 417–423:
+
+```python
+if not team_spec.model_pool or not model_name:
+    return None
+group = [e for e in team_spec.model_pool if e.model_name == model_name]
+if not group:
+    return None
+```
+
+and its own docstring: *"Group missing or pool empty → `None` so the caller falls back to the
+per-agent model declared in `TeamAgentSpec.agents`."* `TeamWorkerBackend._resolve_model` passes
+that `None` straight through.
+
+**Finding.** `agent(model="does-not-exist")` runs on the default worker model with no error and no
+warning. **Labelled SRC, not EXEC** — confirming it end to end needs a live team with a populated
+model pool, which needs credentials the safeguards exclude.
+
+This is the finding that fails Option D against the preservation gate.
+
+---
+
+## V-25 (EXEC) — the built-in guardrail rule set is empty, and the shipped file is orphaned
+
+```
+openjiuwen package rules path: .../openjiuwen/harness/resources/builtin_rules.yaml
+exists: False
+[PermissionEngine] permission.tiered_policy.builtin_rules_missing
+rules loaded: 0
+```
+
+`_resolve_builtin_rules_yaml_path` documents the restriction plainly:
+*"仅使用包内 …/builtin_rules.yaml（不再查用户/环境目录）"* — package path only, user and environment
+directories are no longer consulted.
+
+Meanwhile JiuwenSwarm ships `jiuwenswarm/resources/builtin_rules.yaml` (86 lines) and copies it to
+`~/.jiuwenswarm/config/builtin_rules.yaml` at workspace init. Searching the entire JiuwenSwarm
+tree, all file types, for `builtin_rules` finds **only the two files that write that copy**
+(`common/utils.py`, `init_workspace.py`). No reader exists.
+
+**Finding.** In a stock install the built-in shell guardrail tier loads zero rules, and the file
+that appears to fill it is never read. This corrects Revision 3, which framed it as an openjiuwen
+packaging omission and proposed shipping a file into openjiuwen's package path — the wrong remedy.
+
+---
+
+## V-26 (EXEC) — Core Workflow accepts a runtime-computed fan-out (spike F2 passes)
+
+```
+F2 build: conditional fan-out router ACCEPTED at graph-build time
+F2 run  : OK -> result={'final': None} state=<WorkflowExecutionState.COMPLETED: 'COMPLETED'>
+```
+
+`add_conditional_connection` accepted a router returning a computed `list[str]` of node ids, and
+the graph ran to `COMPLETED`.
+
+**Caveat found by execution.** Declaring `def router(state)` raised
+`router() missing 1 required positional argument: 'state'` — the router is invoked with **zero
+arguments**. `Router` is typed `Callable[..., Hashable | list[Hashable]]`, so fan-out width must
+come from a closure or a channel read, not from a router parameter. F2 passes; the mechanism is
+narrower than the type suggests.
+
+---
+
+## V-27 (EXEC) — the evolution framework has one subject; GraphMemory has none
+
+```
+grep -rn "def get_operators" openjiuwen/            -> 1 match (react_agent_evolve.py)
+grep -rn "GraphMemory|graph_memory" jw-src/jiuwenswarm/ -> 0 matches
+```
+
+`Trainer.train(agent, ...)` requires an agent implementing `get_operators()`; exactly one class in
+openjiuwen does. JiuwenSwarm imports from `agent_evolving` only:
+`EvolutionStore`, `EvolutionArchiveService`, `ExperienceQueryService`, `ExperienceRebuildService`,
+`InMemoryTrajectoryRegistry`, and the tool-description optimizer family
+(`ToolDescriptionMethod`, `ToolOptimizerBase`, `BeamSearch`, `SimpleEval`).
+`Trainer`, `Updater`, `Operator` and `agent_rl` are never imported by the application.
+
+Note also that `jiuwenswarm.common.updater.UpdaterService` is the **application auto-updater**, not
+`agent_evolving.updater` — a name collision that could inflate an apparent wiring count.
+
+**Finding.** RSI surface 1 (text artifacts) is genuinely wired on both sides. The other seven need
+binding work. Revision 3's "only one of eight is absent" was too generous.
+
+---
+
+## V-28 (EXEC) — capsule schema census
+
+All 42 capsule manifests in `harness/capability-capsules/` and `harness/config/capability-capsules/`
+parsed:
+
+| Section | Manifests carrying it |
+|---|---:|
+| `capability_capsule_id`, `capsule_kind`, `metadata` | 42 |
+| `applicability` (task_types, positive_signals, negative_signals) | 42 |
+| `contract` (inputs, outputs, preconditions, postconditions, invariants) | 42 |
+| `composition` (consumes, produces, compatible_with, incompatible_with, requires_after) | 42 |
+| `effects` (read, write, execute, network, cost, risk) | 42 |
+| `bindings` (skills, mcp_capabilities, data_refs, secret_refs, required_guard_capsules) | 42 |
+| `verification` (self_check, external_verifier, pass_conditions) | 42 |
+| `operator_compatibility` (preferred, forbidden) | 42 |
+| `provenance` | 42 |
+| `version` | 23 |
+| `runtime_preferences` | 6 |
+
+Registry (`config/capability-capsules.registry.yaml`): 32 capability + 1 guard + 2 resource = 35
+entries; 30 stable, 5 draft; 35 declare a `default_operator_profile`.
+
+**Finding.** Capsules are already implemented as governed capability identities. Absent from the
+schema, and therefore `BUILD`: planning strategies, benchmarks, performance history, version
+promotion and rollback, RSI target declarations.
+
+---
+
+## V-29 (EXEC) — the seven typed graph domains are absent
+
+`grep -rli` across `AI4Research/harness/lib` and `.../tools`, Python files only:
+
+| Domain | Files |
+|---|---:|
+| `concept_graph` | 0 |
+| `dataset_graph` | 0 |
+| `code_graph` | 0 |
+| `policy_graph` | 0 |
+| `workflow_graph` | 0 |
+| `trace_graph` | 0 |
+| `memory_graph` | 0 |
+| `idea_card` | 0 |
+| `account_registration` | 0 |
+| `falsifiab*` | 2 |
+
+TaskGraph persistence does exist (`lib/task_graph_io.py`, `lib/task_graph_state_io.py`).
+
+**Finding.** Eight of the nine Data Foundation outcomes are `BUILD` under every architecture
+option, as are the Idea Card and the account subsystem.
+
+---
+
+## Revision 4 corrections table
+
+| # | Revision 3 claim | Corrected finding | Class |
+|---|---|---|---|
+| 20 | SwarmFlow brings pause/resume "with it" | engine replay works; the agent-facing tool rejects `resume_id` | EXEC |
+| 21 | (not stated) | a failed step returns `None` and the run reports success | EXEC |
+| 22 | (not stated) | `agent_type` is accepted, forwarded and ignored by every backend | EXEC |
+| 23 | (not stated) | an unknown model name silently substitutes the default | SRC |
+| 24 | openjiuwen ships no `builtin_rules.yaml`; ship one | the file JiuwenSwarm installs is never read; openjiuwen refuses user dirs | EXEC |
+| 25 | only RSI-4 is absent; `agent_evolving` covers the rest | only surface 1 is wired; `Trainer` has one possible subject | EXEC |
+| 26 | F3 checkpointer persistence — open question | resolved: sqlite `PersistenceCheckpointer` is the process default in a stock install | SRC |
+| 27 | F2 runtime fan-out — open spike | resolved: passes, but the router takes no arguments | EXEC |
+| 28 | ~450 LOC wrapper, ~800 LOC compiler, ~12–14 months | withdrawn; effort stated as work items with acceptance criteria | derived |
+| 29 | 8 options as (entry, control plane, execution) triples | 5 complete-product options; mechanisms are not options | derived |
+
+## Blocked in Revision 4
+
+| Test | Why |
+|---|---|
+| Live model call through `agent(model=...)` to confirm silent fallback end to end | needs provider credentials |
+| Dynamic Team role and permission limits under a live team | needs a team runtime and credentials |
+| Windows / macOS installer verification (6 `UNVERIFIED` reuse rows) | cannot build platform installers in this environment |
+| Sandbox enforcement under `jiuwenbox` | needs kernel privileges the safeguards exclude |
+| Entailment precision of a *replacement* grounding check | the replacement does not exist yet |

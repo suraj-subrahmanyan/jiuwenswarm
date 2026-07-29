@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,8 +35,9 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Product / 13-maturity-map.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-classification-scheme">1. Classification scheme</a><a class="l2" href="#2-ai4rnd-maturity-across-the-142-features">2. AI4RnD maturity across the 142 features</a><a class="l3" href="#by-plane">By plane</a><a class="l2" href="#3-the-19-implemented-but-unwired-modules">3. The 19 implemented-but-unwired modules ⭐</a><a class="l2" href="#4-ai4rnd-what-is-genuinely-active">4. AI4RnD — what is genuinely ACTIVE</a><a class="l2" href="#5-ai4rnd-absent-10-features">5. AI4RnD — ABSENT (10 features)</a><a class="l2" href="#6-jiuwenswarm-coverage-of-the-142-features">6. JiuwenSwarm coverage of the 142 features</a><a class="l3" href="#where-jiuwenswarm-is-full-20">Where JiuwenSwarm is FULL (20)</a><a class="l3" href="#where-jiuwenswarm-is-none-72">Where JiuwenSwarm is NONE (72)</a><a class="l2" href="#7-the-two-sided-maturity-picture">7. The two-sided maturity picture</a><a class="l2" href="#8-health-signals">8. Health signals</a></nav><h1 id="maturity-map"><a class="anchor" href="#maturity-map" aria-hidden="true">#</a>Maturity Map</h1>
+<blockquote><p><strong>Revision 4 amendment.</strong> Three maturity judgements changed after executing the runtime rather than reading it. <code>agent_evolving</code> moves from <em>active substrate</em> to <strong>implemented-but-unwired</strong>: <code>Trainer.train</code> needs an agent implementing <code>get_operators()</code> and exactly one class in openjiuwen does, while JiuwenSwarm imports only the experience-archive and tool-description-optimizer parts. <code>GraphMemory</code> is <strong>implemented-but-unwired</strong> — zero references anywhere in JiuwenSwarm. The built-in shell guardrail tier is <strong>scaffolded-but-orphaned</strong>: JiuwenSwarm ships and installs an 86-line <code>builtin_rules.yaml</code> that no code reads back, and openjiuwen's loader refuses user directories. See <a href="15-correction-log.html">15-correction-log.md</a> §9 and <a href="12-verification-appendix.html">V-25 / V-27</a>.</p></blockquote>
 <p>What exists, in what state, on each side. Classifications are from <a href="12-verification-appendix.html#v-8--ai4rnd-module-maturity-by-execution">V-8</a> (executed import/wiring/test probe over 48 modules) plus source reading, mapped onto the 142-feature set.</p>
 <hr>
 <h2 id="1-classification-scheme"><a class="anchor" href="#1-classification-scheme" aria-hidden="true">#</a>1. Classification scheme</h2>

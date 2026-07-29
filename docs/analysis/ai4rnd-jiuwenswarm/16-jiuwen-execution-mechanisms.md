@@ -1,5 +1,15 @@
 # Jiuwen Execution Mechanisms — Bottom-Up Map
 
+> **Revision 4 amendment.** The mechanism inventory below is confirmed by execution, with four
+> reachability corrections. (1) SwarmFlow journal replay works — a resumed run re-executed only the
+> failed step, a third run executed nothing — but the leader-facing tool **rejects `resume_id`**.
+> (2) A failed agent step returns `None` after its retries and the run reports success. (3)
+> `agent_type` is validated and forwarded but **no backend reads it**. (4) An unknown model name
+> **silently substitutes** the default. Core Workflow's conditional router does accept a
+> runtime-computed target list, but is invoked with **no arguments**. See
+> [V-21 to V-26](12-verification-appendix.md).
+
+
 The document Revision 2 should have opened with. Everything here is from
 `openjiuwen==0.1.15.post3` installed from PyPI, and `jiuwenswarm` @ `a98d7ad`.
 

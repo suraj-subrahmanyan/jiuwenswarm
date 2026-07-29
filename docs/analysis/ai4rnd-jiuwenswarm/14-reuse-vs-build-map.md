@@ -1,5 +1,14 @@
 # Reuse-versus-Build Map
 
+> **Revision 4 amendment.** This map is superseded for sourcing decisions by
+> [20-feature-implementation-ownership.md](20-feature-implementation-ownership.md), which decides
+> all 142 rows against the fuller vocabulary the brief requires (REUSE · CONFIGURE · ADAPT · PORT ·
+> EXTEND · BUILD · DEFER · UNRESOLVED) and separates semantic ownership from runtime ownership.
+> Revision 4 totals: BUILD 53 · ADAPT 32 · REUSE 23 · PORT 20 · EXTEND 11 · DEFER 2 ·
+> UNRESOLVED 1. Several Revision 3 `REUSE` calls became `ADAPT` once the capability was invoked
+> rather than read — see [15-correction-log.md](15-correction-log.md) §9.
+
+
 Derived from the 142-row matrix. Every feature carries exactly one disposition.
 
 | Disposition | Count | Meaning |

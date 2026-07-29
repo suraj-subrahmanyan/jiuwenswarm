@@ -5,11 +5,12 @@
 </head><body>
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 <div class="navsec">Start</div>
 <a class="doc" href="readme.html">Overview &amp; verdict</a>
 <a class="doc" href="15-correction-log.html">Correction log</a>
 <div class="navsec">Decision</div>
+<a class="doc" href="20-feature-implementation-ownership.html">Feature ownership matrix</a>
 <a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
 <a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
 <a class="doc" href="07-architecture-options.html">Architecture options</a>
@@ -34,8 +35,9 @@
 <a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
 <a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
 <a class="doc" href="diagrams-readme.html">Diagram index</a>
-<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="crumb">Product / 14-reuse-vs-build-map.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-reuse-from-jiuwenswarm-23-features">1. REUSE from JiuwenSwarm — 23 features</a><a class="l2" href="#2-port-from-ai4rnd-69-features">2. PORT from AI4RnD — 69 features</a><a class="l3" href="#2a-cheap-ports-self-contained-stdlib-only-verified-by-execut">2a. Cheap ports — self-contained, stdlib-only (verified by execution)</a><a class="l3" href="#2b-moderate-ports-real-coupling-algorithm-worth-keeping">2b. Moderate ports — real coupling, algorithm worth keeping</a><a class="l3" href="#2c-hard-port-large-and-solar-coupled">2c. Hard port — large and Solar-coupled</a><a class="l2" href="#3-adapt-21-features">3. ADAPT — 21 features</a><a class="l2" href="#4-build-new-27-features">4. BUILD new — 27 features</a><a class="l2" href="#5-the-one-thing-that-must-be-replaced-not-ported">5. The one thing that must be replaced, not ported</a><a class="l2" href="#6-defer-2-features">6. DEFER — 2 features</a><a class="l2" href="#7-net-effect">7. Net effect</a></nav><h1 id="reuse-versus-build-map"><a class="anchor" href="#reuse-versus-build-map" aria-hidden="true">#</a>Reuse-versus-Build Map</h1>
+<blockquote><p><strong>Revision 4 amendment.</strong> This map is superseded for sourcing decisions by <a href="20-feature-implementation-ownership.html">20-feature-implementation-ownership.md</a>, which decides all 142 rows against the fuller vocabulary the brief requires (REUSE · CONFIGURE · ADAPT · PORT · EXTEND · BUILD · DEFER · UNRESOLVED) and separates semantic ownership from runtime ownership. Revision 4 totals: BUILD 53 · ADAPT 32 · REUSE 23 · PORT 20 · EXTEND 11 · DEFER 2 · UNRESOLVED 1. Several Revision 3 <code>REUSE</code> calls became <code>ADAPT</code> once the capability was invoked rather than read — see <a href="15-correction-log.html">15-correction-log.md</a> §9.</p></blockquote>
 <p>Derived from the 142-row matrix. Every feature carries exactly one disposition.</p>
 <div class="tw"><table><thead><tr><th>Disposition</th><th>Count</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip accent">PORT</span></td><td>69</td><td>AI4RnD code exists and should move across largely intact</td></tr><tr><td><span class="chip bad">BUILD</span></td><td>27</td><td>neither system has it; must be written</td></tr><tr><td><span class="chip ok">REUSE-JW</span></td><td>23</td><td>JiuwenSwarm provides it; do not rebuild</td></tr><tr><td><span class="chip warn">ADAPT</span></td><td>21</td><td>exists on one side but needs rework to fit</td></tr><tr><td><span class="chip neutral">DEFER</span></td><td>2</td><td>not now, and for stated reasons</td></tr></tbody></table></div>
 <div class="fig"><pre class="mermaid">pie showData

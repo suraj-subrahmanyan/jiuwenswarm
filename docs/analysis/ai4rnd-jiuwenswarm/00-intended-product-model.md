@@ -1,5 +1,15 @@
 # The Intended AI4RnD Product
 
+> **Revision 4 amendment.** The workbook was re-read directly with `openpyxl` in this revision and
+> reconciles exactly: 9 + 10 + 6 = **25 L1 groups**, 54 + 65 + 23 = **142 L2 features**. A
+> position-by-position check against the Revision 3 traceability CSV found **zero mismatches** —
+> the row set was already correct. What was missing was per-row *ownership*, which is now in
+> [20-feature-implementation-ownership.md](20-feature-implementation-ownership.md). Capability
+> Capsules are **not** workflow templates: all 42 manifests carry `applicability`, `contract`,
+> `composition`, `effects`, `bindings`, `verification`, `operator_compatibility` and `provenance`
+> ([V-28](12-verification-appendix.md)).
+
+
 Derived from `AI4RnD Feature List.xlsx` (142 Level-2 rows), the architecture
 specifications in `Stellven/AI4Research-A`, the schemas and contracts in
 `Stellven/AI4Research`, and the workbook's own design notes.

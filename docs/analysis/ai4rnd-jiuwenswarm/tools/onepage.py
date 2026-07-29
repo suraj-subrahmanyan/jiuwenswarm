@@ -35,7 +35,7 @@ doc = f"""<!doctype html><html lang="en"><head>
 <style>{CSS}</style></head><body>
 <div class="layout">
 <aside><div class="brand">{M.MARK}<h1>AI4RnD &times; JiuwenSwarm</h1></div>
-<p class="rev">Architecture review &middot; Rev 3</p>
+<p class="rev">Architecture review &middot; Rev 4</p>
 {"".join(nav)}
 <div class="side-foot">Single-page edition<br>jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>
 AI4Research @ d35c511</div></aside>
