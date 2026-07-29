@@ -1,0 +1,216 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Intended product model &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc on" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Product / 00-intended-product-model.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-what-ai4rnd-is-meant-to-be">1. What AI4RnD is meant to be</a><a class="l2" href="#2-the-central-abstraction-stack">2. The central abstraction stack</a><a class="l3" href="#2-1-a-capability-capsule-is-not-a-renamed-skill">2.1 A Capability Capsule is not a renamed skill</a><a class="l3" href="#2-2-operators-are-the-dag-s-execution-vocabulary">2.2 Operators are the DAG's execution vocabulary</a><a class="l3" href="#2-3-evaluators-are-operators-too">2.3 Evaluators are operators too</a><a class="l2" href="#3-rsi-controlled-self-improvement-across-eight-surfaces">3. RSI — controlled self-improvement across eight surfaces</a><a class="l2" href="#4-data-foundations-seven-graphs-plus-memory">4. Data foundations — seven graphs plus memory</a><a class="l2" href="#5-harness-core-what-the-execution-substrate-must-provide">5. Harness Core — what the execution substrate must provide</a><a class="l2" href="#6-what-the-workbook-itself-marks-as-unsettled">6. What the workbook itself marks as unsettled</a><a class="l2" href="#7-scale-of-the-target-versus-what-exists">7. Scale of the target versus what exists</a></nav><h1 id="the-intended-ai4rnd-product"><a class="anchor" href="#the-intended-ai4rnd-product" aria-hidden="true">#</a>The Intended AI4RnD Product</h1>
+<p>Derived from <code>AI4RnD Feature List.xlsx</code> (142 Level-2 rows), the architecture specifications in <code>Stellven/AI4Research-A</code>, the schemas and contracts in <code>Stellven/AI4Research</code>, and the workbook's own design notes.</p>
+<p><strong>This document defines the target.</strong> Everything else in this analysis measures the two codebases against it. The previous revision of this analysis modelled AI4RnD as "a research report generator with an evidence ledger". That was wrong — it described one lane of a much larger product.</p>
+<hr>
+<h2 id="1-what-ai4rnd-is-meant-to-be"><a class="anchor" href="#1-what-ai4rnd-is-meant-to-be" aria-hidden="true">#</a>1. What AI4RnD is meant to be</h2>
+<p>An <strong>automated R&amp;D organisation</strong>: a system that takes a vague human request and carries it all the way to an evidence-backed decision about whether a technical idea works.</p>
+<pre><code>intake → requirement compilation → research &amp; ideation → opportunity selection
+→ technical claims &amp; hypotheses → POC construction → benchmarking → evaluation
+→ decision support → reusable learning and controlled self-improvement</code></pre>
+<p>The distinguishing commitment is not that it writes reports. It is that <strong>every step produces a governed, inspectable artifact, and no step may assert a result it cannot prove</strong>. The workbook and SDD state this as a rule:</p>
+<blockquote><p><code>LLM proposes. Schemas constrain. Code validates. Gates decide. Artifacts preserve.</code></p></blockquote>
+<p>The product is organised in three planes.</p>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph W[&quot;WORKFLOW — 9 lanes, 54 features · the R&amp;D pipeline&quot;]
+        direction LR
+        W1[&quot;Ingestion&quot;] --&gt; W2[&quot;Requirement&lt;br/&gt;compilation&quot;] --&gt; W3[&quot;Search &amp;&lt;br/&gt;ideation&quot;]
+        W3 --&gt; W4[&quot;Opportunity&lt;br/&gt;selection&quot;] --&gt; W5[&quot;Claims &amp;&lt;br/&gt;hypotheses&quot;]
+        W5 --&gt; W6[&quot;POC&lt;br/&gt;implementation&quot;] --&gt; W7[&quot;Benchmarking&quot;] --&gt; W8[&quot;Evaluation&quot;] --&gt; W9[&quot;Delivery&quot;]
+    end
+    subgraph F[&quot;FOUNDATION — 10 groups, 65 features · the machine underneath&quot;]
+        direction LR
+        F1[&quot;Capability&lt;br/&gt;Capsules&quot;] --- F2[&quot;Operators&lt;br/&gt;logical + physical&quot;] --- F3[&quot;Evaluators&quot;]
+        F4[&quot;Foundational&lt;br/&gt;models&quot;] --- F5[&quot;RSI&quot;] --- F6[&quot;Data&lt;br/&gt;foundations&quot;]
+        F7[&quot;Harness&lt;br/&gt;Core&quot;] --- F8[&quot;Intention&lt;br/&gt;compilers&quot;] --- F9[&quot;Planner&quot;] --- F10[&quot;Builder&quot;]
+    end
+    subgraph V[&quot;VERTICAL — 6 groups, 23 features · how humans reach it&quot;]
+        direction LR
+        V1[&quot;Visibility /&lt;br/&gt;statistics&quot;] --- V2[&quot;Installer ·&lt;br/&gt;CLI · Webapp&quot;] --- V3[&quot;UI&lt;br/&gt;CLI/GUI/TUI&quot;]
+        V4[&quot;Account&lt;br/&gt;management&quot;] --- V5[&quot;Message&lt;br/&gt;channels&quot;] --- V6[&quot;System&lt;br/&gt;configuration&quot;]
+    end
+    W --&gt; F
+    V --&gt; W</pre></div>
+<div class="tw"><table><thead><tr><th>Plane</th><th>Groups</th><th>L2 features</th></tr></thead><tbody><tr><td>Workflow</td><td>Ingestion (7), Requirement compilation (7), Search &amp; ideation (8), Idea/opportunity selection (7), Claims &amp; hypotheses (5), POC implementation (5), Benchmarking (5), Evaluation (6), Delivery (4)</td><td><strong>54</strong></td></tr><tr><td>Foundation</td><td>Capability capsule (5), Operators (6), Evaluator (6), Foundational models (3), RSI (8), Data foundations (9), Harness Core (6), Intention compilers (5), Planner (3), Builder (14)</td><td><strong>65</strong></td></tr><tr><td>Vertical</td><td>Visibility (4), Installer/CLI/Webapp (5), UI (3), Account management (4), Message channels (3), System configuration (4)</td><td><strong>23</strong></td></tr><tr><td></td><td></td><td><strong>142</strong></td></tr></tbody></table></div>
+<hr>
+<h2 id="2-the-central-abstraction-stack"><a class="anchor" href="#2-the-central-abstraction-stack" aria-hidden="true">#</a>2. The central abstraction stack</h2>
+<p>The workbook is explicit that Capsules, Contracts and Operators are three <em>different</em> layers, not synonyms. From the Operators notes:</p>
+<blockquote><p>打包的时候从外往里包，执行时从小往外打开。Capsule → contract → logical operator （例如：capsule 仅仅是车辆维修，contract 是不同车型的维修计划，operators 是具体修理项的修理工具）</p></blockquote>
+<p><em>"When packaging, you wrap from the outside in; when executing, you unfold from the inside out. Capsule → contract → logical operator. (For example: the capsule is just 'vehicle repair'; the contract is the repair plan for a particular vehicle model; the operators are the specific tools for individual repair items.)"</em></p>
+<div class="fig"><pre class="mermaid">flowchart TB
+    CAP[&quot;&lt;b&gt;Capability Capsule&lt;/b&gt;&lt;br/&gt;&#x27;vehicle repair&#x27;&lt;br/&gt;a governed, versioned, certified capability&lt;br/&gt;skill + rule + boundary + governance&quot;]
+    CON[&quot;&lt;b&gt;Contract&lt;/b&gt;&lt;br/&gt;&#x27;the repair plan for this model&#x27;&lt;br/&gt;typed inputs/outputs, pre/postconditions,&lt;br/&gt;invariants, acceptance, required evidence&quot;]
+    LOP[&quot;&lt;b&gt;Logical Operator&lt;/b&gt;&lt;br/&gt;&#x27;the specific repair tool&#x27;&lt;br/&gt;DAG-callable unit: identity, version, I/O,&lt;br/&gt;required capabilities, write scope,&lt;br/&gt;evidence requirements, completion conditions&quot;]
+    POP[&quot;&lt;b&gt;Physical Operator&lt;/b&gt;&lt;br/&gt;&#x27;the mechanic who holds the tool&#x27;&lt;br/&gt;an API model, subscription agent, browser&lt;br/&gt;operator, code-agent pane, or host — with&lt;br/&gt;declared capabilities, quota, cost, health&quot;]
+
+    CAP --&gt;|&quot;contains one or more&quot;| CON
+    CON --&gt;|&quot;realised by&quot;| LOP
+    LOP --&gt;|&quot;bound at runtime to&quot;| POP
+    POP -.-&gt;|&quot;execution evidence&quot;| CAP</pre></div>
+<h3 id="2-1-a-capability-capsule-is-not-a-renamed-skill"><a class="anchor" href="#2-1-a-capability-capsule-is-not-a-renamed-skill" aria-hidden="true">#</a>2.1 A Capability Capsule is not a renamed skill</h3>
+<p>The workbook: <em>"capability capsule: is an upgrade of skills → capsule; <strong>skill + rule + boundary + governance</strong>"</em> and <em>"reusable: governable, combinable, verifiable — is a medium for self-evolution."</em></p>
+<p>The shipped schema (<code>schemas/draft/capability-capsule.v1.draft.json</code>) makes this concrete. It requires <strong>eleven</strong> top-level sections; a JiuwenSwarm skill has two (<code>name</code>, <code>description</code>). Verified by execution — 30 capsules load, 23 manifests validate, 0 invalid:</p>
+<div class="tw"><table><thead><tr><th>Capsule section</th><th>What it adds over a skill</th></tr></thead><tbody><tr><td><code>capability_capsule_id</code>, <code>version</code></td><td>identity + versioning for promotion/rollback</td></tr><tr><td><code>capsule_kind</code></td><td><code>capability</code> \</td><td><code>guard</code> \</td><td><code>resource</code></td></tr><tr><td><code>applicability</code></td><td><code>task_types</code>, <code>positive_signals</code>, <code>negative_signals</code> — machine selection</td></tr><tr><td><code>contract</code></td><td><code>inputs</code>, <code>outputs</code>, <code>preconditions</code>, <code>postconditions</code>, <code>invariants</code></td></tr><tr><td><code>composition</code></td><td><code>consumes</code>, <code>produces</code>, <code>compatible_with</code>, <code>incompatible_with</code>, <code>requires_after</code></td></tr><tr><td><code>effects</code></td><td><code>read</code>, <code>write</code>, <code>execute</code>, <code>network</code>, <code>cost</code> — declared side effects</td></tr><tr><td><code>bindings</code></td><td><code>skills</code>, <code>mcp_capabilities</code>, <code>data_refs</code>, <code>secret_refs</code>, <code>required_guard_capsules</code></td></tr><tr><td><code>verification</code></td><td><code>self_check</code>, <code>external_verifier</code>, <code>pass_conditions</code></td></tr><tr><td><code>operator_compatibility</code></td><td><code>preferred</code>, <code>forbidden</code> physical operators</td></tr><tr><td><code>provenance</code></td><td>owner, created_at, manifest_path</td></tr></tbody></table></div>
+<p>Note <code>bindings.skills</code>: <strong>a skill is an ingredient of a capsule</strong>, not an equivalent of one. And <code>bindings.required_guard_capsules</code> means capsules can be gated by other capsules.</p>
+<h3 id="2-2-operators-are-the-dag-s-execution-vocabulary"><a class="anchor" href="#2-2-operators-are-the-dag-s-execution-vocabulary" aria-hidden="true">#</a>2.2 Operators are the DAG's execution vocabulary</h3>
+<ul><li><strong>Logical operator</strong> — a stable, DAG-callable definition. Declares identity/version, I/O,</li></ul>
+<p>required capabilities/capsules, side effects, <strong>write scope</strong>, evidence requirements, completion conditions, concurrency constraints, fallback semantics.</p>
+<ul><li><strong>Physical operator</strong> — a concrete executor. The workbook is explicit that these are</li></ul>
+<p>first-class and heterogeneous: <em>"API models, subscription agents, browser/Web operators, Code Agent panes, and local/remote environments"</em>, each with profiles, adapters, availability, health, capacity, quota, cost and concurrency state.</p>
+<ul><li><strong>Binding</strong> — for a DAG node's logical operator, filter eligible physical operators and</li></ul>
+<p>rank by capabilities, capsule compatibility, permissions, health, host, quota, cost, latency, load and fallback policy.</p>
+<p>The workbook notes the pipeline order:</p>
+<blockquote><p><code>user intent → requirement compilation → Capsule → research contract → planner → dag</code></p></blockquote>
+<p>and <em>"logical operators should be able to be called by the DAG"</em> / <em>"DAG generates the nodes of the workflow"</em>.</p>
+<h3 id="2-3-evaluators-are-operators-too"><a class="anchor" href="#2-3-evaluators-are-operators-too" aria-hidden="true">#</a>2.3 Evaluators are operators too</h3>
+<blockquote><p><em>"Evaluator is also a logical operator, but is an important one. Evaluator is in essence how to organise the chain of evidence."</em></p></blockquote>
+<p>Six evaluator families, each a separate pipeline: contract/schema conformance; engineering correctness; performance/cost/benchmark; security/privacy/compliance/IP; evidence/factuality/ scientific validity; lifecycle/parity/human review. Human-in-the-loop is explicitly present in several, not bolted on at the end.</p>
+<hr>
+<h2 id="3-rsi-controlled-self-improvement-across-eight-surfaces"><a class="anchor" href="#3-rsi-controlled-self-improvement-across-eight-surfaces" aria-hidden="true">#</a>3. RSI — controlled self-improvement across eight surfaces</h2>
+<p>RSI in this product is <strong>not</strong> "the agent rewrites its prompt". It is a governed improvement loop over eight distinct target classes, each with its own validation method:</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Improvement target</th><th>Named methods</th><th>Required validation</th></tr></thead><tbody><tr><td>1</td><td>Prompts, rules, rubrics</td><td>GEPA, MIPROv2, TextGrad</td><td>holdout tasks, A/B, regression</td></tr><tr><td>2</td><td>Runtime &amp; resource routing</td><td>Bayesian optimisation, bandits, cost-aware RL</td><td>traces, load tests, cost–latency</td></tr><tr><td>3</td><td>Capsules &amp; physical operators</td><td>trajectory mining, code evolution, CEGIS</td><td>compatibility tests, sandbox runs, benchmarks</td></tr><tr><td>4</td><td>DAG &amp; agent organisation</td><td>AFlow, MCTS, ADAS</td><td>replay tests, simulation, success–cost</td></tr><tr><td>5</td><td>Evaluators, rewards, contracts, governance</td><td>judge calibration, reward modelling, CEGIS</td><td>golden sets, agreement rates, violation tests</td></tr><tr><td>6</td><td>Memory, retrieval, evidence</td><td>memory learning, Self-RAG, reranker training</td><td>recall, precision, citation accuracy, provenance</td></tr><tr><td>7</td><td>Model policies &amp; weights</td><td>SFT, LoRA, DPO, GRPO, agent RL</td><td>holdout benchmarks, robustness, regressions</td></tr><tr><td>8</td><td>Data, benchmarks, curriculum, observability</td><td>active learning, hard-case mining, credit assignment</td><td>coverage, contamination, trace, ablation</td></tr></tbody></table></div>
+<p>The workbook's own framing: <em>"除了 GEPA，还有 Voyager，让系统从成功执行中自动沉淀"</em> — <em>"besides GEPA there is also Voyager, letting the system automatically precipitate [reusable capability] out of successful executions."</em></p>
+<p><strong>The required loop shape</strong> (this is what the target architecture must show):</p>
+<div class="fig"><pre class="mermaid">flowchart LR
+    EX[&quot;execution&lt;br/&gt;evidence&quot;] --&gt; EV[&quot;evaluation&quot;]
+    EV --&gt; CAND[&quot;improvement&lt;br/&gt;candidate&quot;]
+    CAND --&gt; ISO[&quot;isolated testing&lt;br/&gt;+ benchmarking&quot;]
+    ISO --&gt; DEC{&quot;approve?&quot;}
+    DEC --&gt;|yes| PROMO[&quot;promotion&quot;]
+    DEC --&gt;|no| REJ[&quot;rejection&quot;]
+    PROMO --&gt; UPD[&quot;updated Capsule / Operator /&lt;br/&gt;workflow / evaluator / model policy&quot;]
+    UPD -.-&gt;|next run| EX
+    PROMO -.-&gt;|regression detected| RB[&quot;rollback&quot;]
+    RB --&gt; UPD
+    REJ -.-&gt; EX</pre></div>
+<p>Every arrow in that loop is a product requirement, not an optional extra.</p>
+<hr>
+<h2 id="4-data-foundations-seven-graphs-plus-memory"><a class="anchor" href="#4-data-foundations-seven-graphs-plus-memory" aria-hidden="true">#</a>4. Data foundations — seven graphs plus memory</h2>
+<p>The product treats knowledge as a set of typed, linked graphs rather than a document store:</p>
+<div class="tw"><table><thead><tr><th>Graph</th><th>Contents</th></tr></thead><tbody><tr><td>Concept</td><td>business concepts, entities, terminology, semantic relationships</td></tr><tr><td>Dataset</td><td>datasets, schemas, fields, versions, sources, quality state</td></tr><tr><td>Code</td><td>repos, modules, APIs, functions, tests, configs, dependencies</td></tr><tr><td>Policy</td><td>permissions, approvals, security rules, compliance, retention</td></tr><tr><td>Workflow</td><td>reusable processes, SOPs, approval chains, stages, transitions</td></tr><tr><td>Trace</td><td>requests → plans → executions → operator decisions → tool calls → artifacts → evidence → evaluations → transitions</td></tr><tr><td>Memory</td><td>relationships among remembered facts, decisions, failures, lessons, and their originating evidence</td></tr></tbody></table></div>
+<p>Plus <strong>persistent memory &amp; context retrieval</strong> and <strong>TaskGraph persistence &amp; lifecycle</strong> (nodes, dependencies, scopes, gates, checkpoints, results, closure records).</p>
+<p>The Trace graph is the auditability backbone: it is what makes "why does this sentence exist" answerable.</p>
+<hr>
+<h2 id="5-harness-core-what-the-execution-substrate-must-provide"><a class="anchor" href="#5-harness-core-what-the-execution-substrate-must-provide" aria-hidden="true">#</a>5. Harness Core — what the execution substrate must provide</h2>
+<p>Six requirements, and they are stricter than a chat agent loop:</p>
+<ol><li><strong>Runtime control loop &amp; run lifecycle</strong> — durable run/node state, status projections, close only when required nodes <em>and gates</em> are satisfied.</li><li><strong>Message bus &amp; durable task queue</strong> — persistent queueing, priority, ordering, deduplication/idempotency, backpressure.</li><li><strong>DAG scheduler, readiness &amp; operator binding</strong> — validate, determine readiness from dependencies/gates/external waits, form safe parallel batches using <strong>scope, effect, resource and capacity constraints</strong>.</li><li><strong>Execution admission, lease &amp; concurrency control</strong> — approval/policy/availability checks, lease acquire/release/reap, no duplicate dispatch, quota and exclusion limits.</li><li><strong>Main loop dispatch &amp; runtime supervision</strong> — consume a resolved binding, create the execution envelope, dispatch, monitor heartbeat, collect normalised results and evidence references.</li><li><strong>Failure recovery &amp; resumability</strong> — detect stale execution, retry/requeue/compensate, recover expired leases, replay durable state, <strong>resume without rerunning passed work</strong>.</li></ol>
+<p>Points 2, 4 and 6 are the ones a conversational agent framework typically does not have.</p>
+<hr>
+<h2 id="6-what-the-workbook-itself-marks-as-unsettled"><a class="anchor" href="#6-what-the-workbook-itself-marks-as-unsettled" aria-hidden="true">#</a>6. What the workbook itself marks as unsettled</h2>
+<p>Preserved rather than resolved, per the instruction not to silently pick an interpretation:</p>
+<div class="tw"><table><thead><tr><th>Open question</th><th>Where</th></tr></thead><tbody><tr><td><em>"one capsule have multiple contracts inside???"</em></td><td>Capsule §4 note</td></tr><tr><td><em>"the level 2 for this level 1 feature is too broken"</em></td><td>Operators §1 note</td></tr><tr><td><em>"现在需要新加一个'如何添加逻辑算子'的feature"</em> — a "how to add a logical operator" feature is still missing</td><td>Operators §4 note</td></tr><tr><td><em>"what are the planning strategy available? Is it a template, or is it real time generated?"</em></td><td>Planner §1 note</td></tr><tr><td><em>"task graph is a kind of contract. What other kind of contract?"</em></td><td>Intention compilers §5 note</td></tr><tr><td>Evaluator splitting — <em>"evaluator have different pipeline for different things... we should split them up"</em></td><td>Evaluator §2 note</td></tr><tr><td>Capsule L2 merging — <em>"merge some of the level 2 features that focus on capsule management"</em></td><td>Capsule §5 note</td></tr><tr><td>Where HITL belongs — <em>"HITL 在紫，橙，绿里面都有"</em> (HITL appears in the purple, orange and green areas)</td><td>Evaluator §2 note</td></tr></tbody></table></div>
+<p>These are marked <code>DEBATED</code> in the traceability matrix (11 features) rather than assigned a firm disposition.</p>
+<hr>
+<h2 id="7-scale-of-the-target-versus-what-exists"><a class="anchor" href="#7-scale-of-the-target-versus-what-exists" aria-hidden="true">#</a>7. Scale of the target versus what exists</h2>
+<p>Measured against the 142 rows (full detail in <a href="traceability-142-feature-matrix.html"><code>traceability/142-feature-matrix.md</code></a>):</p>
+<div class="tw"><table><thead><tr><th>AI4RnD maturity</th><th>Count</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip ok">ACTIVE</span></td><td>68</td><td>wired into a runtime path</td></tr><tr><td><span class="chip accent">IMPL-UNWIRED</span></td><td>27</td><td>implemented and tested, but nothing calls it</td></tr><tr><td><span class="chip warn">SCAFFOLD</span></td><td>21</td><td>partial or thin</td></tr><tr><td><span class="chip warn">SPEC</span></td><td>16</td><td>described in the workbook/SDD only</td></tr><tr><td><span class="chip bad">ABSENT</span></td><td>10</td><td>not present at all</td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>JiuwenSwarm coverage</th><th>Count</th></tr></thead><tbody><tr><td><span class="chip ok">FULL</span></td><td>20</td></tr><tr><td><span class="chip warn">PARTIAL</span></td><td>50</td></tr><tr><td><span class="chip bad">NONE</span></td><td>72</td></tr></tbody></table></div>
+<p><strong>The headline number: JiuwenSwarm provides nothing at all for 72 of 142 features (51%), and full coverage for 20 (14%).</strong> Those 20 are concentrated in the execution substrate and the vertical plane — channels, UI, installers, config, code building, memory. Every Workflow-plane lane after ingestion, and almost the entire Foundation plane, is either partial or absent.</p>
+<p>That ratio is what the architecture decision has to answer to. It is a very different picture from a comparison of "two research tools", and it is why <a href="07-architecture-options.html">07-architecture-options.md</a> reconsiders the question from scratch rather than carrying forward the earlier recommendation.</p></article><div class="pager"><a href="09-implementation-plan.html"><div class="d">← Previous</div><div class="t">Staged path</div></a><a class="nx" href="13-maturity-map.html"><div class="d">Next →</div><div class="t">Maturity map</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

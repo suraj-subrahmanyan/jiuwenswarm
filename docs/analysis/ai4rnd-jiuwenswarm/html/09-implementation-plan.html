@@ -1,0 +1,180 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Staged path &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc on" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Decision / 09-implementation-plan.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#stage-0-compilation-spikes-3-weeks">Stage 0 — Compilation spikes (3 weeks)</a><a class="l2" href="#stage-1-research-mode-project-subsystem-8-weeks">Stage 1 — Research mode + project subsystem (8 weeks)</a><a class="l2" href="#stage-2-evidence-lane-with-real-verification-8-weeks">Stage 2 — Evidence lane with real verification (8 weeks)</a><a class="l2" href="#stage-3-capsules-routing-gates-10-weeks">Stage 3 — Capsules, routing, gates (10 weeks)</a><a class="l2" href="#stage-4-workflow-lanes-14-weeks">Stage 4 — Workflow lanes (14 weeks)</a><a class="l2" href="#stage-5-governed-evolution-8-weeks-was-16">Stage 5 — Governed evolution (8 weeks, was 16)</a><a class="l2" href="#stage-6-verticals-and-accounts-10-weeks">Stage 6 — Verticals and accounts (10 weeks)</a><a class="l2" href="#cumulative">Cumulative</a><a class="l2" href="#decision-points">Decision points</a><a class="l2" href="#what-this-plan-deliberately-does-not-do">What this plan deliberately does not do</a></nav><h1 id="staged-path-to-the-complete-product-revision-3"><a class="anchor" href="#staged-path-to-the-complete-product-revision-3" aria-hidden="true">#</a>Staged Path to the Complete Product — Revision 3</h1>
+<p><strong>Replaces the Revision 2 staging</strong> (preserved at <code>dc5de41</code>). Revision 2's Stage 3 ("wire the unwired", 12 weeks) and Stage 6 ("RSI", 16 weeks) were largely aimed at rebuilding openjiuwen machinery — see <a href="15-correction-log.html">15-correction-log.md</a>. Total drops from ~19–20 months to <strong>~12–14 months</strong>.</p>
+<div class="fig"><pre class="mermaid">gantt
+    dateFormat X
+    axisFormat %s
+    title Stage sequence (cumulative weeks from start)
+    section Prove
+    S0 Compilation spikes (3w)       :s0, 0, 3
+    section Product
+    S1 Research mode + project (8w)  :s1, 3, 11
+    S2 Evidence lane + entailment (8w) :s2, 11, 19
+    section Capability
+    S3 Capsules + routing + gates (10w) :s3, 19, 29
+    S4 Workflow lanes (14w)          :s4, 29, 43
+    section Improve
+    S5 Governed evolution (8w)       :s5, 43, 51
+    S6 Verticals + accounts (10w)    :s6, 51, 61</pre></div>
+<p><em>Axis units are weeks from project start. Stage 2 completes at week 19 — the "first trustworthy user value" milestone quoted below as ~4.5 months.</em></p>
+<hr>
+<h2 id="stage-0-compilation-spikes-3-weeks"><a class="anchor" href="#stage-0-compilation-spikes-3-weeks" aria-hidden="true">#</a>Stage 0 — Compilation spikes (3 weeks)</h2>
+<p>Everything hinges on whether an AI4RnD plan compiles to existing mechanisms. Three cheap tests.</p>
+<div class="tw"><table><thead><tr><th>Spike</th><th>Question</th><th>Method</th><th>If it fails</th></tr></thead><tbody><tr><td><strong>F2</strong></td><td>Can Core Workflow express fan-out where N is discovered at runtime?</td><td>build a <code>add_conditional_connection</code> router returning <code>list[Hashable]</code> of computed length; run it</td><td>SwarmFlow-only compilation</td></tr><tr><td><strong>F4</strong></td><td>Does SwarmFlow's determinism lint block real research patterns?</td><td>compile 3 real AI4RnD plans to SwarmFlow scripts; run <code>load_workflow_source</code></td><td>more Core Workflow; if both fail → separate service</td></tr><tr><td><strong>F3</strong></td><td>Is a persistent <code>Checkpointer</code> backend available in a default JiuwenSwarm install?</td><td>inspect configuration; restart mid-run</td><td>AI4RnD-side run store</td></tr><tr><td>F5</td><td>Can write-scope exclusion be solved in the compiler?</td><td>emit conflicting steps, verify they never share a <code>parallel(...)</code></td><td>narrow parallel-group scheduler</td></tr><tr><td>G2</td><td>Does an out-of-tree Rail survive agent-cache invalidation and restart?</td><td>install rail, restart agent server, re-invoke</td><td>affects the mode rail only</td></tr></tbody></table></div>
+<p><strong>Exit gate.</strong> F2 ✅ <strong>or</strong> F4 ✅ (one compilation target suffices to proceed). If both fail, reopen <a href="07-architecture-options.html">07-architecture-options.md</a> with Option 5.</p>
+<hr>
+<h2 id="stage-1-research-mode-project-subsystem-8-weeks"><a class="anchor" href="#stage-1-research-mode-project-subsystem-8-weeks" aria-hidden="true">#</a>Stage 1 — Research mode + project subsystem (8 weeks)</h2>
+<p>The product skeleton. <strong>No core-tree changes.</strong></p>
+<p><strong>Build</strong></p>
+<ol><li><code>Research</code> mode: an out-of-tree Rail registering project tools (verified mechanism, <span class="tag">V-2</span>).</li><li>Project record + store (SQLite): contract, objective, depth tier, budget, status, run history.</li><li>Project lifecycle on <code>NativeHarness</code> — <code>start</code> / <code>pause</code> / <code>abort</code> / <code>subscribe</code> / <code>outputs</code> already exist; AI4RnD adds the record and the run index.</li><li>Project view + plan inspector in the web UI (<a href="19-product-layers-and-ux.html">19 §5</a>).</li><li>Session ↔ project link (<code>project_id</code> in session metadata).</li></ol>
+<p><strong>Exit gate</strong></p>
+<ul><li>A project survives an agent-server restart and a session rewind.</li><li>The user selects only <strong>objective</strong> and <strong>depth</strong> — no execution mechanism is exposed.</li><li>Cancelling from the project view stops in-flight work.</li></ul>
+<hr>
+<h2 id="stage-2-evidence-lane-with-real-verification-8-weeks"><a class="anchor" href="#stage-2-evidence-lane-with-real-verification-8-weeks" aria-hidden="true">#</a>Stage 2 — Evidence lane with real verification (8 weeks)</h2>
+<p><strong>Build</strong></p>
+<ol><li>Package the research evidence core (verified standalone, <span class="tag">V-10</span>).</li><li>Compile the literature-review objective to <strong>SwarmFlow</strong>; step wrapper captures evidence.</li><li><strong>Replace the grounding check.</strong> <span class="tag">V-12</span> measured precision 0.25. Build entailment on <code>llm_as_judge</code> + <code>agent_rl/online/judge</code> calibration — a substrate that already exists.</li><li>Port <code>gate_ledger</code> (append-only, writer-attributed, status-as-projection).</li><li>Ship <code>builtin_rules.yaml</code> into openjiuwen's package path; assert <code>get_builtin_security_rules() &gt; 0</code> at startup (<span class="tag">V-4</span>).</li></ol>
+<p><strong>Exit gate</strong></p>
+<ul><li>Every claim resolves to a citation span verified at char + byte offsets.</li><li><strong>Entailment precision measured on a labelled set and published</strong>, materially beating 0.25.</li></ul>
+<p>Set the bar before building.</p>
+<ul><li>Guardrails confirmed loaded in the deployed configuration.</li></ul>
+<hr>
+<h2 id="stage-3-capsules-routing-gates-10-weeks"><a class="anchor" href="#stage-3-capsules-routing-gates-10-weeks" aria-hidden="true">#</a>Stage 3 — Capsules, routing, gates (10 weeks)</h2>
+<p><strong>Build</strong></p>
+<ol><li><strong>Capsule registry</strong> — wire the existing 1,351 LOC + 30 manifests (<span class="tag">V-11</span>).</li><li><strong>Capability router</strong> (~150 LOC) with the hard gate, Layer-3 liveness net and discriminated stall reasons; <strong>plus writer≠verifier exclusion at candidate-set construction</strong> (<span class="tag">V-6</span>).</li><li><strong><code>effects</code> enforcement at binding time</strong> — a capsule declaring <code>effects.network: none</code> cannot bind to a network-capable runner.</li><li><strong>Write-scope exclusion in the compiler</strong> — conflicting steps never emitted into one <code>parallel(...)</code> (<a href="17-taskgraph-verdict.html">17 §8</a>).</li><li>Remaining evaluator families (conformance, engineering, perf/cost, security/IP).</li></ol>
+<p><strong>Exit gate</strong></p>
+<ul><li>A step needing an unavailable capability stalls with <code>no_matching_worker</code> + missing list.</li><li>An evaluation step can never bind to the runner that wrote the artifact.</li><li>Two write-scope-conflicting steps never co-schedule — asserted by test.</li><li><strong>No AI4RnD scheduler exists</strong> — asserted by code review.</li></ul>
+<hr>
+<h2 id="stage-4-workflow-lanes-14-weeks"><a class="anchor" href="#stage-4-workflow-lanes-14-weeks" aria-hidden="true">#</a>Stage 4 — Workflow lanes (14 weeks)</h2>
+<p>The build-new middle of the R&amp;D pipeline.</p>
+<ol><li><strong>Opportunity selection lane</strong> (features 23–29) — incl. the <strong>Idea Card schema</strong>, which has no implementation anywhere.</li><li><strong>Claims &amp; hypotheses</strong> (32–34) — incl. <strong>falsifiability screening</strong>, the scientific core.</li><li><strong>Benchmarking lane</strong> (40–44) — port the unwired benchmark suite.</li><li>Team-excursion compilation for open-ended steps.</li></ol>
+<p><strong>Exit gate</strong></p>
+<ul><li>A run goes intake → decision with an Idea Card, a falsifiability verdict, a benchmark</li></ul>
+<p>comparison and an evaluation dossier.</p>
+<ul><li>A non-falsifiable hypothesis is blocked before POC construction.</li></ul>
+<hr>
+<h2 id="stage-5-governed-evolution-8-weeks-was-16"><a class="anchor" href="#stage-5-governed-evolution-8-weeks-was-16" aria-hidden="true">#</a>Stage 5 — Governed evolution (8 weeks, was 16)</h2>
+<p><strong>Build</strong></p>
+<ol><li>Bind AI4RnD subjects as <code>Operator</code> implementations with <code>TunableSpec</code>s (<a href="18-evolution-governance.html">18 §4</a>).</li><li><code>ImprovementProposal</code> type + store — <strong>new</strong>.</li><li>Approval gate + risk classification + frozen-policy check (port <code>gepa_optimizer/hard_policy_checker.py</code>) — <strong>new</strong>.</li><li>AI4RnD research metrics as <code>metrics/</code> implementations.</li><li><strong>Improvements inbox</strong> UI.</li><li>Capsule version pinning for in-flight runs.</li><li>RSI-4 (<code>PlanTemplateOperator</code>) — the one genuinely absent surface.</li></ol>
+<p><strong>Deliberately not built:</strong> candidate generation, validation selection, snapshot/rollback, credit assignment, RL training. All exist in <code>agent_evolving</code> (<span class="tag">V-17</span>).</p>
+<p><strong>Exit gate</strong></p>
+<ul><li>A candidate relaxing a frozen policy is rejected before evaluation.</li><li>Every promotion is versioned, evidence-backed and reversible; rollback exercised.</li><li>A user can answer <em>did it change · why · is it better</em> from the inbox alone.</li></ul>
+<hr>
+<h2 id="stage-6-verticals-and-accounts-10-weeks"><a class="anchor" href="#stage-6-verticals-and-accounts-10-weeks" aria-hidden="true">#</a>Stage 6 — Verticals and accounts (10 weeks)</h2>
+<p>Account management (132–135, absent from both), data graphs (85–86), cost/budget visibility, remaining delivery features.</p>
+<hr>
+<h2 id="cumulative"><a class="anchor" href="#cumulative" aria-hidden="true">#</a>Cumulative</h2>
+<div class="tw"><table><thead><tr><th>Stage</th><th>Weeks</th><th>Cum.</th><th>Core changes</th><th>Features (cum.)</th></tr></thead><tbody><tr><td>0 Spikes</td><td>3</td><td>3</td><td>none</td><td>0</td></tr><tr><td>1 Mode + project</td><td>8</td><td>11</td><td><strong>none</strong></td><td>~12</td></tr><tr><td>2 Evidence + entailment</td><td>8</td><td>19</td><td><strong>none</strong></td><td>~30</td></tr><tr><td>3 Capsules + routing + gates</td><td>10</td><td>29</td><td><strong>none</strong></td><td>~54</td></tr><tr><td>4 Workflow lanes</td><td>14</td><td>43</td><td>none</td><td>~75</td></tr><tr><td>5 Governed evolution</td><td>8</td><td>51</td><td>none</td><td>~90</td></tr><tr><td>6 Verticals</td><td>10</td><td>61</td><td>none</td><td>~104</td></tr></tbody></table></div>
+<p><strong>~14 months to substantial completeness; ~4.5 months to first trustworthy user value.</strong> No JiuwenSwarm core-tree change is required at any stage — the ~10-line RPC patch is needed only if project control must be driven from the web UI rather than through the agent.</p>
+<hr>
+<h2 id="decision-points"><a class="anchor" href="#decision-points" aria-hidden="true">#</a>Decision points</h2>
+<div class="tw"><table><thead><tr><th>After</th><th>Decide</th></tr></thead><tbody><tr><td>Stage 0</td><td>proceed, or reopen options if both compilation targets fail</td></tr><tr><td>Stage 1</td><td>is a project the right unit, or do users want one-shot runs?</td></tr><tr><td>Stage 2</td><td>does entailment clear the published bar? If not, the core claim is unmet</td></tr><tr><td>Stage 3</td><td>is compile-time write-scope exclusion sufficient in practice?</td></tr><tr><td>Stage 5</td><td>is evolution producing measured improvement, or churn?</td></tr></tbody></table></div>
+<hr>
+<h2 id="what-this-plan-deliberately-does-not-do"><a class="anchor" href="#what-this-plan-deliberately-does-not-do" aria-hidden="true">#</a>What this plan deliberately does not do</h2>
+<ul><li><strong>Does not build a scheduler, queue, lease manager or retry engine.</strong> [17]</li><li>**Does not port <code>graph_scheduler</code> or <code>actor_*</code>.** ~4,700 LOC of duplication removed.</li><li><strong>Does not rebuild candidate selection, snapshot/rollback or RL.</strong> [18]</li><li><strong>Does not expose execution mechanisms to users.</strong> [19 §2]</li><li><strong>Does not ship the current grounding check.</strong></li><li><strong>Does not port <code>coordinator.sh</code> or the tmux carrier.</strong></li></ul></article><div class="pager"><a href="18-evolution-governance.html"><div class="d">← Previous</div><div class="t">Evolution governance</div></a><a class="nx" href="00-intended-product-model.html"><div class="d">Next →</div><div class="t">Intended product model</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

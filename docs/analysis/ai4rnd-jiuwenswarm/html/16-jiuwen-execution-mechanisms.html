@@ -1,0 +1,184 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jiuwen execution mechanisms &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc on" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Evidence / 16-jiuwen-execution-mechanisms.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#0-the-stack">0. The stack</a><a class="l2" href="#1-core-workflow-openjiuwen-core-workflow">1. Core Workflow (openjiuwen/core/workflow/)</a><a class="l2" href="#2-pregel-graph-engine-openjiuwen-core-graph-pregel">2. Pregel graph engine (openjiuwen/core/graph/pregel/)</a><a class="l2" href="#3-checkpointer-storage-openjiuwen-core-session-checkpointer">3. Checkpointer &amp; Storage (openjiuwen/core/session/checkpointer/)</a><a class="l2" href="#4-workflowagent-workflowcontroller-openjiuwen-core-applicati">4. WorkflowAgent / WorkflowController (openjiuwen/core/application/workflow_agent/)</a><a class="l2" href="#5-swarmflow-openjiuwen-agentteams-workflow">5. SwarmFlow (openjiuwen/agent_teams/workflow/)</a><a class="l2" href="#6-teams-openjiuwen-agentteams">6. Teams (openjiuwen/agent_teams/)</a><a class="l2" href="#7-nativeharness-openjiuwen-agentteams-harness-nativeharness-">7. NativeHarness (openjiuwen/agent_teams/harness/native_harness.py)</a><a class="l2" href="#8-evolution-openjiuwen-agentevolving-see-18-18-evolution-gov">8. Evolution (openjiuwen/agent_evolving/) — see 18</a><a class="l2" href="#9-what-no-jiuwen-mechanism-provides">9. What no Jiuwen mechanism provides</a><a class="l2" href="#10-comparison-table">10. Comparison table</a></nav><h1 id="jiuwen-execution-mechanisms-bottom-up-map"><a class="anchor" href="#jiuwen-execution-mechanisms-bottom-up-map" aria-hidden="true">#</a>Jiuwen Execution Mechanisms — Bottom-Up Map</h1>
+<p>The document Revision 2 should have opened with. Everything here is from <code>openjiuwen==0.1.15.post3</code> installed from PyPI, and <code>jiuwenswarm</code> @ <code>a98d7ad</code>.</p>
+<p>Evidence classes: <strong>EXEC</strong> executed here · <strong>SRC</strong> read in source · <strong>DOC</strong> documented · <strong>UNK</strong> not determined.</p>
+<hr>
+<h2 id="0-the-stack"><a class="anchor" href="#0-the-stack" aria-hidden="true">#</a>0. The stack</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph L5[&quot;Product surfaces — JiuwenSwarm&quot;]
+        MODE[&quot;Modes: plan · performance · team (+ code.team, team.plan)&quot;]
+        CH[&quot;Channels · session · skills · memory&quot;]
+    end
+    subgraph L4[&quot;Orchestration — openjiuwen agent_teams&quot;]
+        TEAM[&quot;TeamAgentSpec · leader/teammate · spawn&quot;]
+        SF[&quot;SwarmFlow engine&lt;br/&gt;journal · admission · progress · background&quot;]
+        NH[&quot;NativeHarness (DeepAgent)&lt;br/&gt;start/stop/pause/abort/subscribe&quot;]
+    end
+    subgraph L3[&quot;Agent runtime — openjiuwen harness&quot;]
+        DA[&quot;DeepAgent · dual-layer task loop&quot;]
+        RAILS[&quot;11 rail lifecycle events&quot;]
+        WFA[&quot;WorkflowAgent + WorkflowController&lt;br/&gt;intent detection · interrupt · resume&quot;]
+    end
+    subgraph L2[&quot;Workflow — openjiuwen core&quot;]
+        WF[&quot;Workflow (Core Workflow)&lt;br/&gt;components · connections · routers&quot;]
+        COMP[&quot;Components: flow · llm · tool · resource · condition&quot;]
+    end
+    subgraph L1[&quot;Graph engine — openjiuwen core&quot;]
+        PG[&quot;PregelGraph · supersteps · channels&lt;br/&gt;barrier · interrupt · snapshot/restore&quot;]
+        CKPT[&quot;Checkpointer · Storage · Store&quot;]
+    end
+    MODE --&gt; TEAM --&gt; SF
+    TEAM --&gt; NH --&gt; DA --&gt; RAILS
+    DA --&gt; WFA --&gt; WF --&gt; COMP --&gt; PG --&gt; CKPT
+    SF --&gt; DA</pre></div>
+<p><strong>The key structural fact:</strong> JiuwenSwarm is a thin product layer. Nearly every execution primitive lives in openjiuwen, and there are <strong>five</strong> distinct graph/state mechanisms, not one.</p>
+<hr>
+<h2 id="1-core-workflow-openjiuwen-core-workflow"><a class="anchor" href="#1-core-workflow-openjiuwen-core-workflow" aria-hidden="true">#</a>1. Core Workflow (<code>openjiuwen/core/workflow/</code>)</h2>
+<div class="tw"><table><thead><tr><th>Property</th><th>Finding</th><th>Class</th></tr></thead><tbody><tr><td>Graph owned</td><td>component graph — <code>set_start_comp</code>, <code>add_workflow_comp</code>, <code>set_end_comp</code>, <code>add_connection</code>, <code>add_stream_connection</code>, <code>add_conditional_connection</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Topology</td><td><strong>static skeleton, dynamic routing.</strong> <code>add_conditional_connection(router)</code> where the router returns <code>Hashable</code> <strong>or <code>list[Hashable]</code></strong> → runtime fan-out to a computed set of targets</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Components available</td><td><code>flow</code>: <code>start_comp</code>, <code>end_comp</code>, <code>branch_comp</code>, <code>branch_router</code>, <strong><code>workflow_comp</code></strong> · <code>llm</code>: <code>llm_comp</code>, <code>intent_detection_comp</code>, <code>questioner_comp</code> · <code>tool</code>: <code>tool_comp</code> · <code>resource</code>: <code>knowledge_retrieval_comp</code>, <code>memory_retrieval_comp</code>, <code>memory_write_comp</code> · <code>condition</code>: <code>expression</code>, <code>number</code>, <code>array</code>, <code>condition</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Nesting / recursion</td><td><strong>yes</strong> — <code>workflow_comp</code> makes a workflow a component of another workflow</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Persistence &amp; resume</td><td>via Pregel + <code>Checkpointer</code> (§2, §3)</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Background work</td><td><code>_spawn_background_task</code>, <code>_wait_background_task</code>, <code>_is_background_task_done</code> on <code>Workflow</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Timeout</td><td><code>_execute_with_timeout(func, timeout)</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Cancellation</td><td>inherited from Pregel/session; not a first-class <code>Workflow.cancel()</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Progress</td><td><code>stream()</code> with stream modes; <code>draw()</code> for visualisation</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Typed contracts on nodes</td><td><strong>no.</strong> Components carry input/output schemas but no acceptance criteria, evidence requirements or gate semantics</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Verified</td><td>built a <code>PregelBuilder</code> graph with fan-out + barrier; enumerated the full <code>Workflow</code> API</td><td><strong>EXEC</strong> <span class="tag">V-15</span></td></tr></tbody></table></div>
+<p><strong>Assessment.</strong> A real, general workflow engine. It can express an AI4RnD research plan's <em>shape</em> — sequence, branch, fan-out, join, nesting. It cannot express <em>why</em> a node exists or <em>what would make its output acceptable</em>.</p>
+<hr>
+<h2 id="2-pregel-graph-engine-openjiuwen-core-graph-pregel"><a class="anchor" href="#2-pregel-graph-engine-openjiuwen-core-graph-pregel" aria-hidden="true">#</a>2. Pregel graph engine (<code>openjiuwen/core/graph/pregel/</code>)</h2>
+<div class="tw"><table><thead><tr><th>Property</th><th>Finding</th><th>Class</th></tr></thead><tbody><tr><td>Model</td><td>Bulk-synchronous supersteps. <code>PregelNode</code>, <code>Channel</code>, <code>Message</code>, <code>TriggerMessage</code>, <code>BarrierMessage</code>, <code>IRouter</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Ready-set computation</td><td><code>ChannelManager.get_ready_nodes()</code>, <code>is_ready()</code>, <code>flush()</code>, <code>buffer_message()</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Barrier</td><td><code>BarrierMessage</code> + <code>add_node(..., wait_for_all=True)</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Durability</td><td><code>Channel.snapshot()</code> / <code>.restore()</code>; <code>ChannelManager.snapshot()/restore()</code>; <code>PregelLoop._save_state_on_error</code> writes <code>channel_snapshot</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Resume</td><td><code>PregelLoop._is_resume(state)</code>; on resume <code>manager.restore(state.channel_values)</code> and <code>max_step = state.step + RECURSION_LIMIT</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Interrupt</td><td><code>Interrupt</code>, <code>GraphInterrupt(Exception)</code>; <code>Pregel.run()</code> returns interrupt payloads</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Loop guard</td><td><code>RECURSION_LIMIT</code> → <code>max_step</code>, raises on exceed</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Store</td><td><code>core/graph/store/{base,inmemory,serde}</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Verified</td><td>primitives imported, graph built, API signatures captured</td><td><strong>EXEC</strong> <span class="tag">V-15</span></td></tr></tbody></table></div>
+<p><strong>Assessment.</strong> This is the durable DAG scheduler. Supersteps + channel snapshot/restore + barrier + interrupt is the same shape as AI4RnD's <code>graph_scheduler</code> readiness/batching loop, one layer down and already integrated with sessions.</p>
+<p><strong>Not provided:</strong> write-scope conflict avoidance. Pregel batches by <em>message readiness</em>, not by <em>declared side-effect scope</em>. That is a genuine AI4RnD contribution (§9).</p>
+<hr>
+<h2 id="3-checkpointer-storage-openjiuwen-core-session-checkpointer"><a class="anchor" href="#3-checkpointer-storage-openjiuwen-core-session-checkpointer" aria-hidden="true">#</a>3. Checkpointer &amp; Storage (<code>openjiuwen/core/session/checkpointer/</code>)</h2>
+<div class="tw"><table><thead><tr><th>Property</th><th>Finding</th><th>Class</th></tr></thead><tbody><tr><td>Hooks</td><td><code>pre_workflow_execute</code>, <code>post_workflow_execute</code>, <code>pre_agent_execute</code>, <code>post_agent_execute</code>, <code>pre_agent_team_execute</code>, <code>post_agent_team_execute</code>, <code>interrupt_agent_execute</code>, <code>session_exists</code>, <code>release</code>, <code>graph_store</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Storage contract</td><td><code>save</code>, <code>recover</code>, <code>clear</code>, <code>exists</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Implementations</td><td><code>inmemory</code> (<code>AgentStorage</code>, <code>AgentTeamStorage</code>, …) and <code>persistence.py</code> over a <code>BaseKVStore</code> with serialise/deserialise</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Survives restart</td><td><strong>yes, if a persistent KV backend is configured</strong>; the in-memory implementation does not</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Verified</td><td>contract enumerated by execution</td><td><strong>EXEC</strong> <span class="tag">V-15</span></td></tr></tbody></table></div>
+<p><strong>Open question (Q24):</strong> which KV backends are wired in a default JiuwenSwarm install. If only in-memory is active, durability is a configuration task, not a build task — but it is a task.</p>
+<hr>
+<h2 id="4-workflowagent-workflowcontroller-openjiuwen-core-applicati"><a class="anchor" href="#4-workflowagent-workflowcontroller-openjiuwen-core-applicati" aria-hidden="true">#</a>4. WorkflowAgent / WorkflowController (<code>openjiuwen/core/application/workflow_agent/</code>)</h2>
+<div class="tw"><table><thead><tr><th>Property</th><th>Finding</th><th>Class</th></tr></thead><tbody><tr><td>Role</td><td>selects <strong>which registered workflow</strong> answers a request, then runs it</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Selection</td><td><code>intent_detection()</code>, <code>_detect_workflow_via_llm()</code>, <code>WorkflowEventHandler._get_workflows() -&gt; List[WorkflowCard]</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Interrupt / resume</td><td><code>interrupt_task</code>, <code>_handle_resume</code>, <code>_should_resume_interrupted_task</code>, <code>_find_interrupted_task_by_node_id</code>, <code>_get_interrupted_component_id</code>, <code>_clear_interrupted_state</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Task model</td><td><code>_create_new_task</code>, <code>Task</code>, per-session interrupted-task lookup</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Human interaction</td><td><code>_extract_interaction_value_from_interaction_data</code>, <code>_count_interactions</code>, <code>_get_first_interrupt</code></td><td><span class="chip neutral">SRC</span></td></tr></tbody></table></div>
+<p><strong>This is "Auto Route".</strong> LLM-based dispatch across registered workflows is an existing openjiuwen mechanism. It is not something to build, and not something to put in front of users as a strategy choice.</p>
+<hr>
+<h2 id="5-swarmflow-openjiuwen-agentteams-workflow"><a class="anchor" href="#5-swarmflow-openjiuwen-agentteams-workflow" aria-hidden="true">#</a>5. SwarmFlow (<code>openjiuwen/agent_teams/workflow/</code>)</h2>
+<div class="tw"><table><thead><tr><th>Property</th><th>Finding</th><th>Class</th></tr></thead><tbody><tr><td>Script model</td><td><strong>ordinary Python</strong>: a pure-literal <code>META = {name, description, phases}</code> + <code>async def run(args)</code>; primitives imported from <code>swarmflow</code> (<code>agent</code>, <code>parallel</code>, <code>workflow</code>, …)</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>META purity</td><td>enforced by <code>ast.literal_eval</code> — a <code>META</code> referencing a name is rejected with <code>MetaError</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Determinism lint</td><td>bans <code>time.{time,monotonic,perf_counter,…}</code>, all of <code>random</code>, all of <code>uuid</code>, and <code>datetime.{now,today,utcnow}</code>; also lints the <code>lambda: agent(...)</code>-in-comprehension closure footgun</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Idempotent replay</td><td><code>Journal</code> — WAL-backed (<code>_append_wal</code>), <code>call_signature(...)</code> keys, <code>get_cached(ks, sig)</code>, <code>save</code>/<code>finalize</code>, <code>_discard_wal_if_durable</code>, <code>hits()</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Admission</td><td><code>SemaphoreAdmission(cap)</code>, <code>ConcurrencyGovernor</code>, <code>ConcurrencyLimits</code>, <code>WorkflowAdmission</code>, <code>RunAgentAdmission</code>, <code>agents_per_run_cap</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Background</td><td><code>SwarmflowTool.run_background(task_id, inputs)</code>; <code>BackgroundTaskController.pause/resume/is_paused/register/deregister</code>; <code>SwarmflowRunHandle</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Cancellation</td><td><code>_check_abort(rt)</code> before each primitive call</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Progress</td><td><code>WorkflowProgressEvent</code>, <code>PhasePlan</code>, <code>ProgressKind</code>; <code>WorkflowRun</code>/<code>PhaseRecord</code>/<code>AgentActivity</code> with per-agent status</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Human-in-the-loop</td><td><code>_on_human_prompt(member, correlation_id, prompt)</code>, <code>_on_human_replied(...)</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Resume</td><td><code>resume_id</code> parameter on the tool</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Topology</td><td><strong>fully dynamic</strong> — it is a Python program; loops and conditionals are ordinary control flow</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>Typed contracts on nodes</td><td><strong>no</strong> — <code>agent(...)</code> takes a prompt and an optional output <code>schema</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Verified</td><td>META extraction accepted a valid script and rejected a name-referencing one</td><td><strong>EXEC</strong> <span class="tag">V-16</span></td></tr></tbody></table></div>
+<p><strong>Assessment.</strong> This is the strongest match for AI4RnD's execution needs. Deterministic, journalled, resumable, admission-controlled, backgroundable, cancellable, with progress events — and <em>dynamic</em>, because it is a real program rather than a static graph.</p>
+<p><strong>Exposure in JiuwenSwarm:</strong> <code>SWARMFLOW_ENABLED_CONFIG_PATH = ("modes","team","jiuwen_team", "enable_swarmflow")</code> — a config flag inside team mode. Its phases and workers are converted into <code>team.task</code> and <code>team.member</code> events so the existing web UI renders them (<code>team_helpers.py:2159-2288</code>). <strong>Users never choose SwarmFlow; they use team mode and SwarmFlow may be how it runs.</strong> [SRC]</p>
+<hr>
+<h2 id="6-teams-openjiuwen-agentteams"><a class="anchor" href="#6-teams-openjiuwen-agentteams" aria-hidden="true">#</a>6. Teams (<code>openjiuwen/agent_teams/</code>)</h2>
+<div class="tw"><table><thead><tr><th>Property</th><th>Finding</th><th>Class</th></tr></thead><tbody><tr><td>Spec</td><td><code>TeamAgentSpec</code>: <code>agents: dict[str, DeepAgentSpec]</code>, <code>team_name</code>, <code>lifecycle</code>, <code>enable_team_plan</code>, <code>teammate_mode</code>, <code>spawn_mode</code>, <code>leader: LeaderSpec</code>, plus <code>TransportSpec</code>/<code>StorageSpec</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Roles</td><td>JiuwenSwarm enriches exactly two: <code>leader</code>, <code>teammate</code></td><td><strong>SRC</strong> <span class="tag">V-6</span></td></tr><tr><td>Spawn</td><td><code>inprocess_spawn</code>, <code>external_cli_spawn</code>, <code>shared_resources</code></td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Dynamic team</td><td>leader composes teammates at runtime; <code>TinyAgentSpec</code> for lightweight members</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Distribution</td><td><code>TransportSpec</code> + <code>remote_member_bootstrap</code> (JiuwenSwarm side)</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>Typed contracts</td><td><strong>no</strong></td><td><span class="chip neutral">SRC</span></td></tr></tbody></table></div>
+<p><strong>Assessment.</strong> Good for uncertain, conversational decomposition. Poor for auditable pipelines — no dependency graph, no gate semantics, and only two roles.</p>
+<hr>
+<h2 id="7-nativeharness-openjiuwen-agentteams-harness-nativeharness-"><a class="anchor" href="#7-nativeharness-openjiuwen-agentteams-harness-nativeharness-" aria-hidden="true">#</a>7. NativeHarness (<code>openjiuwen/agent_teams/harness/native_harness.py</code>)</h2>
+<p><code>class NativeHarness(DeepAgent)</code> with <code>start</code>, <code>stop</code>, <code>pause</code>, <code>abort(immediate=)</code>, <code>send</code>, <code>subscribe</code>, <code>outputs</code>, <code>run_once</code>, <code>dispose</code>, <code>state</code>, <code>schedule_auto_invoke_on_spawn_done</code>, <code>launch_async_tool</code>, <code>async_tool_runtime</code>. [SRC]</p>
+<p><strong>Assessment.</strong> A long-lived, controllable agent process with an async tool runtime. This is the natural host for a <strong>persistent AI4RnD project</strong> — it already models "a thing that keeps running, can be paused and resumed, and emits an output stream".</p>
+<hr>
+<h2 id="8-evolution-openjiuwen-agentevolving-see-18-18-evolution-gov"><a class="anchor" href="#8-evolution-openjiuwen-agentevolving-see-18-18-evolution-gov" aria-hidden="true">#</a>8. Evolution (<code>openjiuwen/agent_evolving/</code>) — see <a href="18-evolution-governance.html">18</a></h2>
+<div class="tw"><table><thead><tr><th>Component</th><th>Contents</th><th>Class</th></tr></thead><tbody><tr><td><code>core/operator/</code></td><td><code>Operator</code> = <strong>tunable-parameter handle, explicitly not executable</strong>; <code>TunableSpec(name, kind, path, constraint)</code>; kinds <code>prompt</code>/<code>continuous</code>/<code>discrete</code>/<code>tool_selector</code>/<code>memory_selector</code>; implementations <code>llm_call</code>, <code>memory_call</code>, <code>skill_call</code>, <code>tool_call</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>dataset/</code></td><td><code>Case(inputs, label, tools, case_id)</code>, <code>EvaluatedCase(case, answer, score, reason, per_metric)</code>, <code>CaseLoader</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>evaluator/</code></td><td><code>metrics/{exact_match, llm_as_judge}</code>, <code>evaluator_pipeline</code>, <code>templates</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>trainer/</code></td><td><code>Trainer.train(agent, train_cases, val_cases)</code>, <code>_select_best_candidate_on_val(candidates)</code>, <code>_snapshot_operators_state</code>, <code>_restore_operators_state</code>, <code>_save_checkpoint_if_needed</code>, <code>_resume_if_needed</code>, <code>apply_updates</code>, <code>evaluate</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>updater/</code></td><td><code>Updater</code> protocol (<code>bind</code>, <code>process</code>, <code>update</code>, <code>requires_forward_data</code>, <code>get_state</code>, <code>load_state</code>) with <code>single_dim</code> and <code>multi_dim</code> (credit assignment)</td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>signal/</code></td><td><code>from_eval</code>, <code>from_conv</code>, <code>team</code>, <code>EvolutionSignal</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>agent_rl/</code></td><td><code>offline/</code>, <code>online/</code> (gateway, inference, judge, launcher, rail, scheduler), <code>rl_trainer/{ppo_step, verl_converter, verl_executor}</code>, <code>reward.py</code>, <code>rl_rail.py</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>checkpointing/</code></td><td><code>EvolutionStore</code> (append_record, archive_evolutions, archive_skill_body, create_skill), <code>skill_package</code> (pack/unpack/install)</td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>sharing/</code></td><td><code>hub_client</code>, <code>experience_sharer</code>, <code>share_stager</code></td><td><span class="chip ok">EXEC</span></td></tr><tr><td><code>experience/</code></td><td><code>archive</code>, <code>lifecycle</code>, <code>online_orchestrator</code>, <code>scorer</code>, <code>submission</code></td><td><span class="chip neutral">SRC</span></td></tr></tbody></table></div>
+<p><strong>Assessment.</strong> A general self-evolution framework with candidate generation, validation-set selection, snapshot/rollback, freeze markers and RL. Revision 2 said most of this had to be built.</p>
+<hr>
+<h2 id="9-what-no-jiuwen-mechanism-provides"><a class="anchor" href="#9-what-no-jiuwen-mechanism-provides" aria-hidden="true">#</a>9. What no Jiuwen mechanism provides</h2>
+<p>After the full inventory, these AI4RnD requirements have <strong>no</strong> counterpart anywhere in JiuwenSwarm or openjiuwen:</p>
+<div class="tw"><table><thead><tr><th>Requirement</th><th>Why it is genuinely missing</th></tr></thead><tbody><tr><td><strong>Capability match as a hard admission gate</strong></td><td>Jiuwen selects by <em>role</em> and <em>registered workflow intent</em>. Nothing matches a task's <code>required_capabilities</code> against a worker's declared ones, and nothing produces a discriminated <code>no_matching_worker</code> stall.</td></tr><tr><td><strong>Write-scope conflict avoidance</strong></td><td>Pregel batches on message readiness; <code>ConcurrencyGovernor</code> caps counts. Neither reasons about declared side-effect scope, so two nodes writing the same artifact can co-schedule.</td></tr><tr><td><strong>Typed research contracts on nodes</strong></td><td>No node type carries acceptance criteria, required evidence, or proof obligations.</td></tr><tr><td><strong>Evidence ledger / claim graph / citation spans</strong></td><td>Absent (confirmed again against openjiuwen).</td></tr><tr><td><strong>Gate ledger with node status as a projection</strong></td><td><code>Checkpointer</code> stores execution state, not <em>verdicts with authorship</em>.</td></tr><tr><td><strong>Writer ≠ verifier enforcement</strong></td><td>No concept of actor identity constraining who may evaluate.</td></tr><tr><td><strong>Capability Capsules</strong></td><td><code>skill_package</code> is a tarball; there is no contract, effects declaration, guard capsule or operator-compatibility rule.</td></tr><tr><td><strong>Governed promotion of research capabilities</strong></td><td><code>Trainer</code> promotes <em>parameters</em>; there is no approval gate, no frozen-policy check on the <em>artifact</em>, no human verdict record.</td></tr><tr><td><strong>RSI-4 (DAG / agent-organisation search)</strong></td><td>Nothing searches workflow structure.</td></tr></tbody></table></div>
+<p><strong>These nine are the real AI4RnD contribution.</strong> Everything else in Revision 2's port list is now a candidate for deletion.</p>
+<hr>
+<h2 id="10-comparison-table"><a class="anchor" href="#10-comparison-table" aria-hidden="true">#</a>10. Comparison table</h2>
+<div class="tw"><table><thead><tr><th></th><th>Core Workflow</th><th>Pregel</th><th>SwarmFlow</th><th>Team</th><th>NativeHarness</th><th>AI4RnD <code>graph_scheduler</code></th></tr></thead><tbody><tr><td>Topology</td><td>static + dynamic routing</td><td>static + routers</td><td><strong>fully dynamic (Python)</strong></td><td>dynamic (LLM)</td><td>n/a</td><td>static JSON DAG</td></tr><tr><td>Barrier / join</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> (<code>parallel</code>)</td><td><span class="ic bad">✗</span></td><td>n/a</td><td><span class="ic ok">✓</span></td></tr><tr><td>Persist &amp; resume</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> snapshot/restore</td><td><span class="ic ok">✓</span> journal + <code>resume_id</code></td><td>partial</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> files</td></tr><tr><td>Skip already-done work</td><td>via checkpoint</td><td>via channel state</td><td><span class="ic ok">✓</span> <strong>journal memoisation</strong></td><td><span class="ic bad">✗</span></td><td>n/a</td><td><span class="ic ok">✓</span> status</td></tr><tr><td>Background</td><td><span class="ic ok">✓</span></td><td>—</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span></td></tr><tr><td>Pause / resume</td><td><span class="ic ok">✓</span> interrupt</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> controller</td><td><span class="ic bad">✗</span></td><td><span class="ic ok">✓</span></td><td><span class="ic bad">✗</span></td></tr><tr><td>Cancel</td><td>session-level</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> <code>_check_abort</code></td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> <code>abort</code></td><td><span class="ic bad">✗</span> (advisory)</td></tr><tr><td>Progress events</td><td>stream</td><td>—</td><td><span class="ic ok">✓</span> rich</td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> files</td></tr><tr><td>Admission / concurrency</td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic ok">✓</span> governor</td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic ok">✓</span> leases</td></tr><tr><td>Nesting</td><td><span class="ic ok">✓</span> <code>workflow_comp</code></td><td><span class="ic ok">✓</span></td><td><span class="ic ok">✓</span> <code>workflow()</code></td><td><span class="ic ok">✓</span> subagents</td><td><span class="ic ok">✓</span></td><td><span class="ic bad">✗</span></td></tr><tr><td>Typed contracts / evidence</td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic ok">✓</span></td></tr><tr><td>Capability routing</td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic ok">✓</span></td></tr><tr><td>Write-scope exclusion</td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic bad">✗</span></td><td><span class="ic ok">✓</span></td></tr></tbody></table></div>
+<p>The last three rows are the entire justification for AI4RnD-owned code at this layer. The other twelve are reasons not to write any.</p></article><div class="pager"><a href="15-correction-log.html"><div class="d">← Previous</div><div class="t">Correction log</div></a><a class="nx" href="17-taskgraph-verdict.html"><div class="d">Next →</div><div class="t">TaskGraph verdict</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

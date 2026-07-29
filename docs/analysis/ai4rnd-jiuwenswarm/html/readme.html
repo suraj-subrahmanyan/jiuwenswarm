@@ -1,0 +1,167 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Overview &amp; verdict &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc on" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Start / README.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#start-here">Start here</a><a class="l2" href="#document-set">Document set</a><a class="l3" href="#rendered-html">Rendered HTML</a><a class="l2" href="#the-seven-findings-that-drive-revision-3">The seven findings that drive Revision 3</a><a class="l2" href="#recommended-architecture-at-a-glance">Recommended architecture at a glance</a><a class="l2" href="#the-three-cheapest-experiments-that-could-disprove-this">The three cheapest experiments that could disprove this</a><a class="l2" href="#reading-the-evidence">Reading the evidence</a></nav><h1 id="ai4rnd-on-jiuwenswarm-architecture-evaluation-revision-3"><a class="anchor" href="#ai4rnd-on-jiuwenswarm-architecture-evaluation-revision-3" aria-hidden="true">#</a>AI4RnD on JiuwenSwarm — Architecture Evaluation (Revision 3)</h1>
+<p><strong>Question.</strong> What is the best way to build the complete intended AI4RnD product using JiuwenSwarm / openJiuwen as its foundation?</p>
+<p><strong>Answer. AI4RnD is a mode, plus a persistent project subsystem, plus a workspace capability registry — and it writes no scheduler.</strong></p>
+<p>Revision 3 reopened the decision after inspecting parts of openjiuwen that earlier revisions never opened. openjiuwen contains a Pregel graph engine, a workflow engine, SwarmFlow (deterministic, journalled, resumable), admission control, and a complete self-evolution framework. Revision 2 recommended porting ~5,200 LOC of scheduler, queue and lease code that already exists one layer down.</p>
+<p><strong>The corrected shape:</strong> AI4RnD owns <em>meaning</em> — the logical research plan, capability routing, evidence, gates, capsules and evolution governance. Jiuwen owns <em>execution</em> — readiness, batching, checkpointing, resume, admission, background work and cancellation. A compiler (~800 LOC) turns the plan into a SwarmFlow script or a Core Workflow. The only AI4RnD runtime code is a ~450-LOC step wrapper.</p>
+<div class="tw"><table><thead><tr><th></th><th>Revision 2</th><th>Revision 3</th></tr></thead><tbody><tr><td>Shape</td><td>separate service with its own scheduler</td><td>mode → project subsystem → compiles to Jiuwen</td></tr><tr><td>AI4RnD runtime code</td><td>~5,200 LOC ported</td><td><strong>~450 LOC</strong></td></tr><tr><td>RSI surfaces to build</td><td>6 of 8</td><td><strong>1 of 8</strong></td></tr><tr><td>JiuwenSwarm coverage of 142 features</td><td>20 FULL / 72 NONE</td><td><strong>23 FULL / 62 NONE</strong></td></tr><tr><td>Time to complete product</td><td>~19–20 months</td><td><strong>~12–14 months</strong></td></tr></tbody></table></div>
+<p>Full account: <strong><a href="15-correction-log.html">15-correction-log.md</a></strong>.</p>
+<hr>
+<h2 id="start-here"><a class="anchor" href="#start-here" aria-hidden="true">#</a>Start here</h2>
+<div class="tw"><table><thead><tr><th>Read this</th><th>For</th></tr></thead><tbody><tr><td><strong><a href="15-correction-log.html">15 Correction log</a></strong></td><td>what changed and why</td></tr><tr><td><strong><a href="16-jiuwen-execution-mechanisms.html">16 Jiuwen execution mechanisms</a></strong></td><td>the bottom-up map earlier revisions lacked</td></tr><tr><td><strong><a href="17-taskgraph-verdict.html">17 TaskGraph verdict</a></strong></td><td>custom scheduler vs Core Workflow / SwarmFlow</td></tr><tr><td><strong><a href="19-product-layers-and-ux.html">19 Product layers &amp; UX</a></strong></td><td>what kind of product this is, and what users select</td></tr><tr><td><strong><a href="08-recommended-architecture.html">08 Recommended architecture</a></strong></td><td>the target</td></tr></tbody></table></div>
+<hr>
+<h2 id="document-set"><a class="anchor" href="#document-set" aria-hidden="true">#</a>Document set</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Document</th><th>Contents</th></tr></thead><tbody><tr><td>00</td><td><a href="00-intended-product-model.html">Intended product model</a></td><td>142 features; Capsule→Contract→Step stack; RSI scope</td></tr><tr><td>01</td><td><a href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a></td><td>current state, corrected by execution</td></tr><tr><td>02</td><td><a href="02-ai4rnd-architecture.html">AI4RnD architecture</a></td><td>current state incl. dormant and unwired code</td></tr><tr><td>03</td><td><a href="03-workflow-traces.html">Workflow traces</a></td><td>entry → planning → routing → execution → verification</td></tr><tr><td>04</td><td><a href="04-component-comparison.html">Component comparison</a></td><td>component-by-component verdicts</td></tr><tr><td>05</td><td><a href="05-capability-matrix.html">Capability matrix</a></td><td>provided / partial / extensible / missing</td></tr><tr><td>06</td><td><a href="06-integration-challenges.html">Integration challenges</a></td><td>conflicts and blockers</td></tr><tr><td>07</td><td><a href="07-architecture-options.html">Architecture options</a></td><td><strong>rewritten</strong> — 8 options as (entry, control plane, execution) triples</td></tr><tr><td>08</td><td><a href="08-recommended-architecture.html">Recommended architecture</a></td><td><strong>rewritten</strong> — ten layers, ownership, RSI loop</td></tr><tr><td>09</td><td><a href="09-implementation-plan.html">Staged path</a></td><td><strong>rewritten</strong> — 7 stages, ~14 months</td></tr><tr><td>10</td><td><a href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a></td><td>incl. Revision 3 reversals</td></tr><tr><td>11</td><td><a href="11-evidence-appendix.html">Evidence appendix</a></td><td>source references</td></tr><tr><td>12</td><td><a href="12-verification-appendix.html">Verification appendix</a></td><td><strong>19 experiments</strong>, commands and results</td></tr><tr><td>13</td><td><a href="13-maturity-map.html">Maturity map</a></td><td>active / unwired / scaffold / spec / absent</td></tr><tr><td>14</td><td><a href="14-reuse-vs-build-map.html">Reuse-vs-build map</a></td><td>per-feature sourcing</td></tr><tr><td><strong>15</strong></td><td><a href="15-correction-log.html"><strong>Correction log</strong></a></td><td>what Revision 2 got wrong</td></tr><tr><td><strong>16</strong></td><td><a href="16-jiuwen-execution-mechanisms.html"><strong>Jiuwen execution mechanisms</strong></a></td><td>bottom-up map of all five graph/state mechanisms</td></tr><tr><td><strong>17</strong></td><td><a href="17-taskgraph-verdict.html"><strong>TaskGraph verdict</strong></a></td><td>definitive answer on custom scheduler vs reuse</td></tr><tr><td><strong>18</strong></td><td><a href="18-evolution-governance.html"><strong>Evolution governance</strong></a></td><td>governed RSI loop over <code>agent_evolving</code></td></tr><tr><td><strong>19</strong></td><td><a href="19-product-layers-and-ux.html"><strong>Product layers &amp; UX</strong></a></td><td>product model, user controls, state ownership</td></tr><tr><td>—</td><td><a href="traceability-142-feature-matrix.html">142-feature matrix</a> · <a href="../traceability/142-feature-matrix.csv">CSV</a></td><td>row-by-row</td></tr><tr><td>—</td><td><a href="readme.html">Diagrams</a></td><td>27 diagrams</td></tr></tbody></table></div>
+<h3 id="rendered-html"><a class="anchor" href="#rendered-html" aria-hidden="true">#</a>Rendered HTML</h3>
+<p>Every document above is also published as a polished, fully offline HTML site — no CDN, no network, no build step. Open either file directly in a browser.</p>
+<div class="tw"><table><thead><tr><th>Artifact</th><th>What it is</th></tr></thead><tbody><tr><td><a href="../html/index.html"><code>html/index.html</code></a></td><td><strong>navigable site</strong> — 23 pages, sidebar, per-page contents, prev/next, light &amp; dark</td></tr><tr><td><a href="../ai4rnd-architecture-review.html"><code>ai4rnd-architecture-review.html</code></a></td><td><strong>single-file edition</strong> — everything on one page, 660 KB, for archiving or printing</td></tr></tbody></table></div>
+<p>All 63 Mermaid diagrams render inline from a vendored copy of the renderer (<code>html/vendor/mermaid.min.js</code>), themed to the same tokens as the text. Markdown remains the source of truth; the HTML is generated from it:</p>
+<pre><code>python3 tools/mdsite.py .     # -&gt; html/  (23 pages + index + style.css)
+python3 tools/onepage.py .    # -&gt; ai4rnd-architecture-review.html</code></pre>
+<p>Colours come from AI4Research's own <code>DESIGN.md</code>: Huawei black / white / red, red rationed as a signal, amber for blocked, quiet ink for done.</p>
+<hr>
+<h2 id="the-seven-findings-that-drive-revision-3"><a class="anchor" href="#the-seven-findings-that-drive-revision-3" aria-hidden="true">#</a>The seven findings that drive Revision 3</h2>
+<ol><li><strong>openjiuwen has a durable DAG engine.</strong> Pregel supersteps, channel <code>snapshot</code>/<code>restore</code>, <code>BarrierMessage</code>, <code>GraphInterrupt</code>, <code>_is_resume</code>, plus <code>Checkpointer</code>/<code>Storage</code>. (<a href="12-verification-appendix.html">V-15</a>)</li></ol>
+<ol><li><strong>SwarmFlow is a deterministic, journalled, resumable workflow engine.</strong> Scripts are ordinary Python with a pure-literal <code>META</code>; the loader bans <code>time</code>/<code>random</code>/<code>uuid</code>/<code>datetime.now</code> because a WAL-backed <code>Journal</code> memoises calls by signature and replays on resume. Admission control, background execution, pause/resume and abort come with it. (<a href="12-verification-appendix.html">V-16</a>)</li></ol>
+<ol><li><strong>openjiuwen has a self-evolution framework.</strong> <code>Operator</code> tunable handles with freeze markers, <code>Case</code>/<code>EvaluatedCase</code> datasets, <code>exact_match</code> + <code>llm_as_judge</code> metrics, <code>Trainer</code> with candidate selection on a validation set, snapshot/restore rollback, <code>Updater</code> with multi-dimensional credit assignment, and PPO-based RL. Revision 2 said six of eight RSI surfaces were absent from both systems; <strong>one is.</strong> (<a href="12-verification-appendix.html">V-17</a>)</li></ol>
+<ol><li><strong>"Operator" means opposite things in the two systems.</strong> openjiuwen: <em>"Operator is NOT an executable unit"</em> — it is a tunable-parameter handle. AI4RnD: an executable work unit. Revision 3 renames AI4RnD's to <strong>Step</strong> and <strong>Runner</strong>. (<a href="12-verification-appendix.html">V-18</a>)</li></ol>
+<ol><li><strong>Execution mechanism must never be a user choice.</strong> SwarmFlow is already a config flag inside team mode, with phases projected into the existing team UI as <code>team.task</code> / <code>team.member</code>. "Auto Route" is <code>WorkflowController.intent_detection</code>. These are internal mechanisms; the compiler picks them. (<a href="19-product-layers-and-ux.html">19 §2</a>)</li></ol>
+<ol><li><strong>Only three capabilities have no Jiuwen equivalent</strong> — capability routing with honest stall, write-scope conflict exclusion, and typed contracts/evidence on nodes. They are worth ~450 LOC, not ~5,200. (<a href="16-jiuwen-execution-mechanisms.html">16 §9</a>)</li></ol>
+<ol><li><strong>A mode alone cannot hold the product.</strong> A JiuwenSwarm mode is an agent assembly profile cached by <code>(mode, sub_mode, project_dir)</code>. It cannot own multi-day state, an evidence ledger that survives <code>/compact</code>, or a cross-project capability registry. Hence mode <strong>plus</strong> project subsystem <strong>plus</strong> registry. (<a href="19-product-layers-and-ux.html">19 §1</a>)</li></ol>
+<hr>
+<h2 id="recommended-architecture-at-a-glance"><a class="anchor" href="#recommended-architecture-at-a-glance" aria-hidden="true">#</a>Recommended architecture at a glance</h2>
+<div class="fig"><pre class="mermaid">flowchart LR
+    subgraph JW[&quot;JiuwenSwarm + openjiuwen — execution&quot;]
+        M[&quot;Research mode · channels · session&quot;]
+        E[&quot;Core Workflow · SwarmFlow · Team&lt;br/&gt;Pregel · Checkpointer · admission&quot;]
+        P[&quot;permissions · sandbox&quot;]
+    end
+    subgraph AI[&quot;AI4RnD — meaning&quot;]
+        PR[&quot;Project control plane&quot;]
+        PL[&quot;Logical plan (artifact)&quot;]
+        CO[&quot;Compiler ~800 LOC&quot;]
+        WR[&quot;Step wrapper ~450 LOC&lt;br/&gt;routing · write-scope · evidence&quot;]
+        GV[&quot;Capsules · gates · evolution governance&quot;]
+    end
+    M --&gt; PR --&gt; PL --&gt; CO --&gt; E
+    E --&gt; WR --&gt; GV
+    E --&gt; P
+    GV -.-&gt;|promote / rollback| GV</pre></div>
+<p><em>JiuwenSwarm and openjiuwen decide how work runs safely. AI4RnD decides what work exists, who may do it, whether the result is true, and what the system learns.</em></p>
+<p><strong>~4.5 months to first trustworthy user value; ~14 months to substantial completeness.</strong> No core-tree change is required at any stage.</p>
+<hr>
+<h2 id="the-three-cheapest-experiments-that-could-disprove-this"><a class="anchor" href="#the-three-cheapest-experiments-that-could-disprove-this" aria-hidden="true">#</a>The three cheapest experiments that could disprove this</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Experiment</th><th>Cost</th><th>Disproves</th></tr></thead><tbody><tr><td><strong>F2</strong></td><td>Build a Core Workflow conditional router returning a runtime-computed <code>list[Hashable]</code> and run it</td><td>~1 day</td><td>that AI4RnD plans compile to Core Workflow</td></tr><tr><td><strong>F4</strong></td><td>Compile three real AI4RnD plans to SwarmFlow scripts and run <code>load_workflow_source</code></td><td>~1 day</td><td>that the determinism lint is compatible with research</td></tr><tr><td><strong>Q27</strong></td><td>Register a non-agent subject (a capsule) as an openjiuwen <code>Operator</code> and run <code>Trainer.train</code> on it</td><td>~2 days</td><td>that RSI can be reused rather than rebuilt</td></tr></tbody></table></div>
+<p>If F2 <strong>and</strong> F4 both fail, the recommendation reverts toward Revision 2's separate service. If Q27 fails, Stage 5 grows from 8 weeks back toward 16.</p>
+<hr>
+<h2 id="reading-the-evidence"><a class="anchor" href="#reading-the-evidence" aria-hidden="true">#</a>Reading the evidence</h2>
+<p><code>V-n</code> refers to a verification experiment in <a href="12-verification-appendix.html">12-verification-appendix.md</a>; <code>[E-Jxx]</code> / <code>[E-Axx]</code> to source references in <a href="11-evidence-appendix.html">11-evidence-appendix.md</a>. Claims are labelled <strong>EXEC</strong> (executed here), <strong>SRC</strong> (source-read), <strong>DOC</strong> (documented), <strong>INF</strong> (inferred).</p>
+<p>Across the 142-row matrix: <strong>74 features rest on executed evidence, 66 on source reading, 2 on documentation.</strong></p>
+<p>Not executed, and why: no live agent conversation, no real model call, no sandbox enforcement test — all require credentials or kernel privileges the safeguards exclude. Stage 0 closes the remaining gaps.</p></article><div class="pager"><a href="index.html"><div class="d">← Back</div><div class="t">Contents</div></a><a class="nx" href="15-correction-log.html"><div class="d">Next →</div><div class="t">Correction log</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

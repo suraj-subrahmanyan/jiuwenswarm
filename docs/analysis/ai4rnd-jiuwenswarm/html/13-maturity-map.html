@@ -1,0 +1,199 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maturity map &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc on" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Product / 13-maturity-map.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-classification-scheme">1. Classification scheme</a><a class="l2" href="#2-ai4rnd-maturity-across-the-142-features">2. AI4RnD maturity across the 142 features</a><a class="l3" href="#by-plane">By plane</a><a class="l2" href="#3-the-19-implemented-but-unwired-modules">3. The 19 implemented-but-unwired modules ⭐</a><a class="l2" href="#4-ai4rnd-what-is-genuinely-active">4. AI4RnD — what is genuinely ACTIVE</a><a class="l2" href="#5-ai4rnd-absent-10-features">5. AI4RnD — ABSENT (10 features)</a><a class="l2" href="#6-jiuwenswarm-coverage-of-the-142-features">6. JiuwenSwarm coverage of the 142 features</a><a class="l3" href="#where-jiuwenswarm-is-full-20">Where JiuwenSwarm is FULL (20)</a><a class="l3" href="#where-jiuwenswarm-is-none-72">Where JiuwenSwarm is NONE (72)</a><a class="l2" href="#7-the-two-sided-maturity-picture">7. The two-sided maturity picture</a><a class="l2" href="#8-health-signals">8. Health signals</a></nav><h1 id="maturity-map"><a class="anchor" href="#maturity-map" aria-hidden="true">#</a>Maturity Map</h1>
+<p>What exists, in what state, on each side. Classifications are from <a href="12-verification-appendix.html#v-8--ai4rnd-module-maturity-by-execution">V-8</a> (executed import/wiring/test probe over 48 modules) plus source reading, mapped onto the 142-feature set.</p>
+<hr>
+<h2 id="1-classification-scheme"><a class="anchor" href="#1-classification-scheme" aria-hidden="true">#</a>1. Classification scheme</h2>
+<div class="tw"><table><thead><tr><th>Class</th><th>Definition</th><th>How determined</th></tr></thead><tbody><tr><td><span class="chip ok">ACTIVE</span></td><td>wired into a live runtime path and exercised</td><td>referenced by <code>coordinator.sh</code>, <code>solar-harness.sh</code>, <code>graph_scheduler</code>, <code>graph_node_dispatcher</code> or <code>multi_task_runner</code>, and imports cleanly</td></tr><tr><td><span class="chip accent">IMPL-UNWIRED</span></td><td>implemented and tested, but nothing in the runtime calls it</td><td>imports cleanly, has tests, <strong>no</strong> runtime reference</td></tr><tr><td><span class="chip warn">SCAFFOLD</span></td><td>partial, thin, or a stub with real structure</td><td>source-read</td></tr><tr><td><span class="chip warn">SPEC</span></td><td>described in the workbook or SDD, no implementation</td><td>source absence + spec presence</td></tr><tr><td><span class="chip bad">ABSENT</span></td><td>not present anywhere</td><td>word-boundary search returns nothing</td></tr></tbody></table></div>
+<hr>
+<h2 id="2-ai4rnd-maturity-across-the-142-features"><a class="anchor" href="#2-ai4rnd-maturity-across-the-142-features" aria-hidden="true">#</a>2. AI4RnD maturity across the 142 features</h2>
+<div class="fig"><pre class="mermaid">pie showData
+    title AI4RnD maturity (142 Level-2 features)
+    &quot;ACTIVE (68)&quot; : 68
+    &quot;IMPL-UNWIRED (27)&quot; : 27
+    &quot;SCAFFOLD (21)&quot; : 21
+    &quot;SPEC (16)&quot; : 16
+    &quot;ABSENT (10)&quot; : 10</pre></div>
+<h3 id="by-plane"><a class="anchor" href="#by-plane" aria-hidden="true">#</a>By plane</h3>
+<div class="tw"><table><thead><tr><th>Plane</th><th>ACTIVE</th><th>IMPL-UNWIRED</th><th>SCAFFOLD</th><th>SPEC</th><th>ABSENT</th></tr></thead><tbody><tr><td>Workflow (54)</td><td>27</td><td>10</td><td>4</td><td>13</td><td>0</td></tr><tr><td>Foundation (65)</td><td>30</td><td>16</td><td>12</td><td>3</td><td>4</td></tr><tr><td>Vertical (23)</td><td>11</td><td>1</td><td>5</td><td>0</td><td>6</td></tr></tbody></table></div>
+<p><strong>Reading.</strong> The Workflow plane is strong at both ends (ingestion/requirement compilation are ACTIVE; evaluation/delivery are ACTIVE) and hollow in the middle — the entire idea-identification and opportunity-selection lane (features 23–29) plus most of claims/hypotheses (30–34) is <code>SPEC</code>. That is the part of the R&amp;D pipeline that turns research signals into <em>decisions</em>, and it is the least built.</p>
+<hr>
+<h2 id="3-the-19-implemented-but-unwired-modules"><a class="anchor" href="#3-the-19-implemented-but-unwired-modules" aria-hidden="true">#</a>3. The 19 implemented-but-unwired modules ⭐</h2>
+<p>This category did not appear in the previous revision and it changes the cost picture materially: this is finished, tested code with no live caller.</p>
+<div class="tw"><table><thead><tr><th>Module</th><th>LOC</th><th>Serves feature(s)</th><th>Why it matters</th></tr></thead><tbody><tr><td><code>capability_capsules</code></td><td>1351</td><td>55–59</td><td>the whole capsule layer — 30 registered, 23 manifests validate</td></tr><tr><td><code>capsule_execution_gate</code></td><td>194</td><td>58</td><td>pre-dispatch cooldown + idempotency gating</td></tr><tr><td><code>skill_to_capsule_compiler</code></td><td>323</td><td>59, 77</td><td>promotes a skill into a capsule draft — the RSI-3 on-ramp</td></tr><tr><td><code>capability_token</code></td><td>105</td><td>56</td><td>capability grant tokens</td></tr><tr><td><code>logical_operator_registry</code></td><td>33</td><td>60</td><td>thin loader over <code>logical-operators.json</code></td></tr><tr><td><code>physical_operator_catalog</code></td><td>100</td><td>61</td><td>static admission (<code>disabled</code>/<code>unavailable</code>/<code>deprecated</code>/health)</td></tr><tr><td><code>operator_router</code></td><td>305</td><td>—</td><td><strong>belongs to the AI-influence subsystem, not operator binding</strong> — a naming trap</td></tr><tr><td><code>operator_state_machine</code></td><td>233</td><td>61, 64</td><td>operator lifecycle states</td></tr><tr><td><code>task_graph_io</code> / <code>task_graph_state_io</code></td><td>351 / 491</td><td>91</td><td>TaskGraph persistence + runtime state</td></tr><tr><td><code>evidence_ledger</code></td><td>117</td><td>43, 70</td><td>sprint-level evidence records</td></tr><tr><td><code>event_ledger</code></td><td>198</td><td>89, 121</td><td>event stream</td></tr><tr><td><code>actor_registry</code></td><td>382</td><td>93, 95</td><td>durable actor identity</td></tr><tr><td><code>actor_lease</code></td><td>238</td><td>95</td><td>lease acquire/release/reap</td></tr><tr><td><code>actor_mailbox</code></td><td>102</td><td>93</td><td>durable message delivery</td></tr><tr><td><code>actor_runtime</code></td><td>329</td><td>92, 96</td><td>actor execution</td></tr><tr><td><code>context_store</code> / <code>solar_db</code></td><td>58 / 41</td><td>83</td><td>context + DB helpers</td></tr><tr><td><code>integrations/gepa_optimizer/</code></td><td><strong>3540</strong></td><td>75</td><td>full RSI propose→promote→rollback with budget caps</td></tr></tbody></table></div>
+<p>Two clusters stand out:</p>
+<ul><li>**The <code>actor_*</code> family** is a durable actor model — registry, leases, mailboxes, runtime.</li></ul>
+<p>It directly implements Harness Core features 2 (durable queue) and 4 (lease and concurrency control), which are exactly the features JiuwenSwarm lacks. It is sitting unused while the live system uses filesystem polling and tmux pane leases.</p>
+<ul><li><strong><code>gepa_optimizer</code></strong> is the single most valuable unwired asset: a complete, safety-gated</li></ul>
+<p>controlled-improvement loop.</p>
+<p><strong>Implication for cost.</strong> Roughly 8,000 LOC of tested capability is one integration effort away from being live. Any plan that treats these as "to build" over-estimates; any plan that treats them as "working" over-claims.</p>
+<hr>
+<h2 id="4-ai4rnd-what-is-genuinely-active"><a class="anchor" href="#4-ai4rnd-what-is-genuinely-active" aria-hidden="true">#</a>4. AI4RnD — what is genuinely ACTIVE</h2>
+<p>Verified by execution (V-8, V-9, V-10):</p>
+<div class="tw"><table><thead><tr><th>Area</th><th>Evidence</th></tr></thead><tbody><tr><td>DAG scheduling + capability routing</td><td><code>graph_scheduler</code> 4,189 LOC; <strong>321 graph tests pass</strong></td></tr><tr><td>Evaluator suite</td><td><strong>104 evaluator tests pass</strong></td></tr><tr><td>Gate ledger</td><td><strong>124 tests pass</strong> (2 root-env artifacts); append-only, writer-attributed</td></tr><tr><td>Research evidence core</td><td>init→add-source→extract→ledger→mine executed standalone</td></tr><tr><td>Intention compilation</td><td><code>intent_gateway</code> 736 + <code>intent_engine_adapter</code> 851, wired</td></tr><tr><td>Planning</td><td><code>apo_plan_compiler</code> 1,093 + <code>plan_validator</code> 1,564, wired</td></tr><tr><td>Contract instantiation</td><td><code>workflow_contract</code> 1,136 + <code>workflow_intake</code> fail-closed</td></tr><tr><td>Model registry/routing/audit</td><td><code>model_registry</code>, <code>model_call_runtime</code>, wired</td></tr></tbody></table></div>
+<hr>
+<h2 id="5-ai4rnd-absent-10-features"><a class="anchor" href="#5-ai4rnd-absent-10-features" aria-hidden="true">#</a>5. AI4RnD — ABSENT (10 features)</h2>
+<div class="tw"><table><thead><tr><th>Feature</th><th>Note</th></tr></thead><tbody><tr><td>76 RSI runtime routing (bandits / Bayesian optimisation)</td><td>no code</td></tr><tr><td>78 RSI DAG &amp; agent organisation (AFlow / MCTS / ADAS)</td><td>no code</td></tr><tr><td>81 RSI model policies &amp; weights (SFT / LoRA / DPO / GRPO)</td><td>no code; needs training infrastructure</td></tr><tr><td>109 Model Construction (train / fine-tune)</td><td>absent both sides</td></tr><tr><td>132–135 Account management (registration, auth/session, profile, privacy controls)</td><td>absent both sides — both systems are single-user local</td></tr><tr><td>136–137 WeChat / Discord channels</td><td>absent in AI4RnD; <strong>JiuwenSwarm ships both</strong></td></tr></tbody></table></div>
+<hr>
+<h2 id="6-jiuwenswarm-coverage-of-the-142-features"><a class="anchor" href="#6-jiuwenswarm-coverage-of-the-142-features" aria-hidden="true">#</a>6. JiuwenSwarm coverage of the 142 features</h2>
+<div class="fig"><pre class="mermaid">pie showData
+    title JiuwenSwarm coverage of intended AI4RnD features
+    &quot;NONE (72)&quot; : 72
+    &quot;PARTIAL (50)&quot; : 50
+    &quot;FULL (20)&quot; : 20</pre></div>
+<h3 id="where-jiuwenswarm-is-full-20"><a class="anchor" href="#where-jiuwenswarm-is-full-20" aria-hidden="true">#</a>Where JiuwenSwarm is FULL (20)</h3>
+<p>Concentrated almost entirely in the execution substrate and the vertical plane:</p>
+<div class="tw"><table><thead><tr><th>Feature</th><th>What JiuwenSwarm provides</th></tr></thead><tbody><tr><td>1 Request capture · 3 material import</td><td>9 IM connectors + web/TUI/desktop/ACP/A2A, E2A-normalised</td></tr><tr><td>35–36 POC env prep + construction · 107–108 build prep + code construction · 112 verification assets</td><td>code mode, worktree, LSP, sandbox, test tooling</td></tr><tr><td>83 Persistent memory &amp; context retrieval</td><td><code>MemoryIndexManager</code> 1,224 LOC, SQLite + vector + file watcher</td></tr><tr><td>92 Runtime control loop · 96 dispatch &amp; supervision</td><td><code>DeepAgent</code> dual-layer task loop (11 rail events verified)</td></tr><tr><td>124–131 Installers, CLI, GUI, TUI, web app</td><td>pip + signed desktop apps + TUI package</td></tr><tr><td>136–137 WeChat, Discord</td><td>shipped connectors</td></tr><tr><td>139–140 LLM config, user settings</td><td>config.yaml + <code>.env</code> + Configuration UI</td></tr></tbody></table></div>
+<h3 id="where-jiuwenswarm-is-none-72"><a class="anchor" href="#where-jiuwenswarm-is-none-72" aria-hidden="true">#</a>Where JiuwenSwarm is NONE (72)</h3>
+<p>Every feature in these groups has no JiuwenSwarm counterpart at all:</p>
+<ul><li><strong>Search &amp; ideation</strong> signal extraction, organisation, trend/gap, coverage review (17–22)</li><li><strong>Idea identification / opportunity selection</strong> — the entire lane (23–29)</li><li><strong>Claims &amp; hypotheses</strong> — the entire lane (30–34)</li><li><strong>Benchmarking</strong> — the entire lane (40–44)</li><li><strong>Evaluation</strong> — the entire lane (45–50)</li><li><strong>Capsules</strong> (55, 59), <strong>operator definition/binding/profiling</strong> (60–62, 64–65)</li><li><strong>Evidence/factuality evaluation</strong> (70), <strong>performance/cost evaluation</strong> (68)</li><li><strong>RSI</strong> — all eight (75–82)</li><li><strong>Data foundations</strong> — dataset/policy/workflow/trace/memory graphs, TaskGraph persistence (85, 87–91)</li><li><strong>DAG scheduler + readiness</strong> (94), <strong>admission/lease</strong> (95, partial)</li><li><strong>Intention compilation</strong> (98–99, 102), <strong>planner</strong> (104–105)</li></ul>
+<hr>
+<h2 id="7-the-two-sided-maturity-picture"><a class="anchor" href="#7-the-two-sided-maturity-picture" aria-hidden="true">#</a>7. The two-sided maturity picture</h2>
+<div class="fig"><pre class="mermaid">quadrantChart
+    title Feature groups — AI4RnD maturity vs JiuwenSwarm coverage
+    x-axis &quot;JiuwenSwarm coverage: NONE&quot; --&gt; &quot;FULL&quot;
+    y-axis &quot;AI4RnD maturity: LOW&quot; --&gt; &quot;HIGH&quot;
+    quadrant-1 &quot;Both strong: reuse JW, retire AI4RnD&#x27;s&quot;
+    quadrant-2 &quot;AI4RnD-owned: port + keep&quot;
+    quadrant-3 &quot;Green field: must build&quot;
+    quadrant-4 &quot;JW-owned: reuse directly&quot;
+    &quot;DAG scheduler&quot;: [0.08, 0.9]
+    &quot;Capability routing&quot;: [0.05, 0.88]
+    &quot;Gate ledger&quot;: [0.05, 0.85]
+    &quot;Evidence ledger&quot;: [0.05, 0.8]
+    &quot;Evaluator suite&quot;: [0.1, 0.82]
+    &quot;Intention compilers&quot;: [0.2, 0.8]
+    &quot;Planner&quot;: [0.2, 0.8]
+    &quot;Capsules&quot;: [0.12, 0.55]
+    &quot;Operators&quot;: [0.15, 0.5]
+    &quot;GEPA / RSI-1&quot;: [0.05, 0.45]
+    &quot;RSI 2-8&quot;: [0.03, 0.08]
+    &quot;Opportunity selection&quot;: [0.03, 0.15]
+    &quot;Claims + hypotheses&quot;: [0.05, 0.2]
+    &quot;Data graphs&quot;: [0.15, 0.2]
+    &quot;Account management&quot;: [0.1, 0.05]
+    &quot;Durable queue + leases&quot;: [0.25, 0.5]
+    &quot;Channels + UI&quot;: [0.95, 0.35]
+    &quot;Installers + packaging&quot;: [0.92, 0.3]
+    &quot;Memory + retrieval&quot;: [0.9, 0.4]
+    &quot;Code building&quot;: [0.85, 0.6]
+    &quot;Permissions + sandbox&quot;: [0.8, 0.15]</pre></div>
+<p><strong>Quadrant reading.</strong></p>
+<ul><li><strong>Bottom-right (JW-owned):</strong> channels, UI, installers, packaging, memory, permissions,</li></ul>
+<p>sandbox, code building. Reuse directly — 23 features.</p>
+<ul><li><strong>Top-left (AI4RnD-owned):</strong> scheduler, routing, ledgers, evaluators, intention</li></ul>
+<p>compilers, planner, capsules, operators. Port — 69 features. JiuwenSwarm offers nothing here and building it fresh would discard working, tested code.</p>
+<ul><li><strong>Bottom-left (green field):</strong> RSI 2–8, opportunity selection, claims/hypotheses, data</li></ul>
+<p>graphs, account management. Build — 27 features. <strong>Neither system has these.</strong></p>
+<ul><li><strong>Top-right:</strong> essentially empty. There is very little the two systems both do well, which</li></ul>
+<p>is why the integration is complementary rather than competitive.</p>
+<hr>
+<h2 id="8-health-signals"><a class="anchor" href="#8-health-signals" aria-hidden="true">#</a>8. Health signals</h2>
+<div class="tw"><table><thead><tr><th>System</th><th>Signal</th><th>Value</th></tr></thead><tbody><tr><td>JiuwenSwarm</td><td>full test suite</td><td><strong>2,816 passed, 18 skipped, 0 failed</strong> (419s)</td></tr><tr><td>JiuwenSwarm</td><td>package install</td><td>clean <code>pip install -e ".[test]"</code>, 2,834 tests collected</td></tr><tr><td>JiuwenSwarm</td><td>permission built-in rules</td><td><strong>0 loaded in a stock install</strong> (V-4) — a live defect</td></tr><tr><td>AI4RnD</td><td>module imports</td><td><strong>48/48 clean</strong> on stdlib + pyyaml</td></tr><tr><td>AI4RnD</td><td>targeted suites</td><td><strong>556 passed</strong>, 2 root-environment artifacts</td></tr><tr><td>AI4RnD</td><td>full suite</td><td><strong>aborts at collection</strong> (<code>SystemExit</code> at module import)</td></tr><tr><td>AI4RnD</td><td>research core</td><td>runs standalone, no harness</td></tr><tr><td>AI4RnD</td><td>capsule manifests</td><td>23/23 valid, 0 invalid</td></tr><tr><td>AI4RnD</td><td>grounding evaluator</td><td><strong>precision 0.25, unsupported-detection 0.14</strong> (V-12)</td></tr></tbody></table></div>
+<p>The asymmetry is informative. JiuwenSwarm is a well-maintained package with a real regression suite and one significant unnoticed security regression. AI4RnD is a large, partially-wired research system whose core subsystems are individually tested but whose whole cannot be collected, and whose headline verification claim does not currently hold.</p></article><div class="pager"><a href="00-intended-product-model.html"><div class="d">← Previous</div><div class="t">Intended product model</div></a><a class="nx" href="14-reuse-vs-build-map.html"><div class="d">Next →</div><div class="t">Reuse vs build</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

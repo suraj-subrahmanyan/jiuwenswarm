@@ -9,19 +9,22 @@ machinery — see [15-correction-log.md](15-correction-log.md). Total drops from
 gantt
     dateFormat X
     axisFormat %s
-    title Stage sequence (relative weeks)
+    title Stage sequence (cumulative weeks from start)
     section Prove
-    S0 Compilation spikes            :s0, 0, 3
+    S0 Compilation spikes (3w)       :s0, 0, 3
     section Product
-    S1 Research mode + project       :s1, after s0, 8
-    S2 Evidence lane + entailment    :s2, after s1, 8
+    S1 Research mode + project (8w)  :s1, 3, 11
+    S2 Evidence lane + entailment (8w) :s2, 11, 19
     section Capability
-    S3 Capsules + routing + gates    :s3, after s2, 10
-    S4 Workflow lanes                :s4, after s3, 14
+    S3 Capsules + routing + gates (10w) :s3, 19, 29
+    S4 Workflow lanes (14w)          :s4, 29, 43
     section Improve
-    S5 Governed evolution            :s5, after s4, 8
-    S6 Verticals + accounts          :s6, after s5, 10
+    S5 Governed evolution (8w)       :s5, 43, 51
+    S6 Verticals + accounts (10w)    :s6, 51, 61
 ```
+
+*Axis units are weeks from project start. Stage 2 completes at week 19 — the
+"first trustworthy user value" milestone quoted below as ~4.5 months.*
 
 ---
 

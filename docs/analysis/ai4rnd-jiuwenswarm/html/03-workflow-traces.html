@@ -1,0 +1,355 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workflow traces &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc on" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Systems / 03-workflow-traces.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-how-work-enters">1. How work enters</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#2-how-tasks-are-planned">2. How tasks are planned</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#3-how-agents-or-workers-are-selected">3. How agents or workers are selected</a><a class="l3" href="#jiuwenswarm-role-and-configuration">JiuwenSwarm — role and configuration</a><a class="l3" href="#ai4rnd-capability-matching">AI4RnD — capability matching</a><a class="l2" href="#4-how-tools-are-executed">4. How tools are executed</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#5-where-intermediate-state-is-stored">5. Where intermediate state is stored</a><a class="l2" href="#6-how-results-are-verified">6. How results are verified</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#7-failure-cancellation-recovery">7. Failure, cancellation, recovery</a><a class="l3" href="#jiuwenswarm">JiuwenSwarm</a><a class="l3" href="#ai4rnd">AI4RnD</a><a class="l2" href="#8-end-to-end-comparison">8. End-to-end comparison</a></nav><h1 id="workflow-traces"><a class="anchor" href="#workflow-traces" aria-hidden="true">#</a>Workflow Traces</h1>
+<p>Seven questions traced through both systems: how work enters, how it is planned, how a worker is chosen, how tools execute, where intermediate state lives, how results are verified, and what happens on failure, cancellation and recovery.</p>
+<p>Evidence tags resolve in <a href="11-evidence-appendix.html">11-evidence-appendix.md</a>.</p>
+<hr>
+<h2 id="1-how-work-enters"><a class="anchor" href="#1-how-work-enters" aria-hidden="true">#</a>1. How work enters</h2>
+<h3 id="jiuwenswarm"><a class="anchor" href="#jiuwenswarm" aria-hidden="true">#</a>JiuwenSwarm</h3>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant U as User (web / TUI / IM / ACP)
+    participant C as Channel connector
+    participant P as im_pipeline
+    participant MH as MessageHandler
+    participant AC as routing/agent_client
+    participant WS as agent_ws_server
+    participant AM as AgentManager
+    participant AD as agent_adapter
+    participant DA as DeepAgent (openjiuwen)
+
+    U-&gt;&gt;C: platform-native message
+    C-&gt;&gt;P: raw payload
+    P-&gt;&gt;MH: normalised inbound
+    MH-&gt;&gt;MH: slash-command parse, session routing
+    MH-&gt;&gt;AC: dispatch
+    AC-&gt;&gt;WS: E2A envelope over WebSocket (method=chat.send)
+    WS-&gt;&gt;WS: _handle_message → dispatch on req_method
+    WS-&gt;&gt;AM: get agent for (mode, sub_mode, project_dir)
+    AM-&gt;&gt;AD: agent instance (cached)
+    AD-&gt;&gt;DA: invoke</pre></div>
+<p>Every inbound path — nine IM platforms, web, TUI, desktop, ACP, A2A, cron — converges on the same normalised E2A envelope before reaching the agent server. Cron-triggered work enters through the same <code>MessageHandler</code> path, not a side door. <span class="tag">E-J03</span>, <span class="tag">E-J04</span></p>
+<p>Work can also enter <em>below</em> the gateway: the agent server's WebSocket accepts direct RPC, which is how the TUI and desktop app operate.</p>
+<h3 id="ai4rnd"><a class="anchor" href="#ai4rnd" aria-hidden="true">#</a>AI4RnD</h3>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant U as User
+    participant CLI as solar-harness.sh
+    participant WI as workflow_intake.py
+    participant FS as sprints/&amp;lt;sid&amp;gt;.*
+    participant CO as coordinator.sh
+
+    U-&gt;&gt;CLI: solar harness intake &quot;...&quot;
+    alt registered workflow_id
+        CLI-&gt;&gt;WI: instantiate fixed-stages contract
+        WI-&gt;&gt;FS: write task_graph.json (with contract id/version/hash)
+        WI-&gt;&gt;FS: write status.json + prd/contract/design/plan
+    else generic
+        CLI-&gt;&gt;FS: write drafting sprint scaffold
+    end
+    CO-&gt;&gt;FS: poll (max mtime over sprint-*.status.json)
+    CO-&gt;&gt;CO: detect state change → dispatch</pre></div>
+<p>Entry is a CLI command that writes files. The coordinator discovers work by polling. <code>workflow_intake.py</code> is a newer, stricter path: given a registered contract it instantiates a fixed-stage task graph and <strong>fails closed</strong> (exit 3/4) on an unknown or planner-generated <code>workflow_id</code> rather than falling through to the generic planner. <span class="tag">E-A17</span></p>
+<p>There is also a status-server HTTP surface with <code>POST /api/sprints/&lt;sid&gt;/plan-verdict</code>, <code>/eval-verdict</code>, <code>/handoff-submit</code> — human gates over HTTP. <span class="tag">E-A18</span></p>
+<p><strong>Contrast.</strong> JiuwenSwarm's entry is a <em>message</em> to a running agent. AI4RnD's entry is a <em>file</em> that a poller finds. The former is push, low-latency, and authenticated by channel; the latter is pull, up-to-one-poll-interval latent, and authenticated by filesystem permissions.</p>
+<hr>
+<h2 id="2-how-tasks-are-planned"><a class="anchor" href="#2-how-tasks-are-planned" aria-hidden="true">#</a>2. How tasks are planned</h2>
+<h3 id="jiuwenswarm"><a class="anchor" href="#jiuwenswarm" aria-hidden="true">#</a>JiuwenSwarm</h3>
+<p>Three modes, and planning differs by mode:</p>
+<div class="tw"><table><thead><tr><th>Mode</th><th>Planning</th></tr></thead><tbody><tr><td>Performance</td><td>none — direct ReAct, parallel tool calls</td></tr><tr><td>Plan</td><td><code>TaskPlanningRail</code> builds a step list; each step confirmed</td></tr><tr><td>Swarm</td><td>leader decomposes the goal, assembles a team, delegates to teammates</td></tr></tbody></table></div>
+<p><code>TaskPlanningRail</code> connects todo tools, a <code>TaskPlan</code>, task dependencies, progress reminders and multi-model selection to the outer task loop. In code mode <code>swarm.code_task_planning</code> and <code>core.task_planning</code> are the corresponding elements. Plan-mode state is persisted into the session, so a plan survives restart. <span class="tag">E-J15</span> <em>(documented — the rail lives in <code>openjiuwen</code>)</em></p>
+<p>Symphony adds a second planning axis when many skills are installed: retrieve candidate skills from the tree index, then orchestrate them into a dependency-checked skill chain using the skill score graph, presented for user confirmation before execution.</p>
+<p>Planning output is <strong>conversational and in-session</strong>. There is no plan artifact on disk that an external tool can validate.</p>
+<h3 id="ai4rnd"><a class="anchor" href="#ai4rnd" aria-hidden="true">#</a>AI4RnD</h3>
+<p>Planning is a first-class, file-backed, validated stage.</p>
+<div class="fig"><pre class="mermaid">flowchart LR
+    PRD[&quot;prd.md&lt;br/&gt;(PM)&quot;] --&gt; DESIGN[&quot;design.md&quot;]
+    DESIGN --&gt; PLAN[&quot;plan.md&quot;]
+    PLAN --&gt; TG[&quot;task_graph.json&quot;]
+    TG --&gt; PV[&quot;plan_validator.py&lt;br/&gt;1,564 LOC&quot;]
+    PV --&gt;|&quot;compiles ⇒ dispatchable&quot;| SCHED[&quot;graph_scheduler&quot;]
+    PV --&gt;|invalid| REJECT[&quot;fail fast&quot;]</pre></div>
+<p>The state machine will not advance out of <code>prd_ready</code> until <code>exists(design.md) &amp;&amp; exists(plan.md) &amp;&amp; exists(task_graph.json)</code> <span class="tag">E-A03</span>. The task graph is then validated: cycles, missing dependencies and duplicate node ids fail fast <span class="tag">E-A07</span>. A comment in <code>plan_validator.py</code> records the intent that validation must also guarantee routability — <em>"(no_matching_worker) — 'compiles' must imply 'dispatchable'"</em> — so a plan that no worker can serve is a planning error, not a runtime surprise.</p>
+<p>Human gate: <code>solar harness plan-verdict &lt;sid&gt; approve|reject [reason]</code>, an atomic status + history + event update.</p>
+<p>For research work, planning is the question graph and the physical operator plan (<code>survey-plan</code>, <code>research plan</code>), with the optimizer specified as code-defined and persisted rather than hidden reasoning <span class="tag">E-A14</span>.</p>
+<p><strong>Contrast.</strong> JiuwenSwarm plans <em>in the model's context</em>; AI4RnD plans <em>into a validated artifact</em>. AI4RnD's approach is strictly better for auditability and is a prerequisite for its gate model. JiuwenSwarm's is lower-friction and better for conversational work.</p>
+<hr>
+<h2 id="3-how-agents-or-workers-are-selected"><a class="anchor" href="#3-how-agents-or-workers-are-selected" aria-hidden="true">#</a>3. How agents or workers are selected</h2>
+<h3 id="jiuwenswarm-role-and-configuration"><a class="anchor" href="#jiuwenswarm-role-and-configuration" aria-hidden="true">#</a>JiuwenSwarm — role and configuration</h3>
+<div class="fig"><pre class="mermaid">flowchart TB
+    REQ[&quot;request (mode, sub_mode, project_dir)&quot;] --&gt; CACHE{&quot;agent cached?&quot;}
+    CACHE --&gt;|yes| USE[&quot;reuse agent&quot;]
+    CACHE --&gt;|no| SPEC[&quot;build TeamAgentSpec&quot;]
+    SPEC --&gt; ROLE[&quot;for role in (leader, teammate)&quot;]
+    ROLE --&gt; CS[&quot;config_specs.build_member_capability_specs(config, mode, role)&quot;]
+    CS --&gt; ELEMS[&quot;hardcoded element name lists&lt;br/&gt;_COMMON_RAIL_NAMES / _CODE_RAIL_NAMES / ...&quot;]
+    ELEMS --&gt; BUILD[&quot;spec.build(SwarmBuildContext)&quot;]
+    BUILD --&gt; USE</pre></div>
+<p>Selection is by <strong>role plus mode</strong>. <code>AgentManager</code> caches on <code>(mode, sub_mode, project_dir)</code> <span class="tag">E-J19</span>. Within a team the leader delegates to teammates, and in code mode to sub-agents (<code>explore</code>, <code>plan</code>, <code>browser</code>, <code>code</code>), but the choice is prompt-driven rather than governed by a declared capability contract.</p>
+<p>There is no capability declaration, no capability matching, and consequently no "no capable worker" state. If a teammate lacks the ability to do the work, that surfaces as a poor result, not a routing decision.</p>
+<h3 id="ai4rnd-capability-matching"><a class="anchor" href="#ai4rnd-capability-matching" aria-hidden="true">#</a>AI4RnD — capability matching</h3>
+<div class="fig"><pre class="mermaid">flowchart TB
+    NODE[&quot;ready node&lt;br/&gt;role + required_capabilities + required_skills + preferred_model&quot;]
+    NODE --&gt; LOOP[&quot;for each worker in physical operators&quot;]
+    LOOP --&gt; R{&quot;role compatible?&quot;}
+    R --&gt;|no| SKIP1[&quot;skip&quot;]
+    R --&gt;|yes| CAP{&quot;capabilities ⊇ required?&lt;br/&gt;HARD GATE — never relaxed&quot;}
+    CAP --&gt;|no| SKIP2[&quot;skip · record missing_capabilities&quot;]
+    CAP --&gt;|yes| Q{&quot;quota / model / runtime / busy?&quot;}
+    Q --&gt;|blocked| SKIP3[&quot;skip · record reason&quot;]
+    Q --&gt;|ok| SK{&quot;skills match?&quot;}
+    SK --&gt;|yes| STRICT[&quot;strict candidates&quot;]
+    SK --&gt;|no| RELAX[&quot;relaxed candidates&quot;]
+    STRICT --&gt; PICK[&quot;sort by (role_penalty, −cap_score,&lt;br/&gt;−skill_count, model_penalty, load, pane)&quot;]
+    RELAX -.-&gt;|&quot;only if strict empty&lt;br/&gt;(Layer-3 liveness net)&quot;| PICK
+    PICK --&gt; ASSIGN[&quot;assign to pane&quot;]
+    SKIP2 &amp; SKIP3 --&gt; NONE{&quot;any candidates?&quot;}
+    NONE --&gt;|no| STALL[&quot;queue with discriminated reason:&lt;br/&gt;no_matching_worker /&lt;br/&gt;worker_capacity_exhausted /&lt;br/&gt;worker_runtime_unavailable&quot;]</pre></div>
+<p><span class="tag">E-A06</span>. The key properties: capability is a hard gate that is never relaxed; skills are a preference with a liveness net so a drifted skill string cannot permanently strand a node; and the stall reason distinguishes "no capable worker exists" from "capable workers are all busy" from "capable workers are quota-blocked".</p>
+<p><strong>This is the single capability AI4RnD has that JiuwenSwarm most clearly lacks</strong>, and it is also the one most cleanly transplantable — it is pure data plus a scoring function over a worker list.</p>
+<hr>
+<h2 id="4-how-tools-are-executed"><a class="anchor" href="#4-how-tools-are-executed" aria-hidden="true">#</a>4. How tools are executed</h2>
+<h3 id="jiuwenswarm"><a class="anchor" href="#jiuwenswarm" aria-hidden="true">#</a>JiuwenSwarm</h3>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant M as Model
+    participant RA as Rails (before_tool_call)
+    participant PE as Permission engine
+    participant U as User
+    participant T as Tool
+    participant SB as jiuwenbox (optional)
+
+    M-&gt;&gt;RA: tool call intent
+    RA-&gt;&gt;PE: evaluate_tiered_policy(tool_name, tool_args)
+    PE-&gt;&gt;PE: baseline → builtin rules → user rules → overrides → defaults
+    alt deny
+        PE--&gt;&gt;M: rejected
+    else ask
+        PE-&gt;&gt;U: approval prompt
+        U--&gt;&gt;PE: approve / reject
+    end
+    PE-&gt;&gt;T: execute (allowed)
+    opt sandbox enabled
+        T-&gt;&gt;SB: run inside bwrap/cgroup with network policy
+    end
+    T--&gt;&gt;RA: result
+    RA-&gt;&gt;RA: after_tool_call (LSP diagnostics, progress, evolution signals)
+    RA--&gt;&gt;M: observation</pre></div>
+<p>Tools are Python callables registered on the agent's ability manager. Every call passes the tiered policy engine <span class="tag">E-J12</span>; optionally the whole execution runs inside jiuwenbox <span class="tag">E-J11</span>. <code>after_tool_call</code> rails feed the skill-evolution signal detector <span class="tag">E-J13</span>.</p>
+<h3 id="ai4rnd"><a class="anchor" href="#ai4rnd" aria-hidden="true">#</a>AI4RnD</h3>
+<p>Two distinct paths.</p>
+<p><strong>Pane path</strong> (the shipped default):</p>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant CO as coordinator.sh
+    participant PN as tmux pane (claude/codex CLI)
+    participant FS as filesystem
+
+    CO-&gt;&gt;PN: capture-pane, grep busy markers (✳ ✶ ⏺ Cogitated …)
+    loop up to 12 × 10s
+        CO-&gt;&gt;PN: still busy? wait
+    end
+    alt still busy after 120s
+        CO-&gt;&gt;FS: emit DISPATCH_DEFERRED, return failure
+    else free
+        CO-&gt;&gt;PN: send-keys &quot;&lt;command&gt;&quot;
+        CO-&gt;&gt;CO: sleep 0.8
+        CO-&gt;&gt;PN: send-keys Enter
+    end
+    PN-&gt;&gt;PN: agent CLI runs with --dangerously-skip-permissions
+    PN-&gt;&gt;FS: write handoff.md / eval.md / status.json
+    CO-&gt;&gt;FS: poll max mtime, detect change</pre></div>
+<p>There is no permission check on this path. The worker CLI's own gate is explicitly disabled at launch <span class="tag">E-A05</span>, and AI4RnD adds none of its own. <span class="tag">E-A08</span></p>
+<p><strong>Codex bridge path:</strong></p>
+<div class="fig"><pre class="mermaid">sequenceDiagram
+    participant CO as coordinator.sh
+    participant IN as codex-bridge/inbox
+    participant BR as codex-bridge.sh daemon
+    participant CX as codex CLI
+    participant OUT as codex-bridge/outbox
+
+    CO-&gt;&gt;CO: check budget + tier (S/A/B)
+    CO-&gt;&gt;IN: write *.req.md with frontmatter
+    BR-&gt;&gt;IN: poll, parse frontmatter
+    BR-&gt;&gt;BR: re-check tier + budget
+    BR-&gt;&gt;CX: codex exec -s read-only (non-interactive)
+    CX--&gt;&gt;BR: response
+    BR-&gt;&gt;OUT: write *.res.md
+    BR-&gt;&gt;BR: append ledger, consume budget, mv req → processed
+    CO-&gt;&gt;OUT: poll, read, rm
+    Note over CO: or BUDGET_EXCEEDED / CIRCUIT_BREAKER_OPEN</pre></div>
+<p>Bounded, read-only, budgeted (30 calls / 20,000 tokens per day, hard stop), audited.</p>
+<p><strong>Contrast.</strong> JiuwenSwarm's tool execution is governed at every call. AI4RnD's pane path is ungoverned; its Codex path is well-governed but limited to read-only analysis. This is the sharpest security asymmetry between the systems.</p>
+<hr>
+<h2 id="5-where-intermediate-state-is-stored"><a class="anchor" href="#5-where-intermediate-state-is-stored" aria-hidden="true">#</a>5. Where intermediate state is stored</h2>
+<div class="tw"><table><thead><tr><th>Concern</th><th>JiuwenSwarm</th><th>AI4RnD</th></tr></thead><tbody><tr><td>Conversation</td><td>session store (<code>session_history.py</code>)</td><td>pane scrollback (ephemeral)</td></tr><tr><td>Task/plan state</td><td>persisted into session (documented)</td><td><code>sprints/&lt;sid&gt;.status.json</code> + <code>.task_graph.json</code></td></tr><tr><td>Long-term memory</td><td>SQLite + vector index, file-watched, hybrid search</td><td><code>run/state.db</code>, wiki under <code>runtime/schema</code> contracts</td></tr><tr><td>Intermediate reasoning artifacts</td><td><strong>none</strong> — lives in the transcript</td><td>typed files: <code>prd.md</code>, <code>design.md</code>, <code>plan.md</code>, <code>handoff.md</code>, <code>eval.md</code></td></tr><tr><td>Research artifacts</td><td><strong>none</strong></td><td>evidence ledger, claims, citation map, gate results, repair history</td></tr><tr><td>Event stream</td><td>logs, OpenTelemetry</td><td><code>events.jsonl</code> (append-only) + <code>&lt;sid&gt;.gate-ledger.jsonl</code></td></tr><tr><td>Configuration</td><td><code>~/.jiuwenswarm/config/config.yaml</code></td><td>`harness/config/*.json</td><td>yaml`</td></tr></tbody></table></div>
+<p>The structural difference: <strong>AI4RnD's intermediate state is a validated artifact tree; JiuwenSwarm's is a chat log.</strong> AI4RnD can answer "which exact source span supports this sentence" by reading files. JiuwenSwarm cannot answer it at all.</p>
+<p>Corollary for integration: if AI4RnD's research core is retained, it brings its own artifact store, and that store — not the JiuwenSwarm session — must remain the source of truth for evidence.</p>
+<hr>
+<h2 id="6-how-results-are-verified"><a class="anchor" href="#6-how-results-are-verified" aria-hidden="true">#</a>6. How results are verified</h2>
+<h3 id="jiuwenswarm"><a class="anchor" href="#jiuwenswarm" aria-hidden="true">#</a>JiuwenSwarm</h3>
+<div class="fig"><pre class="mermaid">flowchart LR
+    RESULT[&quot;agent output&quot;] --&gt; STOP[&quot;stop evaluators&lt;br/&gt;rounds / timeout / token budget /&lt;br/&gt;completion promise / custom predicate&quot;]
+    STOP --&gt; LSP[&quot;code mode: LSP diagnostics&quot;]
+    LSP --&gt; USER[&quot;user reads the answer&quot;]
+    RESULT -.-&gt; EVO[&quot;evolution signal detection&lt;br/&gt;(tool failures, user corrections)&quot;]
+    EVO -.-&gt; SKILL[&quot;evolutions.json → better skill next time&quot;]</pre></div>
+<p>Verification answers <em>"should the loop stop"</em> and <em>"was the tool call permitted"</em>. Nothing answers <em>"is this output correct"</em>. The Auto Harness CI loop verifies harness changes, and <code>skilldev/stages/evaluate_stage.py</code> verifies generated skill definitions — both are capability-quality checks, not result-correctness checks. <span class="tag">E-J14</span></p>
+<h3 id="ai4rnd"><a class="anchor" href="#ai4rnd" aria-hidden="true">#</a>AI4RnD</h3>
+<div class="fig"><pre class="mermaid">flowchart TB
+    ART[&quot;node artifacts&quot;] --&gt; VG[&quot;verification_gate.check_code_task&quot;]
+    VG --&gt; C1{&quot;has_patch?&quot;}
+    VG --&gt; C2{&quot;has_test_evidence?&quot;}
+    VG --&gt; C3{&quot;writer_actor ≠ verifier_actor?&quot;}
+    VG --&gt; C4{&quot;verifier_decision ∈ pass/approved?&quot;}
+    C1 &amp; C2 &amp; C3 &amp; C4 --&gt; PASSED{&quot;all satisfied?&quot;}
+    PASSED --&gt;|no| REASONS[&quot;reasons: no_patch_artifact /&lt;br/&gt;no_test_evidence /&lt;br/&gt;writer_and_verifier_same_actor /&lt;br/&gt;no_verifier_decision&quot;]
+    PASSED --&gt;|yes| GL[&quot;gate_ledger.append_record(eval_verdict)&quot;]
+    GL --&gt; PROJ[&quot;node status = projection of ledger&quot;]
+
+    ART2[&quot;research artifacts&quot;] --&gt; RE[&quot;research/evaluator.py&quot;]
+    RE --&gt; G1[&quot;citation grounding&quot;]
+    RE --&gt; G2[&quot;source authority&quot;]
+    RE --&gt; G3[&quot;source diversity&quot;]
+    RE --&gt; G4[&quot;source-type plausibility&quot;]
+    RE --&gt; G5[&quot;section coverage&quot;]
+    RE --&gt; G6[&quot;expert novelty&quot;]
+    RE --&gt; G7[&quot;figure grounding&quot;]
+    G1 &amp; G2 &amp; G3 &amp; G4 &amp; G5 &amp; G6 &amp; G7 --&gt; PROF[&quot;_apply_profile_gate&lt;br/&gt;per-profile thresholds&quot;]
+    PROF --&gt;|fail| REPAIR[&quot;survey-auto-repair:&lt;br/&gt;rewrite failed sections → re-eval&quot;]
+    PROF --&gt;|pass| CLOSE[&quot;evaluate_final_closeout&quot;]</pre></div>
+<p><span class="tag">E-A11</span>, <span class="tag">E-A12</span>, <span class="tag">E-A10</span>. Two independent verification layers: structural (did the work produce the required evidence, was it independently checked) and epistemic (is the content grounded in real sources).</p>
+<p><code>graph_scheduler</code> additionally guards the write path: <code>_assert_pass_mark_allowed</code>, <code>_passed_without_required_eval</code>, <code>_node_eval_is_self_graded</code> and <code>_node_has_independent_eval_report</code> block a node being marked passed without independent evaluation evidence <span class="tag">E-A07</span>.</p>
+<p><strong>Contrast.</strong> This is the capability gap. JiuwenSwarm has nothing at this layer.</p>
+<hr>
+<h2 id="7-failure-cancellation-recovery"><a class="anchor" href="#7-failure-cancellation-recovery" aria-hidden="true">#</a>7. Failure, cancellation, recovery</h2>
+<h3 id="jiuwenswarm"><a class="anchor" href="#jiuwenswarm" aria-hidden="true">#</a>JiuwenSwarm</h3>
+<div class="tw"><table><thead><tr><th>Situation</th><th>Mechanism</th></tr></thead><tbody><tr><td>Cancel</td><td><code>chat.interrupt</code> with intent <code>pause</code> / <code>resume</code> / <code>cancel</code>; <code>abort</code> cancels the outer task loop and attempts to interrupt the inner ReAct loop <span class="tag">E-J20</span></td></tr><tr><td>Tool exception</td><td><code>on_tool_exception</code> rails repair context and govern the exception</td></tr><tr><td>Model exception</td><td><code>on_model_exception</code> rails</td></tr><tr><td>Runaway loop</td><td>stop evaluators: max rounds, timeout, token budget</td></tr><tr><td>Context overflow</td><td><code>/compact</code>, <code>/compact-partial</code>, context engine, <code>ContextCompression</code></td></tr><tr><td>Undo</td><td>three session rewind variants: full, full-with-file-restore, full-with-compaction; plus context rewind <span class="tag">E-J04</span></td></tr><tr><td>Process failure</td><td><code>gateway/heartbeat/</code>, <code>instance_manager/</code>, desktop auto-update</td></tr><tr><td>Bad skill behaviour</td><td>evolution signals → improved skill definition</td></tr></tbody></table></div>
+<p>Cancellation is <em>synchronous and in-process</em> — the request reaches a live object.</p>
+<h3 id="ai4rnd"><a class="anchor" href="#ai4rnd" aria-hidden="true">#</a>AI4RnD</h3>
+<div class="tw"><table><thead><tr><th>Situation</th><th>Mechanism</th></tr></thead><tbody><tr><td>Node fails eval</td><td><code>eval_verdict FAIL</code> → status <code>blocked</code> → re-dispatch to builder → <code>handoff_updated</code> → re-evaluate. Bounded by <code>retry_policy.max_attempts</code> <span class="tag">E-A03</span></td></tr><tr><td>Gate fails</td><td>repair DAG: targeted evidence search → extract → verify → rewrite → re-gate; persisted to <code>repair_dags.jsonl</code> <span class="tag">E-A14</span>. Implemented for surveys as <code>survey-auto-repair</code></td></tr><tr><td>Repair exhausted</td><td><code>repair_exhausted</code> record in the gate ledger; <code>needs_human_review</code> node status</td></tr><tr><td>No capable worker</td><td>node marked <code>worker_blocked</code> with <code>blocking_reason: no_matching_worker</code>; run stalls honestly <span class="tag">E-A06</span></td></tr><tr><td>Pane busy</td><td>busy-marker polling, then <code>DISPATCH_DEFERRED</code> <span class="tag">E-A08</span></td></tr><tr><td>Dropped keystroke</td><td>the mitigation <em>is</em> the busy-poll + split send-keys; there is no delivery acknowledgement</td></tr><tr><td>Coordinator death</td><td>pidfile with <code>kill -0</code> liveness plus <code>ps aux</code> cross-validation; stale pidfile self-heal</td></tr><tr><td>Missed state change</td><td>periodic compensating sweeps (<code>loop_count % 30</code>), <code>detect_stuck_state()</code> scanning <code>events.jsonl</code> for events &gt;60 s old with no status advance</td></tr><tr><td>Partial state write</td><td>atomic <code>plan-verdict</code> / <code>handoff-submit</code> / <code>eval-verdict</code> commands (tempfile+rename)</td></tr><tr><td>Duplicate finalisation</td><td><code>.finalized</code> marker file</td></tr><tr><td>Corrupt sprint</td><td><code>clean-corrupted --apply</code> moves to <code>.quarantine/</code> with a manifest — never deletes</td></tr><tr><td>Reconciliation</td><td><code>verify-events &lt;sid&gt;</code> checks per-round completeness of history vs events</td></tr><tr><td>Stale code in a running process</td><td>md5 logged at coordinator start; PROBE logs on rarely-taken branches (after Bug #5)</td></tr></tbody></table></div>
+<p>Cancellation is <em>asynchronous and advisory</em> — there is no direct cancel path to a pane running an interactive CLI.</p>
+<p><strong>Contrast.</strong> AI4RnD's recovery machinery is more elaborate because its substrate generates more failures. Almost every mechanism in the AI4RnD column exists to compensate for filesystem polling or terminal-typing. Under an in-process substrate, most would be unnecessary; the ones that would remain and are worth keeping are the <em>semantic</em> ones — bounded repair, repair-exhausted → human review, honest stalling, quarantine-not-delete, and event/history reconciliation.</p>
+<hr>
+<h2 id="8-end-to-end-comparison"><a class="anchor" href="#8-end-to-end-comparison" aria-hidden="true">#</a>8. End-to-end comparison</h2>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph JWF[&quot;JiuwenSwarm — message-driven, in-process&quot;]
+        direction LR
+        J1[&quot;message&quot;] --&gt; J2[&quot;agent (cached)&quot;] --&gt; J3[&quot;ReAct + task loop&quot;]
+        J3 --&gt; J4[&quot;tool call&quot;] --&gt; J5[&quot;permission engine&quot;] --&gt; J6[&quot;execute&quot;]
+        J6 --&gt; J3
+        J3 --&gt; J7[&quot;stop evaluator&quot;] --&gt; J8[&quot;reply&quot;]
+    end
+
+    subgraph AIF[&quot;AI4RnD — artifact-driven, out-of-process&quot;]
+        direction LR
+        A1[&quot;intake writes files&quot;] --&gt; A2[&quot;coordinator polls&quot;]
+        A2 --&gt; A3[&quot;capability routing&quot;] --&gt; A4[&quot;tmux send-keys&quot;]
+        A4 --&gt; A5[&quot;worker writes artifact&quot;] --&gt; A6[&quot;gate evaluates&quot;]
+        A6 --&gt;|fail| A7[&quot;repair DAG&quot;] --&gt; A3
+        A6 --&gt;|pass| A8[&quot;gate ledger → status projection&quot;]
+    end</pre></div>
+<div class="tw"><table><thead><tr><th>Axis</th><th>JiuwenSwarm</th><th>AI4RnD</th></tr></thead><tbody><tr><td>Coupling</td><td>tight, in-process</td><td>loose, filesystem</td></tr><tr><td>Latency</td><td>milliseconds</td><td>one poll interval + busy-wait</td></tr><tr><td>Governance of actions</td><td>strong (permissions, sandbox)</td><td>weak (pane) / strong (Codex)</td></tr><tr><td>Governance of <em>outputs</em></td><td>none</td><td>strong (gates, ledger, independent verifier)</td></tr><tr><td>Inspectability of intermediates</td><td>low</td><td>high</td></tr><tr><td>Worker selection</td><td>role + config</td><td>capability match with honest stall</td></tr><tr><td>Cancellation</td><td>synchronous</td><td>advisory</td></tr><tr><td>Failure modes</td><td>model/tool exceptions</td><td>plus transport, polling, process-liveness</td></tr></tbody></table></div>
+<p>The two systems are close to complementary. That is the case for integrating them, and <a href="08-recommended-architecture.html">08-recommended-architecture.md</a> proposes the split that follows from this table.</p></article><div class="pager"><a href="02-ai4rnd-architecture.html"><div class="d">← Previous</div><div class="t">AI4RnD architecture</div></a><a class="nx" href="04-component-comparison.html"><div class="d">Next →</div><div class="t">Component comparison</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

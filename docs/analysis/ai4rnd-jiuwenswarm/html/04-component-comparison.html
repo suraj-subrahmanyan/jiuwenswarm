@@ -1,0 +1,237 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Component comparison &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc on" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Systems / 04-component-comparison.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#component-map">Component map</a><a class="l2" href="#1-entry-surface-and-channels">1. Entry surface and channels</a><a class="l2" href="#2-control-plane-task-loop">2. Control plane / task loop</a><a class="l2" href="#3-sprint-run-state-machine">3. Sprint / run state machine</a><a class="l2" href="#4-dag-scheduling">4. DAG scheduling</a><a class="l2" href="#5-capability-routing">5. Capability routing</a><a class="l2" href="#5b-capability-capsules-new-component-rev-2">5b. Capability Capsules ⭐ new component, Rev 2</a><a class="l2" href="#5c-rsi-controlled-self-improvement-new-component-rev-2">5c. RSI / controlled self-improvement ⭐ new component, Rev 2</a><a class="l2" href="#6-operator-model">6. Operator model</a><a class="l2" href="#7-worker-dispatch">7. Worker dispatch</a><a class="l2" href="#8-artifact-store">8. Artifact store</a><a class="l2" href="#9-gate-ledger">9. Gate ledger</a><a class="l2" href="#10-verification-gate">10. Verification gate</a><a class="l2" href="#11-evidence-ledger">11. Evidence ledger</a><a class="l2" href="#12-claim-graph">12. Claim graph</a><a class="l2" href="#13-quality-gates-research-evaluator">13. Quality gates / research evaluator</a><a class="l2" href="#14-repair-dag">14. Repair DAG</a><a class="l2" href="#15-skills">15. Skills</a><a class="l2" href="#16-knowledge-base">16. Knowledge base</a><a class="l2" href="#17-observability-surface">17. Observability surface</a><a class="l2" href="#18-sandbox-and-permissions">18. Sandbox and permissions</a><a class="l2" href="#19-concurrency-control">19. Concurrency control</a><a class="l2" href="#20-distribution-and-packaging">20. Distribution and packaging</a><a class="l2" href="#summary-tally-component-level">Summary tally (component level)</a></nav><h1 id="component-by-component-comparison"><a class="anchor" href="#component-by-component-comparison" aria-hidden="true">#</a>Component-by-Component Comparison</h1>
+<blockquote><p><strong>Revision 2 note.</strong> This document compares the two systems <em>as they exist</em>. The feature-level mapping against the <strong>intended product</strong> is in <a href="traceability-142-feature-matrix.html"><code>traceability/142-feature-matrix.md</code></a> and summarised in <a href="14-reuse-vs-build-map.html">14-reuse-vs-build-map.md</a>, which supersedes the summary tally at the end of this document.</p>
+<p>Three verdicts below changed after execution:</p>
+<div class="tw"><table><thead><tr><th>Component</th><th>Rev 1 verdict</th><th>Rev 2 verdict</th><th>Why</th></tr></thead><tbody><tr><td>Capability capsules</td><td>folded into "operator model — Conflict"</td><td><strong>Port</strong> — a distinct governed abstraction</td><td>11-section contract; 30 registered, 23 validated <span class="tag">V-11</span></td></tr><tr><td>RSI / evolution</td><td>not treated as a component</td><td><strong>Port (GEPA) + Build (7 surfaces)</strong></td><td>3,540 LOC with full promote/rollback, unwired <span class="tag">V-13</span></td></tr><tr><td>Durable queue + leases</td><td>"Reuse JiuwenSwarm's task loop"</td><td><strong>Port from AI4RnD</strong> — <code>actor_*</code> family</td><td>JiuwenSwarm has no durable queue or lease model <span class="tag">V-8</span></td></tr></tbody></table></div></blockquote>
+<p>For each AI4RnD component: what JiuwenSwarm offers in its place, and a verdict — <strong>Reuse</strong> (take JiuwenSwarm's), <strong>Port</strong> (bring AI4RnD's across largely intact), <strong>Adapt</strong> (bring the design, rewrite the implementation), <strong>Rewrite</strong> (neither is adequate), <strong>Drop</strong> (AI4RnD's exists only to compensate for its substrate), or <strong>Conflict</strong> (the two designs are mutually exclusive).</p>
+<hr>
+<h2 id="component-map"><a class="anchor" href="#component-map" aria-hidden="true">#</a>Component map</h2>
+<div class="fig"><pre class="mermaid">flowchart LR
+    subgraph AI[&quot;AI4RnD component&quot;]
+        direction TB
+        A1[&quot;solar-harness CLI&quot;]
+        A2[&quot;coordinator.sh&quot;]
+        A3[&quot;state machine JSON&quot;]
+        A4[&quot;graph_scheduler&quot;]
+        A5[&quot;capability routing&quot;]
+        A6[&quot;logical/physical operators&quot;]
+        A7[&quot;capability capsules&quot;]
+        A8[&quot;tmux dispatch&quot;]
+        A9[&quot;codex bridge&quot;]
+        A10[&quot;sprint artifacts&quot;]
+        A11[&quot;gate ledger&quot;]
+        A12[&quot;verification_gate&quot;]
+        A13[&quot;research evidence ledger&quot;]
+        A14[&quot;claim graph&quot;]
+        A15[&quot;citation spans&quot;]
+        A16[&quot;research evaluator + gates&quot;]
+        A17[&quot;repair DAGs&quot;]
+        A18[&quot;survey pipeline&quot;]
+        A19[&quot;wiki schema contracts&quot;]
+        A20[&quot;skills (SKILL.md)&quot;]
+        A21[&quot;status-server + React app&quot;]
+        A22[&quot;state.db&quot;]
+        A23[&quot;pane leases&quot;]
+    end
+    subgraph JW[&quot;JiuwenSwarm counterpart&quot;]
+        direction TB
+        B1[&quot;channels + slash commands&quot;]
+        B2[&quot;DeepAgent task loop&quot;]
+        B3[&quot;— none —&quot;]
+        B4[&quot;— none —&quot;]
+        B5[&quot;— none —&quot;]
+        B6[&quot;swarm roles + harness manifest&quot;]
+        B7[&quot;skills + Symphony score&quot;]
+        B8[&quot;in-process invocation&quot;]
+        B9[&quot;sub-agents + MCP&quot;]
+        B10[&quot;session store&quot;]
+        B11[&quot;— none —&quot;]
+        B12[&quot;— none —&quot;]
+        B13[&quot;— none —&quot;]
+        B14[&quot;— none —&quot;]
+        B15[&quot;— none —&quot;]
+        B16[&quot;Auto Harness (different purpose)&quot;]
+        B17[&quot;— none —&quot;]
+        B18[&quot;— none —&quot;]
+        B19[&quot;memory index&quot;]
+        B20[&quot;skills (SKILL.md)&quot;]
+        B21[&quot;web UI&quot;]
+        B22[&quot;SQLite + vector index&quot;]
+        B23[&quot;agent cache keys&quot;]
+    end
+    A1 --&gt; B1
+    A2 --&gt; B2
+    A6 --&gt; B6
+    A7 --&gt; B7
+    A8 --&gt; B8
+    A9 --&gt; B9
+    A10 --&gt; B10
+    A16 -.weak.-&gt; B16
+    A19 -.weak.-&gt; B19
+    A20 --&gt; B20
+    A21 --&gt; B21
+    A22 --&gt; B22
+    A23 --&gt; B23</pre></div>
+<p>Nine AI4RnD components map to nothing in JiuwenSwarm. All nine are in the routing, verification and evidence layers.</p>
+<hr>
+<h2 id="1-entry-surface-and-channels"><a class="anchor" href="#1-entry-surface-and-channels" aria-hidden="true">#</a>1. Entry surface and channels</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>solar-harness.sh</code> (6,119 LOC bash CLI), tmux cockpit, HTTP status server, <code>workflow_intake.py</code></td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>9 IM connectors, web UI, TUI, desktop app, ACP, A2A, cron, slash commands, all normalised through E2A</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Reuse JiuwenSwarm.</strong> Strictly superior — multi-channel, normalised, authenticated, packaged. AI4RnD's CLI is single-user, single-machine, macOS-primary.</td></tr><tr><td><strong>Caveat</strong></td><td>AI4RnD's <em>contracted</em> intake (fail-closed on unknown <code>workflow_id</code>) is a good property with no JiuwenSwarm equivalent. <strong>Port that behaviour</strong> into the research service's own API. <span class="tag">E-A17</span></td></tr></tbody></table></div>
+<h2 id="2-control-plane-task-loop"><a class="anchor" href="#2-control-plane-task-loop" aria-hidden="true">#</a>2. Control plane / task loop</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>coordinator.sh</code> (5,797 LOC), filesystem polling, <code>coordinator-state-machine.json</code>, watchdog, self-healing sweeps</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td><code>DeepAgent</code> dual-layer task loop with <code>TaskLoopController</code>, <code>LoopCoordinator</code>, <code>LoopQueues</code>, stop evaluators, <code>follow_up</code>/<code>steer</code>/<code>abort</code></td></tr><tr><td><strong>Verdict</strong></td><td><strong>Reuse JiuwenSwarm; drop AI4RnD's.</strong> In-process event-driven beats bash-polling on latency, reliability, testability and cancellation. <code>DISPATCH-PROTOCOL.md</code>'s nine post-mortems are all substrate failures that disappear here. <span class="tag">E-A08</span></td></tr><tr><td><strong>Keep from AI4RnD</strong></td><td>the <em>declarative</em> state machine as data. A frozen transition table with guards, <code>requested_role</code>, <code>required_artifacts</code>, ack/artifact timeouts and retry policy is more auditable than an implicit loop. Adapt as the research service's internal run state machine. <span class="tag">E-A03</span></td></tr></tbody></table></div>
+<h2 id="3-sprint-run-state-machine"><a class="anchor" href="#3-sprint-run-state-machine" aria-hidden="true">#</a>3. Sprint / run state machine</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>12 lifecycle states, artifact-existence guards, per-transition timeout and retry policy</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>none — no run concept above the session</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port (adapted).</strong> The research service needs a run lifecycle. Reuse the shape; replace file-existence guards with typed artifact validation, since the service owns its own store.</td></tr></tbody></table></div>
+<h2 id="4-dag-scheduling"><a class="anchor" href="#4-dag-scheduling" aria-hidden="true">#</a>4. DAG scheduling</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>graph_scheduler.py</code> (4,189 LOC): validation, topo order/layers, critical path, parallelism metrics, <strong>write-scope conflict avoidance</strong>, pass-mark guards</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>none. Swarm mode has a leader delegating to teammates, but no explicit dependency graph, no batching, no write-scope reasoning</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> Genuinely absent from JiuwenSwarm and genuinely valuable. Write-scope conflict avoidance (nodes with overlapping write scope never share a batch; undeclared scope ⇒ exclusive writer) is a correctness property for parallel agent work. <span class="tag">E-A07</span></td></tr><tr><td><strong>Risk</strong></td><td>4,189 LOC with heavy coupling to sprint paths, <code>state.db</code>, <code>gate_ledger</code>, <code>node_runstate</code> and <code>prerequisite_resolver</code>. Extracting the scheduling core from the Solar-specific plumbing is real work. Budget a rewrite of the I/O layer around a retained algorithm.</td></tr></tbody></table></div>
+<h2 id="5-capability-routing"><a class="anchor" href="#5-capability-routing" aria-hidden="true">#</a>5. Capability routing</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>hard capability gate (never relaxed), skills as preference with a Layer-3 liveness net, discriminated stall reasons, capability scoring</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>none. Selection is role + mode + config</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> The highest value-per-line item in the whole comparison. The algorithm is ~150 lines of pure scoring over a worker list; the data is two JSON files. <span class="tag">E-A06</span></td></tr><tr><td><strong>Adaptation</strong></td><td>JiuwenSwarm workers are swarm members and sub-agents, not tmux panes. Worker capability declarations would come from member config, not <code>physical-operators.json</code>. The <code>flow_control</code>/quota fields map onto model-provider rate limits.</td></tr></tbody></table></div>
+<h2 id="5b-capability-capsules-new-component-rev-2"><a class="anchor" href="#5b-capability-capsules-new-component-rev-2" aria-hidden="true">#</a>5b. Capability Capsules ⭐ <strong>new component, Rev 2</strong></h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>capability_capsules.py</code> (1,351 LOC) + <code>capability-capsule.v1.draft.json</code> requiring 11 sections + 30 registered capsules + <code>capsule_execution_gate</code> + <code>skill_to_capsule_compiler</code>. <strong>Executed:</strong> 30 load, 23 manifests validate, 0 invalid</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>skills — <code>SKILL.md</code> with <code>name</code> + <code>description</code>. No contract, no declared effects, no verification block, no operator compatibility, no composition rules</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> Not a naming difference. <code>effects</code> (read/write/execute/network/cost) and <code>operator_compatibility</code> (preferred/forbidden) are <em>router inputs</em> that let a capability be constrained at binding time. <code>bindings.skills</code> shows a JiuwenSwarm skill is an <strong>ingredient</strong> of a capsule. <code>required_guard_capsules</code> lets capsules gate capsules.</td></tr><tr><td><strong>Integration</strong></td><td>build a capsule↔skill bridge: a capsule's <code>bindings.skills</code> resolves to installed JiuwenSwarm skills, so the existing skill ecosystem becomes capsule-consumable without rewriting it.</td></tr></tbody></table></div>
+<h2 id="5c-rsi-controlled-self-improvement-new-component-rev-2"><a class="anchor" href="#5c-rsi-controlled-self-improvement-new-component-rev-2" aria-hidden="true">#</a>5c. RSI / controlled self-improvement ⭐ <strong>new component, Rev 2</strong></h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>integrations/gepa_optimizer/</code> (3,540 LOC): propose · run · review · promote · rollback · status; dry-run default; <code>--execute</code> requires all three budget caps; promotion restricted to <code>/tmp</code>; <code>hard_policy_checker</code> freezes safety policy. Plus <code>evolution_engine</code> (854) and <code>failure_miner</code> (109). <strong>All unwired.</strong></td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>Auto Harness — optimises <em>the harness</em> against CI pass, with worktree isolation and PR submission. Different target (capability, not correctness) and no promote/rollback of versioned artifacts</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port GEPA + wire; Build the other 7 surfaces.</strong> One of eight RSI surfaces exists.</td></tr><tr><td><strong>Synergy</strong></td><td>Auto Harness could <em>consume</em> AI4RnD's quality gates as its optimisation signal — scoring harness changes on grounding quality against a fixed benchmark rather than CI-pass. The strongest identified synergy between the systems.</td></tr></tbody></table></div>
+<h2 id="6-operator-model"><a class="anchor" href="#6-operator-model" aria-hidden="true">#</a>6. Operator model</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>logical-operators.json</code> (types + required capabilities + concurrency), <code>physical-operators.json</code> (concrete workers), capability capsules (see §5b)</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>the harness element manifest — <code>@harness_element</code> descriptors with <code>kind</code>, <code>name</code>, <code>description</code>, <code>factory_ref</code>, <code>input_schema</code> with per-field <code>source</code> markers, <code>interface_methods</code>; catalog-driven registration; JSON round-trip</td></tr><tr><td><strong>Verdict</strong></td><td>**Conflict — resolve in JiuwenSwarm's favour for <em>construction</em>, AI4RnD's for <em>routing</em>.** They answer different questions. JiuwenSwarm's manifest describes <em>how to build a capability</em>; AI4RnD's registry describes <em>which worker can serve a requirement</em>. Both are needed.</td></tr><tr><td><strong>Note</strong></td><td>JiuwenSwarm's manifest is the more mature abstraction (serialisable input schemas with param/context source markers, reflective <code>factory_ref</code> resolution). AI4RnD's registries are flatter but carry the routing metadata JiuwenSwarm lacks. Merging them is a design task, not a port.</td></tr><tr><td><strong>Blocker</strong></td><td>JiuwenSwarm's <code>config_specs.py</code> hardcodes which element names are assembled. The "configuration-file → harness loader" that would make the manifest dynamically extensible is listed as <strong>future work, not implemented</strong> (<code>DESIGN.md</code> §15). <span class="tag">E-J05</span></td></tr></tbody></table></div>
+<h2 id="7-worker-dispatch"><a class="anchor" href="#7-worker-dispatch" aria-hidden="true">#</a>7. Worker dispatch</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>tmux send-keys</code> with busy-marker polling and split text/Enter; workers launched <code>--dangerously-skip-permissions</code></td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>direct in-process invocation of <code>DeepAgent</code> and sub-agents; distributed members via <code>remote_member_bootstrap.py</code></td></tr><tr><td><strong>Verdict</strong></td><td><strong>Drop AI4RnD's entirely. Conflict if retained.</strong> Porting it into JiuwenSwarm would bypass the permission engine, the sandbox and the audit trail, and reintroduce every failure mode in <code>DISPATCH-PROTOCOL.md</code>. <span class="tag">E-A05</span>, <span class="tag">E-A08</span></td></tr><tr><td><strong>Exception</strong></td><td>the <strong>Codex bridge</strong> pattern — bounded work packets, tier classification, token budget with circuit breaker, read-only execution, ledger — is worth <strong>adapting</strong> as a general policy for delegating to any external, expensive, untrusted runtime.</td></tr></tbody></table></div>
+<h2 id="8-artifact-store"><a class="anchor" href="#8-artifact-store" aria-hidden="true">#</a>8. Artifact store</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>sprints/&lt;sid&gt;.*</code>, <code>events.jsonl</code>, run directories with typed sub-trees (<code>evidence/</code>, <code>claims/</code>, <code>quality/</code>, <code>repair/</code>, <code>bundle/</code>)</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>session store — a chat transcript with metadata</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> JiuwenSwarm has no equivalent and cannot gain one without adding a run concept. The artifact store must live with the research service.</td></tr><tr><td><strong>Consequence</strong></td><td>dual state. The session (JiuwenSwarm) and the run bundle (research service) both persist. They must be linked by an id, and the boundary must be explicit: <em>the session never becomes the source of truth for evidence.</em></td></tr></tbody></table></div>
+<h2 id="9-gate-ledger"><a class="anchor" href="#9-gate-ledger" aria-hidden="true">#</a>9. Gate ledger</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>append-only JSONL, 8 record kinds, author typing, verdict kinds (content/mechanical/infrastructure), eval generation, repair attempt, <strong>writer attribution on status transitions</strong>, <code>applied: False</code> for neutralised writes, node status as a projection</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>none</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port, largely intact.</strong> Small (single module), self-contained, no Solar-specific dependencies beyond path resolution, and the design is right. <span class="tag">E-A10</span></td></tr></tbody></table></div>
+<h2 id="10-verification-gate"><a class="anchor" href="#10-verification-gate" aria-hidden="true">#</a>10. Verification gate</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>evidence requirements + <strong>writer ≠ verifier</strong> + verifier decision; scheduler-side guards against self-graded passes</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>stop evaluators (loop control), permission engine (action control), LSP diagnostics</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> Independent-verifier enforcement is a policy JiuwenSwarm cannot express today.</td></tr><tr><td><strong>Adaptation</strong></td><td>"actor id" in JiuwenSwarm terms is a team member id or sub-agent id. Enforcing writer ≠ verifier requires the leader to dispatch evaluation to a <em>different</em> member — expressible in swarm mode, but currently a prompt convention, not a constraint.</td></tr></tbody></table></div>
+<h2 id="11-evidence-ledger"><a class="anchor" href="#11-evidence-ledger" aria-hidden="true">#</a>11. Evidence ledger</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>SourceDocument</code> / <code>EvidenceItem</code> / <code>Claim</code> / <code>ClaimEvidenceLink</code> / <code>CitationSpan</code>; SHA-256 content hashing; deterministic ids; char+byte-offset span verification; SQLite (7 tables) + JSONL</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>none — no such identifier exists in the tree <span class="tag">E-J14</span></td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port unchanged.</strong> This is the core asset. It is pure Python over stdlib + sqlite3, with no Solar coupling beyond <code>PYTHONPATH</code>. It is the most portable component in AI4RnD and the most valuable. <span class="tag">E-A13</span></td></tr></tbody></table></div>
+<h2 id="12-claim-graph"><a class="anchor" href="#12-claim-graph" aria-hidden="true">#</a>12. Claim graph</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>typed relations (<code>supports</code>, <code>refutes</code>, <code>qualifies</code>, <code>contradicts</code>, <code>depends_on</code>, <code>duplicates</code>, <code>updates</code>, <code>belongs_to_section</code>), verification status, confidence</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>none. Symphony's skill score is a graph, but of <em>skill I/O connectivity</em>, not of beliefs</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> Note the spec is richer than the implementation — <code>claim_graph.json</code> and contradiction search are specified in the SDD; the implemented surface is <code>mine</code> / <code>check</code> over claims and evidence links. Some build work remains regardless of integration.</td></tr></tbody></table></div>
+<h2 id="13-quality-gates-research-evaluator"><a class="anchor" href="#13-quality-gates-research-evaluator" aria-hidden="true">#</a>13. Quality gates / research evaluator</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>evaluator.py</code> (1,673 LOC): citation grounding, source authority, diversity, source-type plausibility, section coverage, expert novelty, figure grounding; per-profile thresholds; pluggable <code>@register_gate</code> registry</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>Auto Harness (optimises the harness), <code>skilldev/evaluate_stage</code> (rates a skill definition)</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port.</strong> Different purpose from anything JiuwenSwarm has. The gate registry pattern is clean and should survive intact. <span class="tag">E-A12</span></td></tr><tr><td><strong>Opportunity</strong></td><td>JiuwenSwarm's Auto Harness could <em>consume</em> these gates: harness changes that improve grounding scores on a fixed research benchmark would be a far better optimisation signal than CI-pass. This is the most interesting synergy in the analysis.</td></tr></tbody></table></div>
+<h2 id="14-repair-dag"><a class="anchor" href="#14-repair-dag" aria-hidden="true">#</a>14. Repair DAG</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>specified fully; implemented for surveys (<code>survey-auto-repair</code>, <code>survey-rewrite-queue</code>, <code>survey-rewrite-run</code>); repair state in the gate ledger (<code>repair_start</code>, <code>repair_exhausted</code>)</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td><code>on_tool_exception</code> / <code>on_model_exception</code> rails repair <em>context</em>, not <em>results</em></td></tr><tr><td><strong>Verdict</strong></td><td><strong>Port the design; complete the implementation.</strong> Generalising beyond surveys is unfinished work in AI4RnD today.</td></tr></tbody></table></div>
+<h2 id="15-skills"><a class="anchor" href="#15-skills" aria-hidden="true">#</a>15. Skills</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>skills/&lt;name&gt;/SKILL.md</code>, YAML frontmatter (<code>name</code>, <code>description</code>, plus Claude-Code extras: <code>user-invocable</code>, <code>disable-model-invocation</code>, <code>argument-hint</code>)</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td><code>skills/&lt;name&gt;/SKILL.md</code>, YAML frontmatter (<code>name</code>, <code>description</code>), optional <code>references/</code>, <code>scripts/</code>; five registries; hot install; <code>evolutions.json</code></td></tr><tr><td><strong>Verdict</strong></td><td><strong>Reuse JiuwenSwarm; migrate AI4RnD's content.</strong> The formats are compatible at the frontmatter level. <span class="tag">E-J16</span></td></tr><tr><td><strong>Friction</strong></td><td>AI4RnD skills are slash-command-flavoured (<code>/stats</code>, <code>/save</code>, <code>/review</code> — user-invoked, argument-hinted); JiuwenSwarm skills are model-invoked capability packages. Migration is a rewrite of <em>invocation assumptions</em>, not of format. AI4RnD skills that shell out to <code>solar-harness.sh</code> will not port at all.</td></tr><tr><td><strong>Bonus</strong></td><td>JiuwenSwarm's skill evolution and Symphony retrieval apply to migrated skills for free.</td></tr></tbody></table></div>
+<h2 id="16-knowledge-base"><a class="anchor" href="#16-knowledge-base" aria-hidden="true">#</a>16. Knowledge base</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>schema-contracted wiki: <code>entities.yaml</code> (typed fields, ranges, enums, conditional requirements), <code>edges.yaml</code>, <code>xref.yaml</code> (mandatory bidirectional links), <code>conventions.yaml</code> (ownership: user-owned / tools-only / append-only)</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>memory index — SQLite + vectors, file-watched, hybrid search; <code>dreaming/sweeper.py</code> consolidation; project memory; coding memory</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Both, for different jobs.</strong> JiuwenSwarm's memory is <em>retrieval over unstructured content</em>; AI4RnD's wiki is a <em>typed, linked, contract-validated knowledge graph</em>. Keep JiuwenSwarm's memory for agent recall; keep the wiki as a research artifact store if the research programme needs it. <span class="tag">E-A16</span></td></tr><tr><td><strong>Note</strong></td><td>AI4RnD's ownership contract (skills must not overwrite <code>raw/papers</code>) is a good idea with no JiuwenSwarm analogue.</td></tr></tbody></table></div>
+<h2 id="17-observability-surface"><a class="anchor" href="#17-observability-surface" aria-hidden="true">#</a>17. Observability surface</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>status-server.py</code> (14,400 LOC) + React app; DAG view, agent roster, process stream, honest stall display, per-sprint token usage; endpoints for verdicts</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>web UI, TUI, desktop app, skill graph/index views, OpenTelemetry</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Rewrite as a JiuwenSwarm view.</strong> The AI4RnD <em>design contract</em> (honest state rules: never show a filled progress bar for a stalled sprint; never synthesise "result available"; show stalls via the blocked step's raw tokens) is valuable and should carry over. The 14,400-line implementation should not. <span class="tag">E-A02</span></td></tr></tbody></table></div>
+<h2 id="18-sandbox-and-permissions"><a class="anchor" href="#18-sandbox-and-permissions" aria-hidden="true">#</a>18. Sandbox and permissions</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>none at the pane level; Codex path is read-only sandboxed</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>tiered permission engine; jiuwenbox (bwrap, cgroup, network policy, inference privacy proxy)</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Reuse JiuwenSwarm.</strong> Strict improvement. Research operators that fetch and parse untrusted web content are exactly the workload that should run sandboxed — arguably a stronger case than for coding agents. <span class="tag">E-J11</span>, <span class="tag">E-J12</span></td></tr></tbody></table></div>
+<h2 id="19-concurrency-control"><a class="anchor" href="#19-concurrency-control" aria-hidden="true">#</a>19. Concurrency control</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td>pane leases, <code>concurrency-policy.json</code>, per-operator <code>max_parallel</code>/<code>singleton</code>, write-scope batching, SQLite WAL</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td>agent cache keyed by <code>(mode, sub_mode, project_dir)</code>; per-session lifecycle locks; <code>tenant_agent_pool.py</code></td></tr><tr><td><strong>Verdict</strong></td><td><strong>Adapt AI4RnD's declarative policy.</strong> Per-operator concurrency limits and write-scope exclusion are expressible as data and belong with the ported scheduler. Pane leases are substrate-specific — drop.</td></tr></tbody></table></div>
+<h2 id="20-distribution-and-packaging"><a class="anchor" href="#20-distribution-and-packaging" aria-hidden="true">#</a>20. Distribution and packaging</h2>
+<div class="tw"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>AI4RnD</strong></td><td><code>get-solar.sh</code> shell installer into <code>~/.solar</code> + <code>~/.claude/solar</code>, install receipt, <code>doctor</code>/<code>update</code>/<code>repair</code>/<code>backup</code>/<code>uninstall</code>; pipx wrapper; <code>install.ps1</code> provisioning WSL2</td></tr><tr><td><strong>JiuwenSwarm</strong></td><td><code>pip install jiuwenswarm</code>, <code>jiuwenswarm-init</code>, <code>jiuwenswarm-start</code>; signed desktop apps for Windows/macOS with auto-update</td></tr><tr><td><strong>Verdict</strong></td><td><strong>Reuse JiuwenSwarm.</strong> AI4RnD's own README rates Windows as experimental and the macOS DMG as needing real-machine release proof.</td></tr></tbody></table></div>
+<hr>
+<h2 id="summary-tally-component-level"><a class="anchor" href="#summary-tally-component-level" aria-hidden="true">#</a>Summary tally (component level)</h2>
+<div class="tw"><table><thead><tr><th>Verdict</th><th>Components</th></tr></thead><tbody><tr><td><strong>Reuse JiuwenSwarm</strong> (6)</td><td>channels, task loop, skills runtime, sandbox/permissions, packaging, agent memory</td></tr><tr><td><strong>Port from AI4RnD</strong> (11)</td><td>evidence ledger, claim graph, citation spans, research evaluator + gate registry, gate ledger, verification gate, DAG scheduler, capability routing, <strong>capability capsules</strong>, <strong>GEPA/RSI-1</strong>, **durable queue + leases (<code>actor_*</code>)**</td></tr><tr><td><strong>Adapt</strong> (5)</td><td>run state machine, concurrency policy, Codex-bridge delegation pattern, contracted intake, observability honesty rules</td></tr><tr><td><strong>Rewrite</strong> (3)</td><td>status server UI, repair-DAG generalisation, <strong>the grounding check (precision 0.25 — must not be ported)</strong></td></tr><tr><td><strong>Drop</strong> (4)</td><td>tmux dispatch, coordinator polling loop, pane leases, shell installer</td></tr><tr><td><strong>Conflict</strong> (1)</td><td>operator model — a merge of vocabularies, not a port</td></tr><tr><td><strong>Build</strong> (7 surfaces)</td><td>RSI 2, 4, 5, 6, 7, 8 + entailment</td></tr></tbody></table></div>
+<p><strong>The shape of the answer, revised.</strong> JiuwenSwarm wins every execution-layer contest. AI4RnD wins every correctness-<em>architecture</em> contest — but not every correctness-<em>implementation</em> contest, because its central grounding gate does not work and its capsule and RSI layers are disconnected.</p>
+<p>Two caveats that Revision 1 did not carry:</p>
+<ul><li>"Reuse JiuwenSwarm's permissions" now requires repairing the built-in rule loading first</li></ul>
+<p>(V-4), and cannot deliver per-operator policy (V-6).</p>
+<ul><li>"Port AI4RnD's evaluators" must exclude the grounding judgement (V-12), which needs</li></ul>
+<p>replacing rather than moving.</p>
+<p>The feature-level view — which is the one that should drive planning — is in <a href="14-reuse-vs-build-map.html">14-reuse-vs-build-map.md</a>: <strong>69 port · 27 build · 23 reuse-JW · 21 adapt · 2 defer.</strong></p></article><div class="pager"><a href="03-workflow-traces.html"><div class="d">← Previous</div><div class="t">Workflow traces</div></a><a class="nx" href="05-capability-matrix.html"><div class="d">Next →</div><div class="t">Capability matrix</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

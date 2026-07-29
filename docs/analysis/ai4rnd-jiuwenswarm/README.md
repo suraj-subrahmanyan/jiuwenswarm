@@ -68,7 +68,28 @@ Full account: **[15-correction-log.md](15-correction-log.md)**.
 | **19** | [**Product layers & UX**](19-product-layers-and-ux.md) | product model, user controls, state ownership |
 | — | [142-feature matrix](traceability/142-feature-matrix.md) · [CSV](traceability/142-feature-matrix.csv) | row-by-row |
 | — | [Diagrams](diagrams/README.md) | 27 diagrams |
-| — | [`ai4rnd-architecture-review.html`](ai4rnd-architecture-review.html) | single-page review artifact |
+
+### Rendered HTML
+
+Every document above is also published as a polished, fully offline HTML site — no CDN, no
+network, no build step. Open either file directly in a browser.
+
+| Artifact | What it is |
+|---|---|
+| [`html/index.html`](html/index.html) | **navigable site** — 23 pages, sidebar, per-page contents, prev/next, light & dark |
+| [`ai4rnd-architecture-review.html`](ai4rnd-architecture-review.html) | **single-file edition** — everything on one page, 660 KB, for archiving or printing |
+
+All 63 Mermaid diagrams render inline from a vendored copy of the renderer
+(`html/vendor/mermaid.min.js`), themed to the same tokens as the text. Markdown remains the
+source of truth; the HTML is generated from it:
+
+```
+python3 tools/mdsite.py .     # -> html/  (23 pages + index + style.css)
+python3 tools/onepage.py .    # -> ai4rnd-architecture-review.html
+```
+
+Colours come from AI4Research's own `DESIGN.md`: Huawei black / white / red, red rationed as a
+signal, amber for blocked, quiet ink for done.
 
 ---
 
