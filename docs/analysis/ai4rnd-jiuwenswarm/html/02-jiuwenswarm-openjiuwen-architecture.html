@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JiuwenSwarm &amp; OpenJiuwen &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 4</p>
+<div class="navsec">Overview</div>
+<a class="doc" href="00-executive-summary.html">Executive summary</a>
+<div class="navsec">Background</div>
+<a class="doc" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
+<a class="doc on" href="02-jiuwenswarm-openjiuwen-architecture.html">JiuwenSwarm &amp; OpenJiuwen</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="03-integration-options.html">Integration options</a>
+<a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<div class="navsec">Delivery</div>
+<a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="06-evidence-assumptions-open-questions.html">Evidence &amp; open questions</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Background / 02-jiuwenswarm-openjiuwen-architecture.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-the-two-layer-shape">1. The two-layer shape</a><a class="l2" href="#2-the-execution-mechanisms">2. The execution mechanisms</a><a class="l3" href="#confirmed-by-execution">Confirmed by execution</a><a class="l3" href="#confirmed-gaps-the-ones-that-shape-the-integration">Confirmed gaps — the ones that shape the integration</a><a class="l2" href="#3-skills-symphony-and-why-capsules-don-t-map-onto-them">3. Skills, Symphony and why capsules don't map onto them</a><a class="l2" href="#4-the-evolution-framework">4. The evolution framework</a><a class="l2" href="#5-a-naming-hazard">5. A naming hazard</a><a class="l2" href="#6-what-the-foundation-provides-netted-out">6. What the foundation provides, netted out</a></nav><h1 id="jiuwenswarm-and-openjiuwen-architecture"><a class="anchor" href="#jiuwenswarm-and-openjiuwen-architecture" aria-hidden="true">#</a>JiuwenSwarm and OpenJiuwen Architecture</h1>
+<p><strong>Purpose of this document: describe the foundation as it actually is — what can be relied on, what exists but is not reachable, and what is missing.</strong> Every "confirmed" below was executed in this analysis; every "not reachable" was demonstrated, not assumed. Probe details: <a href="06-evidence-assumptions-open-questions.html">06-evidence-assumptions-open-questions.md</a>.</p>
+<p>Versions examined: JiuwenSwarm <code>0.2.3.beta1</code>, OpenJiuwen <code>0.1.15.post3</code>.</p>
+<hr>
+<h2 id="1-the-two-layer-shape"><a class="anchor" href="#1-the-two-layer-shape" aria-hidden="true">#</a>1. The two-layer shape</h2>
+<p>JiuwenSwarm is the <strong>application</strong>: the deployable product with channels, a gateway, a web UI and workspace management. OpenJiuwen is the <strong>runtime library</strong> it is built on: agents, execution engines, sandboxing, memory and evolution primitives. Most execution capability lives in OpenJiuwen; JiuwenSwarm wires a subset of it into the application.</p>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph CL[&quot;Clients&quot;]
+        direction LR
+        WEB[&quot;Web UI&quot;] --- TUI[&quot;TUI&quot;] --- IM[&quot;9 IM channels&lt;br/&gt;incl. WeChat · Discord&quot;] --- A2A[&quot;Agent-to-agent&lt;br/&gt;peers&quot;]
+    end
+    subgraph JWS[&quot;JiuwenSwarm — application layer&quot;]
+        direction LR
+        GW[&quot;Gateway&lt;br/&gt;channel adapters · routing&quot;] --&gt; AS[&quot;Agent server&lt;br/&gt;sessions · modes · skills&quot;]
+        AS --- SYM[&quot;Symphony&lt;br/&gt;skill retrieval &amp; ranking&quot;]
+        AS --- WSP[&quot;Workspace&lt;br/&gt;config · skills · templates&quot;]
+    end
+    subgraph OJW[&quot;OpenJiuwen — runtime library&quot;]
+        direction LR
+        DA[&quot;DeepAgent&lt;br/&gt;single-agent turns&quot;] --- CW[&quot;Core Workflow / Pregel&lt;br/&gt;durable staged graphs&quot;]
+        CW --- SF[&quot;SwarmFlow&lt;br/&gt;scripted multi-agent pipelines&quot;]
+        SF --- TM[&quot;Dynamic Team&lt;br/&gt;leader + teammates&quot;]
+        DA --- WT[&quot;Code mode · worktrees&quot;]
+        TM --- EVO[&quot;agent_evolving&lt;br/&gt;self-improvement framework&quot;]
+    end
+    subgraph INFRA[&quot;Shared infrastructure&quot;]
+        direction LR
+        CKP[&quot;Checkpointer&lt;br/&gt;sqlite, process default&quot;] --- POOL[&quot;Model pool&lt;br/&gt;+ allocator&quot;] --- BOX[&quot;jiuwenbox sandbox&lt;br/&gt;bwrap / cgroups&quot;] --- OBS[&quot;Observability&lt;br/&gt;spans · telemetry&quot;]
+    end
+    CL --&gt; JWS --&gt; OJW --&gt; INFRA</pre></div>
+<h2 id="2-the-execution-mechanisms"><a class="anchor" href="#2-the-execution-mechanisms" aria-hidden="true">#</a>2. The execution mechanisms</h2>
+<p>These five mechanisms are what AI4RnD work would actually run on. <strong>None of them is a product architecture</strong>; each is a way of running work.</p>
+<div class="tw"><table><thead><tr><th>Mechanism</th><th>Best for</th><th>Durability model</th></tr></thead><tbody><tr><td><strong>DeepAgent</strong></td><td>One bounded agent task</td><td>Session checkpointer</td></tr><tr><td><strong>Core Workflow (Pregel)</strong></td><td>Stable multi-stage lifecycles with checkpoints and human interrupts</td><td>Graph snapshot/restore per superstep</td></tr><tr><td><strong>SwarmFlow</strong></td><td>Deterministic multi-agent pipelines: fan-out, panels, loops</td><td>Write-ahead journal; completed calls replay for free</td></tr><tr><td><strong>Dynamic Team</strong></td><td>Genuinely open-ended collaboration</td><td>Team session state</td></tr><tr><td><strong>Code mode / worktrees</strong></td><td>Software construction in isolation</td><td>Git worktree per task</td></tr></tbody></table></div>
+<h3 id="confirmed-by-execution"><a class="anchor" href="#confirmed-by-execution" aria-hidden="true">#</a>Confirmed by execution</h3>
+<ul><li><strong>Journal replay is real.</strong> A SwarmFlow run interrupted at step B was resumed: only step B</li></ul>
+<p>re-executed; a third run replayed entirely from the journal with zero live calls.</p>
+<ul><li><strong>Runtime-computed fan-out works in Core Workflow.</strong> A conditional router returning a</li></ul>
+<p>runtime-computed list of target nodes was accepted and the graph ran to completion. (Caveat: the router receives no arguments — fan-out width must come from a closure or a channel read.)</p>
+<ul><li><strong>Admission control is a hard precondition.</strong> SwarmFlow refuses to launch without a configured</li></ul>
+<p>concurrency governor, with an explicit error, rather than running unmetered.</p>
+<ul><li><strong>A stock install has persistent state.</strong> The agent server configures a sqlite-backed</li></ul>
+<p>checkpointer as the process default at startup.</p>
+<h3 id="confirmed-gaps-the-ones-that-shape-the-integration"><a class="anchor" href="#confirmed-gaps-the-ones-that-shape-the-integration" aria-hidden="true">#</a>Confirmed gaps — the ones that shape the integration</h3>
+<div class="tw"><table><thead><tr><th>Gap</th><th>What was observed</th><th>Why it matters</th></tr></thead><tbody><tr><td><strong>Silent model substitution</strong></td><td>Requesting an unknown model name resolves to <code>None</code> and the worker's default model is used, with no error or warning</td><td>A research product cannot run a step on a substitute model unannounced. Until fixed, model routing stays on the AI4RnD side.</td></tr><tr><td><strong>Resume is not exposed</strong></td><td>The agent-facing SwarmFlow tool advertises a <code>resume_id</code> parameter and rejects it: <em>"not supported yet"</em>. Resume exists only as an internal control-plane call</td><td>The integration bridge must provide the resume path; it is not free</td></tr><tr><td><strong>Failure degrades to <code>None</code></strong></td><td>A step that fails all its retries returns <code>None</code>, and the workflow completes "successfully" around it</td><td>The engine's completion signal is not evidence of step success. AI4RnD must keep its own run-state authority</td></tr><tr><td><strong><code>agent_type</code> is unread</strong></td><td>The option is validated and forwarded, but no execution backend consumes it</td><td>Typed operator binding (researcher vs. builder vs. judge) must be built in the bridge</td></tr><tr><td><strong>Guardrail tier loads zero rules</strong></td><td>OpenJiuwen's loader looks only inside its own package, where no rules file ships; JiuwenSwarm installs a rules file that no code reads back</td><td>The built-in shell-safety tier is inert in a stock install; fix before relying on it</td></tr></tbody></table></div>
+<p>An important pattern in these gaps: <strong>the engine fails loudly on typos but silently on unimplemented features.</strong> A misspelled option raises a precise error; an advertised-but-unwired option passes clean. Reading the source overstates what is reachable — which is why every reuse claim in this package is labelled by whether it was executed.</p>
+<h2 id="3-skills-symphony-and-why-capsules-don-t-map-onto-them"><a class="anchor" href="#3-skills-symphony-and-why-capsules-don-t-map-onto-them" aria-hidden="true">#</a>3. Skills, Symphony and why capsules don't map onto them</h2>
+<p>JiuwenSwarm's unit of reusable capability is the <strong>skill</strong> (name, description, prompt, optional config), retrieved and ranked by Symphony using embedding similarity. Two properties make skills insufficient as a capsule substrate:</p>
+<ol><li><strong>No contract.</strong> Skills declare no inputs, outputs, preconditions, effects or verification.</li><li><strong>Ranking never refuses.</strong> Symphony returns the best-scoring match; it has no concept of "no qualified capability exists — stall." Research correctness requires the refusal.</li></ol>
+<p>Skills remain the right mechanism for what they are; capsules layer governance <em>above</em> them and can bind to skills as one kind of resource.</p>
+<h2 id="4-the-evolution-framework"><a class="anchor" href="#4-the-evolution-framework" aria-hidden="true">#</a>4. The evolution framework</h2>
+<p>OpenJiuwen ships a genuine self-improvement framework (<code>agent_evolving</code>): tunable-parameter handles with freeze markers, case datasets, exact-match and LLM-judge metrics, a trainer with candidate selection on a validation set, snapshot/rollback, multi-dimensional credit assignment, and PPO-based RL.</p>
+<p>Its reach today is narrow, and this was verified rather than assumed:</p>
+<ul><li>The trainer requires an agent that exposes its tunable parameters; **exactly one agent class in</li></ul>
+<p>OpenJiuwen does**.</p>
+<ul><li>JiuwenSwarm imports only the experience-archive services and the tool-description optimizer</li></ul>
+<p>from the framework. The trainer, updater and RL stack are not imported by the application at all.</p>
+<ul><li>OpenJiuwen's graph-memory module is referenced <strong>zero</strong> times in JiuwenSwarm.</li></ul>
+<p>So the substrate for governed RSI exists and is well built, but treating it as "already wired" was a Revision 3 error, corrected here: binding AI4RnD subjects (capsules, prompts, routing policies, evaluators) to it is adaptation work, and only one of the eight RSI surfaces — text artifacts — has working machinery on both sides today.</p>
+<h2 id="5-a-naming-hazard"><a class="anchor" href="#5-a-naming-hazard" aria-hidden="true">#</a>5. A naming hazard</h2>
+<p>OpenJiuwen defines <code>Operator</code> as a <strong>tunable-parameter handle</strong> and states in source: <em>"Operator is NOT an executable unit."</em> The AI4RnD workbook defines Operator as exactly an executable unit. Integration code must give the AI4RnD concept a distinct name internally, or the collision will eventually produce a wrong binding. (JiuwenSwarm also has an <code>UpdaterService</code> that is an app auto-updater, unrelated to the evolution framework's <code>Updater</code> — same hazard, same rule.)</p>
+<h2 id="6-what-the-foundation-provides-netted-out"><a class="anchor" href="#6-what-the-foundation-provides-netted-out" aria-hidden="true">#</a>6. What the foundation provides, netted out</h2>
+<div class="tw"><table><thead><tr><th>AI4RnD needs</th><th>Foundation provides</th><th>Verdict</th></tr></thead><tbody><tr><td>Channels, UI, sessions, config, packaging</td><td>Fully</td><td>reuse</td></tr><tr><td>Sandboxed execution</td><td>jiuwenbox (bwrap/cgroups)</td><td>reuse (enforcement untested here — needs kernel privileges)</td></tr><tr><td>Durable staged execution</td><td>Core Workflow / Pregel</td><td>reuse</td></tr><tr><td>Deterministic replayable pipelines</td><td>SwarmFlow journal</td><td>reuse, once resume is exposed via the bridge</td></tr><tr><td>Concurrency and admission</td><td>ConcurrencyGovernor</td><td>reuse</td></tr><tr><td>Persistent session state</td><td>sqlite checkpointer</td><td>reuse — but it is <em>session</em>-scoped; project state needs its own store</td></tr><tr><td>Capability governance</td><td>nothing comparable</td><td>AI4RnD builds</td></tr><tr><td>Honest capability routing</td><td>Symphony ranks, never refuses</td><td>AI4RnD builds</td></tr><tr><td>Trustworthy failure semantics</td><td>completion signal unreliable (<code>None</code> steps)</td><td>AI4RnD keeps run-state authority</td></tr><tr><td>Model routing that fails loudly</td><td>silent substitution</td><td>AI4RnD keeps until fixed upstream</td></tr><tr><td>Evidence, gates, evaluators</td><td>nothing comparable</td><td>AI4RnD builds/ports</td></tr><tr><td>Self-improvement machinery</td><td>real but narrowly wired</td><td>adapt, surface by surface</td></tr></tbody></table></div></article><div class="pager"><a href="01-intended-ai4rnd-product.html"><div class="d">← Previous</div><div class="t">The intended AI4RnD product</div></a><a class="nx" href="03-integration-options.html"><div class="d">Next →</div><div class="t">Integration options</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

@@ -13,7 +13,7 @@ all 142 workbook outcomes. Anything else is an execution pattern, a partial impl
 rejected option — and is labelled as such.
 
 Row-by-row evidence: [20-feature-implementation-ownership.md](20-feature-implementation-ownership.md)
-· [preservation gate CSV](traceability/142-feature-preservation-gate.csv).
+· [preservation gate CSV](../traceability/142-feature-preservation-gate.csv).
 
 ---
 

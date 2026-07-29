@@ -1,0 +1,378 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recommended architecture &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 4</p>
+<div class="navsec">Overview</div>
+<a class="doc" href="00-executive-summary.html">Executive summary</a>
+<div class="navsec">Background</div>
+<a class="doc" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
+<a class="doc" href="02-jiuwenswarm-openjiuwen-architecture.html">JiuwenSwarm &amp; OpenJiuwen</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="03-integration-options.html">Integration options</a>
+<a class="doc on" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<div class="navsec">Delivery</div>
+<a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="06-evidence-assumptions-open-questions.html">Evidence &amp; open questions</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Decision / 04-recommended-target-architecture.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-the-structure">1. The structure</a><a class="l2" href="#2-the-end-to-end-functional-workflow">2. The end-to-end functional workflow</a><a class="l2" href="#3-ownership-at-a-glance">3. Ownership at a glance</a><a class="l2" href="#4-boundary-rules">4. Boundary rules</a><a class="l2" href="#5-the-governed-rsi-loop">5. The governed RSI loop</a><a class="l2" href="#6-what-retires-when-in-the-mature-form">6. What retires when, in the mature form</a></nav><h1 id="recommended-target-architecture"><a class="anchor" href="#recommended-target-architecture" aria-hidden="true">#</a>Recommended Target Architecture</h1>
+<p><strong>AI4RnD is a first-class, persistent project subsystem on JiuwenSwarm. AI4RnD permanently owns product semantics; JiuwenSwarm owns the application foundation; OpenJiuwen supplies execution mechanisms; a thin bridge compiles ready sub-plans onto them progressively.</strong></p>
+<p>This is Option C from <a href="03-integration-options.html">03-integration-options.md</a>. This document gives the structure, the central end-to-end workflow, and the rules that keep the boundaries honest.</p>
+<hr>
+<h2 id="1-the-structure"><a class="anchor" href="#1-the-structure" aria-hidden="true">#</a>1. The structure</h2>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 448" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Recommended integration structure">
+<defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="8" y="8" width="1174" height="96" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="32" font-size="12.5" font-weight="640" fill="var(--primary-ink)">JiuwenSwarm — application foundation</text>
+<rect x="8" y="112" width="1174" height="104" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="136" font-size="12.5" font-weight="640" fill="var(--primary-ink)">AI4RnD — product core (permanent)</text>
+<rect x="8" y="224" width="1174" height="104" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="248" font-size="12.5" font-weight="640" fill="var(--primary-ink)">AI4RnD–Jiuwen integration bridge</text>
+<rect x="8" y="336" width="1174" height="96" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="360" font-size="12.5" font-weight="640" fill="var(--primary-ink)">OpenJiuwen — execution mechanisms</text>
+<rect x="240" y="42" width="200" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="340.0" y="68" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Channels · Gateway</text>
+<rect x="480" y="42" width="200" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="580.0" y="68" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Sessions · workspace</text>
+<rect x="720" y="42" width="430" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="935.0" y="68" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">UI shell · accounts · providers · config · packaging</text>
+<rect x="40" y="146" width="240" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="160.0" y="169" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project subsystem</text>
+<text x="160.0" y="183" font-size="11.5" text-anchor="middle" fill="var(--muted)">record · Contract · budget · status</text>
+<rect x="320" y="146" width="250" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="445.0" y="169" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Intention Compiler · Planner</text>
+<text x="445.0" y="183" font-size="11.5" text-anchor="middle" fill="var(--muted)">→ semantic TaskGraph</text>
+<rect x="610" y="146" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="725.0" y="169" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capability Capsules ·</text>
+<text x="725.0" y="183" font-size="11.5" text-anchor="middle" fill="var(--muted)">Logical Operators</text>
+<rect x="880" y="146" width="270" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1015.0" y="169" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence · gates · evaluators</text>
+<text x="1015.0" y="183" font-size="11.5" text-anchor="middle" fill="var(--muted)">data foundations · governed RSI</text>
+<rect x="320" y="258" width="250" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="445.0" y="281" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Compiler</text>
+<text x="445.0" y="295" font-size="11.5" text-anchor="middle" fill="var(--muted)">ready sub-plan → execution spec</text>
+<rect x="610" y="258" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="725.0" y="281" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capability & model binding</text>
+<text x="725.0" y="295" font-size="11.5" text-anchor="middle" fill="var(--muted)">honest stall · no substitution</text>
+<rect x="880" y="258" width="270" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1015.0" y="281" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Fact converter</text>
+<text x="1015.0" y="295" font-size="11.5" text-anchor="middle" fill="var(--muted)">receipts → evidence & state</text>
+<rect x="40" y="370" width="800" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="440.0" y="396" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Core Workflow · SwarmFlow · DeepAgent · Dynamic Team · code mode / worktrees</text>
+<path d="M520 86 L200 146" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah2)"/>
+<text x="300" y="124" font-size="11" text-anchor="start" fill="var(--muted)">requests · sessions</text>
+<path d="M445 198 L445 258" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah2)"/>
+<text x="453" y="232" font-size="11" text-anchor="start" fill="var(--muted)">ready sub-plans</text>
+<path d="M725 198 L725 258" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah2)"/>
+<text x="733" y="232" font-size="11" text-anchor="start" fill="var(--muted)">qualified capsules</text>
+<path d="M1015 258 L1015 198" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah2)"/>
+<text x="1023" y="232" font-size="11" text-anchor="start" fill="var(--muted)">evidence · verified state</text>
+<path d="M445 310 L445 370" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah2)"/>
+<text x="453" y="344" font-size="11" text-anchor="start" fill="var(--muted)">stages · scripts</text>
+<path d="M725 310 L725 370" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah2)"/>
+<text x="733" y="344" font-size="11" text-anchor="start" fill="var(--muted)">bound agent calls</text>
+<path d="M840 392 L1015 392 L1015 310" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah2)"/>
+<text x="860" y="384" font-size="11" text-anchor="start" fill="var(--muted)">execution facts</text>
+</svg></div>
+<p>The bridge is the only place the two vocabularies meet: on one side, plan nodes, capability requirements and gate policy; on the other, workflow scripts, agent calls and worktrees. It never makes semantic decisions — it translates them.</p>
+<h2 id="2-the-end-to-end-functional-workflow"><a class="anchor" href="#2-the-end-to-end-functional-workflow" aria-hidden="true">#</a>2. The end-to-end functional workflow</h2>
+<p>The central picture. <strong>Solid arrows are control and execution; dashed arrows are evidence and state.</strong> The semantic TaskGraph defines <em>what must happen</em>; execution specifications define <em>how ready work runs</em>.</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 918" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="End-to-end functional workflow">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="126" y="8" width="1056" height="76" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="8" width="112" height="76" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="28" font-size="15" font-weight="700" fill="var(--primary-ink)">1</text>
+<text x="20" y="46" font-size="10.5" fill="var(--subtle)">User and</text>
+<text x="20" y="60" font-size="10.5" fill="var(--subtle)">channels</text>
+<rect x="126" y="92" width="1056" height="76" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="92" width="112" height="76" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="112" font-size="15" font-weight="700" fill="var(--primary-ink)">2</text>
+<text x="20" y="130" font-size="10.5" fill="var(--subtle)">JiuwenSwarm</text>
+<text x="20" y="144" font-size="10.5" fill="var(--subtle)">application</text>
+<rect x="126" y="176" width="1056" height="236" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="176" width="112" height="236" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="196" font-size="15" font-weight="700" fill="var(--primary-ink)">3</text>
+<text x="20" y="214" font-size="10.5" fill="var(--subtle)">AI4RnD product</text>
+<text x="20" y="228" font-size="10.5" fill="var(--subtle)">core</text>
+<rect x="126" y="420" width="1056" height="168" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="420" width="112" height="168" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="440" font-size="15" font-weight="700" fill="var(--primary-ink)">4</text>
+<text x="20" y="458" font-size="10.5" fill="var(--subtle)">AI4RnD–Jiuwen</text>
+<text x="20" y="472" font-size="10.5" fill="var(--subtle)">integration</text>
+<text x="20" y="486" font-size="10.5" fill="var(--subtle)">bridge</text>
+<rect x="126" y="596" width="1056" height="84" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="596" width="112" height="84" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="616" font-size="15" font-weight="700" fill="var(--primary-ink)">5</text>
+<text x="20" y="634" font-size="10.5" fill="var(--subtle)">OpenJiuwen</text>
+<text x="20" y="648" font-size="10.5" fill="var(--subtle)">execution</text>
+<text x="20" y="662" font-size="10.5" fill="var(--subtle)">runtime</text>
+<rect x="126" y="688" width="1056" height="74" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="688" width="112" height="74" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="708" font-size="15" font-weight="700" fill="var(--primary-ink)">7</text>
+<text x="20" y="726" font-size="10.5" fill="var(--subtle)">External</text>
+<text x="20" y="740" font-size="10.5" fill="var(--subtle)">models, tools,</text>
+<text x="20" y="754" font-size="10.5" fill="var(--subtle)">sources</text>
+<rect x="126" y="770" width="1056" height="124" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="770" width="112" height="124" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="790" font-size="15" font-weight="700" fill="var(--primary-ink)">6</text>
+<text x="20" y="808" font-size="10.5" fill="var(--subtle)">Data, evidence</text>
+<text x="20" y="822" font-size="10.5" fill="var(--subtle)">and project</text>
+<text x="20" y="836" font-size="10.5" fill="var(--subtle)">state</text>
+<rect x="226" y="26" width="110" height="40" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="281.0" y="50" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">User</text>
+<rect x="392" y="26" width="210" height="40" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="497.0" y="50" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Channel · Web UI · CLI</text>
+<rect x="392" y="112" width="210" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="497.0" y="138" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Gateway · session</text>
+<rect x="880" y="112" width="270" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1015.0" y="131" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project view</text>
+<text x="1015.0" y="145" font-size="11.5" text-anchor="middle" fill="var(--muted)">progress · approvals · deliverables</text>
+<rect x="226" y="196" width="170" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="311.0" y="224" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Intention Compiler</text>
+<rect x="462" y="196" width="120" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="522.0" y="224" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Planner</text>
+<rect x="648" y="196" width="210" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="753.0" y="217" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Semantic readiness ·</text>
+<text x="753.0" y="231" font-size="11.5" text-anchor="middle" fill="var(--muted)">run-state authority</text>
+<rect x="690" y="308" width="150" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="765.0" y="338" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Gate decision</text>
+<rect x="462" y="308" width="140" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="532.0" y="331" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Repair ·</text>
+<text x="532.0" y="345" font-size="11.5" text-anchor="middle" fill="var(--muted)">replanning</text>
+<rect x="900" y="308" width="150" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="975.0" y="338" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Deliverable</text>
+<rect x="226" y="440" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="351.0" y="465" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capability &amp; model binding</text>
+<text x="351.0" y="479" font-size="11.5" text-anchor="middle" fill="var(--muted)">stalls honestly — never substitutes</text>
+<rect x="546" y="440" width="220" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="656.0" y="465" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Compiler</text>
+<text x="656.0" y="479" font-size="11.5" text-anchor="middle" fill="var(--muted)">progressively compiles ready sub-plans</text>
+<rect x="836" y="440" width="180" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="926.0" y="465" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Dispatch ·</text>
+<text x="926.0" y="479" font-size="11.5" text-anchor="middle" fill="var(--muted)">resume · cancel</text>
+<rect x="560" y="520" width="250" height="50" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="685.0" y="542" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Fact converter</text>
+<text x="685.0" y="556" font-size="11.5" text-anchor="middle" fill="var(--muted)">a None result is a failure</text>
+<rect x="226" y="612" width="800" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="626.0" y="642" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Core Workflow · SwarmFlow · DeepAgent · Dynamic Team · code mode / worktrees</text>
+<rect x="226" y="700" width="800" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="626.0" y="726" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Model providers · tools · literature &amp; data sources</text>
+<path d="M236 814 a 75.0 8 0 0 1 150 0 v 36 a 75.0 8 0 0 1 -150 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M236 814 a 75.0 8 0 0 0 150 0" fill="none" stroke="var(--line-strong)"/>
+<text x="311.0" y="836" font-size="11" text-anchor="middle" fill="var(--ink)">Project store</text>
+<text x="311.0" y="848" font-size="11" text-anchor="middle" fill="var(--ink)">Contract · plan · runs</text>
+<path d="M416 814 a 75.0 8 0 0 1 150 0 v 36 a 75.0 8 0 0 1 -150 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M416 814 a 75.0 8 0 0 0 150 0" fill="none" stroke="var(--line-strong)"/>
+<text x="491.0" y="836" font-size="11" text-anchor="middle" fill="var(--ink)">Gate ledger</text>
+<text x="491.0" y="848" font-size="11" text-anchor="middle" fill="var(--ink)">append-only</text>
+<path d="M596 814 a 85.0 8 0 0 1 170 0 v 36 a 85.0 8 0 0 1 -170 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M596 814 a 85.0 8 0 0 0 170 0" fill="none" stroke="var(--line-strong)"/>
+<text x="681.0" y="836" font-size="11" text-anchor="middle" fill="var(--ink)">Evidence ledger</text>
+<text x="681.0" y="848" font-size="11" text-anchor="middle" fill="var(--ink)">citation spans</text>
+<rect x="806" y="806" width="160" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="886.0" y="829" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improvement</text>
+<text x="886.0" y="843" font-size="11.5" text-anchor="middle" fill="var(--muted)">Proposal</text>
+<path d="M996 814 a 75.0 8 0 0 1 150 0 v 36 a 75.0 8 0 0 1 -150 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M996 814 a 75.0 8 0 0 0 150 0" fill="none" stroke="var(--line-strong)"/>
+<text x="1071.0" y="836" font-size="11" text-anchor="middle" fill="var(--ink)">Typed knowledge</text>
+<text x="1071.0" y="848" font-size="11" text-anchor="middle" fill="var(--ink)">graphs</text>
+<path d="M336 46 L392 46" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M497 66 L497 112" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="505" y="94" font-size="11" text-anchor="start" fill="var(--muted)">request</text>
+<path d="M420 156 L280 196" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="300" y="172" font-size="11" text-anchor="start" font-weight="640" fill="var(--muted)">Qualified Intake</text>
+<path d="M380 196 L560 156" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<text x="612" y="150" font-size="11" text-anchor="start" fill="var(--muted)">ambiguity Q&amp;A · confirm Contract</text>
+<path d="M396 220 L462 220" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="429" y="212" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Research</text>
+<text x="429" y="236" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Contract</text>
+<path d="M582 220 L648 220" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="615" y="190" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">semantic TaskGraph</text>
+<text x="615" y="258" font-size="11" text-anchor="middle" fill="var(--subtle)">what must happen</text>
+<path d="M760 244 L760 308" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="768" y="280" font-size="11" text-anchor="start" fill="var(--muted)">gated step done</text>
+<path d="M690 334 L602 334" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="646" y="326" font-size="11" text-anchor="middle" fill="var(--muted)">fail</text>
+<path d="M528 308 L528 244" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="536" y="280" font-size="11" text-anchor="start" fill="var(--muted)">revised sub-plan</text>
+<path d="M840 334 L900 334" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="870" y="326" font-size="11" text-anchor="middle" fill="var(--muted)">pass</text>
+<path d="M975 308 L975 156" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="983" y="234" font-size="11" text-anchor="start" font-weight="640" fill="var(--muted)">Deliverable</text>
+<path d="M824 308 L940 156" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<text x="890" y="262" font-size="11" text-anchor="start" fill="var(--muted)">human approval</text>
+<path d="M660 244 L660 398 L360 398 L360 440" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="510" y="380" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Logical Operator Request +</text>
+<text x="510" y="394" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Capability Requirement</text>
+<path d="M476 468 L546 468" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="511" y="510" font-size="11" text-anchor="middle" fill="var(--muted)">bound capsule + executor</text>
+<path d="M766 468 L836 468" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="801" y="432" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Execution Specification</text>
+<text x="801" y="508" font-size="11" text-anchor="middle" fill="var(--subtle)">how ready work runs</text>
+<path d="M926 496 L926 612" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="934" y="560" font-size="11" text-anchor="start" fill="var(--muted)">run</text>
+<path d="M626 664 L626 700" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="634" y="686" font-size="11" text-anchor="start" fill="var(--muted)">model &amp; tool calls</text>
+<path d="M685 612 L685 570" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="693" y="596" font-size="11" text-anchor="start" font-weight="640" fill="var(--muted)">Node Execution Receipt</text>
+<path d="M810 545 L1060 545 L1060 264 L838 264 L838 244" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="1068" y="420" font-size="11" text-anchor="start" font-weight="640" fill="var(--muted)" transform="rotate(90 1068 420)">verified step state</text>
+<path d="M800 360 L800 384 L1136 384 L1136 778 L491 778 L491 806" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="955" y="376" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Gate Verdict — recorded append-only</text>
+<path d="M560 532 L178 532 L178 788 L681 788 L681 806" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="360" y="524" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">Evidence Record</text>
+<path d="M226 220 L205 220 L205 798 L300 798 L300 806" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="198" y="520" font-size="11" text-anchor="middle" fill="var(--muted)" transform="rotate(-90 198 520)">Contract · plan · run state</text>
+<path d="M766 832 L806 832" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="786" y="876" font-size="11" text-anchor="middle" fill="var(--muted)">performance history</text>
+<path d="M1026 638 L1108 638 L1108 156" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="1120" y="430" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)" transform="rotate(90 1120 430)">Progress Event</text>
+<path d="M886 806 L886 782 L1164 782 L1164 416 L340 416 L340 440" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="1176" y="600" font-size="11" text-anchor="middle" fill="var(--muted)" transform="rotate(90 1176 600)">governed RSI loop (§5) — promoted versions govern future bindings</text>
+<g font-size="11" fill="var(--muted)"><line x1="134" y1="908" x2="174" y2="908" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah)"/><text x="182" y="912">control / execution</text><line x1="322" y1="908" x2="362" y2="908" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/><text x="370" y="912">evidence / state</text><text x="526" y="912" font-weight="640" fill="var(--muted)">bold labels</text><text x="604" y="912">= the twelve hand-off objects</text></g>
+</svg></div>
+<p>Reading it left to right and back:</p>
+<ol><li>A request arrives on any channel; the Gateway qualifies it and binds it to a project (<strong>Qualified Intake</strong>).</li><li>The Intention Compiler resolves ambiguity with the user and produces a confirmed <strong>Research Contract</strong>; the Planner turns it into the <strong>semantic TaskGraph</strong>.</li><li>As steps become <em>semantically</em> ready, AI4RnD issues <strong>Logical Operator Requests</strong> with their <strong>Capability Requirements</strong>. The bridge binds each to a qualified capsule and permitted executor — or stalls with a stated reason. It never substitutes.</li><li>The compiler emits an <strong>Execution Specification</strong> — a Core Workflow stage, a SwarmFlow script, an agent call, a team excursion or a worktree build — and dispatch hands it to the runtime. This is the progressive part: only <em>ready</em> sub-plans are compiled, and more compilation moves behind this line as compatibility tests pass.</li><li>The runtime streams <strong>Progress Events</strong> to the project view and returns <strong>Node Execution Receipts</strong>. The fact converter turns receipts into <strong>Evidence Records</strong> and <em>verified</em> step state — a step whose result is <code>None</code> is recorded as failed, whatever the engine said.</li><li>Evaluators read evidence; gates issue <strong>Gate Verdicts</strong>. Failures route to repair and replanning, which feed the Planner a revised sub-plan. Where policy requires, a human approves through the same channels.</li><li>Completion is decided by AI4RnD's own authority, and the <strong>Deliverable</strong> returns through the channel it came from. Run history feeds <strong>Improvement Proposals</strong> into the governed RSI loop.</li></ol>
+<h2 id="3-ownership-at-a-glance"><a class="anchor" href="#3-ownership-at-a-glance" aria-hidden="true">#</a>3. Ownership at a glance</h2>
+<div class="tw"><table><thead><tr><th>Concern</th><th>Decided by</th><th>Stored by</th><th>Verified by</th></tr></thead><tbody><tr><td>What the request means; when it is done</td><td>AI4RnD core</td><td>Project store</td><td>Contract acceptance criteria</td></tr><tr><td>What work exists and in what order</td><td>AI4RnD core (TaskGraph)</td><td>Project store</td><td>Plan validation &amp; feasibility</td></tr><tr><td>Which capability serves a step</td><td>Bridge, from capsule registry</td><td>Capsule registry</td><td>Certification + effects check</td></tr><tr><td>How a ready sub-plan physically runs</td><td>Bridge compiler</td><td>Jiuwen checkpointer / journal</td><td>Compatibility tests</td></tr><tr><td>Whether a step actually succeeded</td><td>AI4RnD run-state authority</td><td>Project store</td><td>Fact converter rules</td></tr><tr><td>Whether the output is true</td><td>AI4RnD evaluators &amp; gates</td><td>Evidence + gate ledgers</td><td>Writer ≠ verifier</td></tr><tr><td>Whether the system may change itself</td><td>Governed RSI</td><td>Improvement store</td><td>Approval + frozen-policy check</td></tr><tr><td>Who the user is; where they interact</td><td>JiuwenSwarm</td><td>Application stores</td><td>Platform</td></tr></tbody></table></div>
+<h2 id="4-boundary-rules"><a class="anchor" href="#4-boundary-rules" aria-hidden="true">#</a>4. Boundary rules</h2>
+<ol><li>The product definition never moves; execution choices change ownership, never outcomes.</li><li>Users choose <strong>objective and depth</strong>. The execution mechanism is a read-only diagnostic.</li><li>The compiler picks mechanisms from the sub-plan's shape, not from user intent.</li><li>AI4RnD never trusts a completion signal it did not verify.</li><li>A capability, model or executor that cannot be bound <strong>stalls with a reason</strong> — no fallback, no substitution.</li><li>Declared capsule effects are enforced at binding time (<code>network: none</code> cannot bind to a networked runner).</li><li>The writer of an artifact never verifies it — enforced when the candidate set is built.</li><li>Write-scope conflicts are excluded at compile time, so conflicting steps never run in parallel.</li><li>The gate ledger is append-only and writer-attributed; status is a projection.</li><li>Evidence and project state are <strong>project-scoped</strong>, never session-scoped — the runtime's journal is keyed by session and must not carry multi-week continuity.</li><li>Nothing self-modifies without a proposal, risk class, frozen-policy check and approval.</li><li>In-flight runs pin their capsule versions; promotions never change running work.</li></ol>
+<h2 id="5-the-governed-rsi-loop"><a class="anchor" href="#5-the-governed-rsi-loop" aria-hidden="true">#</a>5. The governed RSI loop</h2>
+<p>All eight improvement surfaces (text artifacts, routing, capsules/operators, plan structure, evaluators/rewards, memory/retrieval, model weights, data/benchmarks) travel the same loop. Model weights are deferred on cost, not capability.</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 452" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Governed RSI loop">
+<defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="40" y="36" width="190" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="135.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Run evidence</text>
+<text x="135.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">performance history</text>
+<rect x="290" y="36" width="235" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="407.5" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improvement Proposal</text>
+<text x="407.5" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">subject · claim · measurement</text>
+<rect x="585" y="36" width="160" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="665.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Risk</text>
+<text x="665.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">classification</text>
+<rect x="805" y="36" width="185" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="897.5" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Frozen-policy check</text>
+<text x="897.5" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">rejects relaxations</text>
+<path d="M230 62 L290 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah4)"/>
+<path d="M525 62 L585 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<path d="M745 62 L805 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<rect x="585" y="186" width="220" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="695.0" y="209" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Isolated evaluation</text>
+<text x="695.0" y="223" font-size="11" text-anchor="middle" fill="var(--muted)">on a held-out set</text>
+<rect x="290" y="186" width="235" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="407.5" y="209" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Human approval</text>
+<text x="407.5" y="223" font-size="11" text-anchor="middle" fill="var(--muted)">Improvements inbox</text>
+<rect x="1010" y="186" width="140" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1080.0" y="216" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Rejected</text>
+<path d="M860 88 L695 186" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<text x="742" y="132" font-size="11" text-anchor="start" fill="var(--muted)">clean</text>
+<path d="M935 88 L1080 186" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<text x="1010" y="132" font-size="11" text-anchor="middle" fill="var(--muted)">relaxes a</text>
+<text x="1030" y="146" font-size="11" text-anchor="middle" fill="var(--muted)">frozen rule</text>
+<path d="M585 212 L525 212" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<path d="M407 238 L407 286 L1080 286 L1080 238" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<text x="700" y="280" font-size="11" text-anchor="middle" fill="var(--muted)">declined</text>
+<rect x="40" y="336" width="190" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="135.0" y="359" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Registry & config</text>
+<text x="135.0" y="373" font-size="11" text-anchor="middle" fill="var(--muted)">updated, versioned</text>
+<rect x="290" y="336" width="220" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="400.0" y="366" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Versioned promotion</text>
+<rect x="585" y="336" width="180" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="675.0" y="366" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Monitoring</text>
+<rect x="820" y="318" width="180" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="910.0" y="337" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Rolled back</text>
+<text x="910.0" y="351" font-size="11" text-anchor="middle" fill="var(--muted)">on regression</text>
+<rect x="820" y="380" width="160" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="900.0" y="399" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Kept</text>
+<text x="900.0" y="413" font-size="11" text-anchor="middle" fill="var(--muted)">the new baseline</text>
+<path d="M350 238 L350 336" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<text x="358" y="292" font-size="11" text-anchor="start" fill="var(--muted)">approved</text>
+<path d="M510 362 L585 362" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<path d="M765 352 L820 336" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<text x="776" y="330" font-size="11" text-anchor="start" fill="var(--muted)">regression</text>
+<path d="M765 372 L820 396" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah4)"/>
+<text x="776" y="402" font-size="11" text-anchor="start" fill="var(--muted)">holds</text>
+<path d="M290 362 L230 362" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah4)"/>
+<path d="M1000 336 L1030 336 L1030 434 L135 434 L135 388" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah4)"/>
+<text x="600" y="428" font-size="11" text-anchor="middle" fill="var(--muted)">rollback restores the prior version</text>
+</svg></div>
+<p>A reviewer must be able to answer <em>what changed, why, and is it better</em> from the Improvements inbox alone.</p>
+<h2 id="6-what-retires-when-in-the-mature-form"><a class="anchor" href="#6-what-retires-when-in-the-mature-form" aria-hidden="true">#</a>6. What retires when, in the mature form</h2>
+<p>Option C's end state approaches full delegation. Each fallback below dies only when its named test passes — never on a date:</p>
+<div class="tw"><table><thead><tr><th>AI4RnD-side fallback</th><th>Retires when</th></tr></thead><tbody><tr><td>Model routing</td><td>the runtime fails loudly on an unknown model instead of substituting</td></tr><tr><td>Resume re-drive logic</td><td>resume is reachable through a supported runtime surface</td></tr><tr><td>Failure detection in the fact converter</td><td>failed steps propagate as failures, not <code>None</code></td></tr><tr><td>Typed-executor enforcement in the bridge</td><td>the runtime honors executor typing end to end</td></tr><tr><td>Compile-time write-scope exclusion</td><td>only if the runtime ever offers equivalent isolation guarantees</td></tr></tbody></table></div>
+<p>What never retires: semantic readiness, evidence sufficiency, gate decisions, repair/replanning, and project-completion authority. Those are the product.</p></article><div class="pager"><a href="03-integration-options.html"><div class="d">← Previous</div><div class="t">Integration options</div></a><a class="nx" href="05-feature-ownership-implementation-plan.html"><div class="d">Next →</div><div class="t">Ownership &amp; implementation plan</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

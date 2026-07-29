@@ -14,32 +14,15 @@ OUT.mkdir(exist_ok=True)
 
 # ---------------------------------------------------------------- document set
 DOCS = [
-    ("README.md",                         "Overview & verdict",        "Start"),
-    ("15-correction-log.md",              "Correction log",            "Start"),
-    ("20-feature-implementation-ownership.md", "Feature ownership matrix", "Decision"),
-    ("16-jiuwen-execution-mechanisms.md", "Jiuwen execution mechanisms","Evidence"),
-    ("17-taskgraph-verdict.md",           "TaskGraph verdict",         "Decision"),
-    ("19-product-layers-and-ux.md",       "Product layers & UX",       "Decision"),
-    ("07-architecture-options.md",        "Architecture options",      "Decision"),
-    ("08-recommended-architecture.md",    "Recommended architecture",  "Decision"),
-    ("18-evolution-governance.md",        "Evolution governance",      "Decision"),
-    ("09-implementation-plan.md",         "Staged path",               "Decision"),
-    ("00-intended-product-model.md",      "Intended product model",    "Product"),
-    ("13-maturity-map.md",                "Maturity map",              "Product"),
-    ("14-reuse-vs-build-map.md",          "Reuse vs build",            "Product"),
-    ("traceability/142-feature-matrix.md","142-feature matrix",        "Product"),
-    ("01-jiuwenswarm-architecture.md",    "JiuwenSwarm architecture",  "Systems"),
-    ("02-ai4rnd-architecture.md",         "AI4RnD architecture",       "Systems"),
-    ("03-workflow-traces.md",             "Workflow traces",           "Systems"),
-    ("04-component-comparison.md",        "Component comparison",      "Systems"),
-    ("05-capability-matrix.md",           "Capability matrix",         "Systems"),
-    ("06-integration-challenges.md",      "Integration challenges",    "Systems"),
-    ("12-verification-appendix.md",       "Verification appendix",     "Evidence"),
-    ("11-evidence-appendix.md",           "Evidence appendix",         "Evidence"),
-    ("10-risks-assumptions-open-questions.md","Risks & open questions","Evidence"),
-    ("diagrams/README.md",                "Diagram index",             "Evidence"),
+    ("00-executive-summary.md",                    "Executive summary",                 "Overview"),
+    ("01-intended-ai4rnd-product.md",              "The intended AI4RnD product",       "Background"),
+    ("02-jiuwenswarm-openjiuwen-architecture.md",  "JiuwenSwarm & OpenJiuwen",          "Background"),
+    ("03-integration-options.md",                  "Integration options",               "Decision"),
+    ("04-recommended-target-architecture.md",      "Recommended architecture",          "Decision"),
+    ("05-feature-ownership-implementation-plan.md","Ownership & implementation plan",   "Delivery"),
+    ("06-evidence-assumptions-open-questions.md",  "Evidence & open questions",         "Evidence"),
 ]
-SECTIONS = ["Start", "Decision", "Product", "Systems", "Evidence"]
+SECTIONS = ["Overview", "Background", "Decision", "Delivery", "Evidence"]
 SLUG = {src: re.sub(r'[^a-z0-9]+', '-', src.lower().replace(".md", "")).strip('-') + ".html"
         for src, _, _ in DOCS}
 
@@ -54,6 +37,10 @@ CHIP = {
     "DEFER": "neutral", "UPSTREAM": "neutral", "SERVICE": "neutral",
     # Revision 4 implementation decisions
     "REUSE": "ok", "CONFIGURE": "ok", "EXTEND": "accent", "UNRESOLVED": "warn",
+    # evidence-treatment labels
+    "Verified": "ok", "Judgment": "accent", "Architectural judgment": "accent",
+    "Unverified": "warn", "UNVERIFIED": "warn", "Assumed": "warn",
+    "Unverified assumption": "warn",
     # Revision 4 preservation-gate verdicts
     "PRESERVED": "ok", "PRESERVED WITH ADAPTATION": "warn",
     "NEW BUILD REQUIRED": "bad", "DROPPED": "bad",
@@ -145,6 +132,9 @@ def render(md: str):
             code = "\n".join(body)
             if lang == "mermaid":
                 out.append(f'<div class="fig"><pre class="mermaid">{html.escape(code)}</pre></div>')
+            elif lang == "svg":
+                # trusted, repo-authored inline SVG (theme-aware via CSS variables)
+                out.append(f'<div class="fig fig-svg">{code}</div>')
             else:
                 out.append(f'<pre><code>{html.escape(code)}</code></pre>')
             continue
@@ -364,6 +354,8 @@ td code{font-size:12px}
   border-radius:10px;overflow-x:auto}
 .fig pre.mermaid{background:none;border:0;padding:0;margin:0;text-align:center}
 .fig svg{max-width:none;height:auto}
+.fig-svg{text-align:center}
+.fig-svg svg{max-width:100%;height:auto}
 .fig[data-wide]{padding-bottom:14px}
 .fig pre.mermaid.raw{text-align:left;font-family:var(--mono);font-size:12px;
   white-space:pre;color:var(--muted)}
@@ -582,54 +574,37 @@ for idx, (src, title, sec) in enumerate(DOCS):
 
 # ---------------------------------------------------------------- index page
 DESC = {
- "README.md":"The question, the verdict, and what executing the runtime changed in Revision 4.",
- "15-correction-log.md":"What each revision assumed too early, and why. Severity-rated.",
- "20-feature-implementation-ownership.md":"All 142 workbook outcomes: semantic owner, runtime implementer, persistence, verification, surface, decision.",
- "16-jiuwen-execution-mechanisms.md":"Bottom-up map of all five Jiuwen graph/state mechanisms.",
- "17-taskgraph-verdict.md":"Definitive answer: AI4RnD keeps a plan, not a scheduler.",
- "19-product-layers-and-ux.md":"What kind of product this is, what users select, who owns state.",
- "07-architecture-options.md":"Eight options as (entry, control plane, execution) triples.",
- "08-recommended-architecture.md":"Ten layers, ownership boundaries, the RSI loop.",
- "18-evolution-governance.md":"A governed ten-step improvement loop over agent_evolving.",
- "09-implementation-plan.md":"Seven stages, exit gates, decision points, ~14 months.",
- "00-intended-product-model.md":"The 142-feature target: workflow, foundation, vertical planes.",
- "13-maturity-map.md":"Active / unwired / scaffold / spec / absent, on both sides.",
- "14-reuse-vs-build-map.md":"Where each feature comes from: reuse, port, adapt, build.",
- "traceability/142-feature-matrix.md":"Row-by-row traceability for all 142 Level-2 features.",
- "01-jiuwenswarm-architecture.md":"Current state, corrected by execution.",
- "02-ai4rnd-architecture.md":"Current state including dormant and unwired code.",
- "03-workflow-traces.md":"Entry, planning, routing, execution, verification, recovery.",
- "04-component-comparison.md":"Component-by-component verdicts.",
- "05-capability-matrix.md":"Provided / partial / extensible / needs-internals / missing.",
- "06-integration-challenges.md":"Conflicts and blockers, ranked by constraint.",
- "12-verification-appendix.md":"Nineteen experiments with commands and results.",
- "11-evidence-appendix.md":"Source references, file and line.",
- "10-risks-assumptions-open-questions.md":"Risks, assumptions, reversals, open questions.",
- "diagrams/README.md":"All 27 diagrams in one place.",
+ "00-executive-summary.md":"The recommendation and why, in five minutes. Start here.",
+ "01-intended-ai4rnd-product.md":"What is being built: the 142-outcome definition, the capsule model, current state.",
+ "02-jiuwenswarm-openjiuwen-architecture.md":"What the foundation reliably provides, what exists but is unreachable, what is missing.",
+ "03-integration-options.md":"Five coherent architectures, the preservation gate, and why progressive compilation wins.",
+ "04-recommended-target-architecture.md":"The design: layers, the end-to-end workflow, twelve boundary rules, the governed RSI loop.",
+ "05-feature-ownership-implementation-plan.md":"Who owns each feature group, the ten dependency-critical capabilities, six phases.",
+ "06-evidence-assumptions-open-questions.md":"Verified vs architectural judgment vs unverified assumption, plus open product questions.",
 }
 NUM = {s: (s.split("/")[-1][:2] if s[:2].isdigit() or s.split("/")[-1][:2].isdigit() else "—")
        for s, _, _ in DOCS}
 
 hero = f"""<div class="hero">
-<h1>Can AI4RnD be built on JiuwenSwarm?</h1>
-<p class="lede">Yes &mdash; as a <strong>mode, plus a persistent project subsystem, plus a
-workspace capability registry</strong>. AI4RnD owns meaning: the research plan, capability
-routing, evidence, gates, capsules and evolution governance. Jiuwen owns execution. AI4RnD
-writes <strong>no scheduler</strong>.</p>
+<h1>AI4RnD on JiuwenSwarm</h1>
+<p class="lede">Build AI4RnD as a <strong>first-class, persistent research product</strong> on
+JiuwenSwarm. AI4RnD keeps all product semantics &mdash; contracts, plans, capsules, evidence,
+gates, governed self-improvement. OpenJiuwen executes. Migration of low-level scheduling is
+<strong>progressive, gated by compatibility tests</strong>. All 142 workbook outcomes preserved.</p>
 <div class="stats">
-  <div class="stat"><div class="n"><span class="was">5,200</span>450</div>
-    <div class="k">LOC of AI4RnD runtime code</div></div>
-  <div class="stat"><div class="n"><span class="was">6</span>1</div>
-    <div class="k">of 8 RSI surfaces to build</div></div>
-  <div class="stat"><div class="n">23<span style="font-size:15px;color:var(--subtle)">/142</span></div>
-    <div class="k">features Jiuwen covers fully</div></div>
-  <div class="stat"><div class="n"><span class="was">20</span>14</div>
-    <div class="k">months to complete product</div></div>
-  <div class="stat"><div class="n">19</div>
-    <div class="k">experiments executed</div></div>
+  <div class="stat"><div class="n">142<span style="font-size:15px;color:var(--subtle)">/142</span></div>
+    <div class="k">product outcomes preserved under the recommended architecture</div></div>
+  <div class="stat"><div class="n">53</div>
+    <div class="k">outcomes needing new construction &mdash; under every option</div></div>
+  <div class="stat"><div class="n">29</div>
+    <div class="k">executed experiments behind the evidence labels</div></div>
+  <div class="stat"><div class="n">7</div>
+    <div class="k">verified negative findings shaping the design</div></div>
 </div>
-<p style="font-size:13px;color:var(--subtle);margin-top:10px">Struck-through figures are
-Revision 2&rsquo;s. See the <a href="15-correction-log.html">correction log</a>.</p>
+<p style="font-size:13px;color:var(--subtle);margin-top:10px">Seven documents. The
+<a href="00-executive-summary.html">executive summary</a> is the five-minute version; dense
+evidence lives in <a href="06-evidence-assumptions-open-questions.html">document 06</a> and the
+CSVs below.</p>
 </div>"""
 
 cards = ""
@@ -649,13 +624,19 @@ for sec in SECTIONS:
                   f'<div class="cd">{html.escape(DESC.get(src,""))}</div></a>')
     cards += "</div>"
 
-extra = """<div class="sech">Also here</div><div class="cards">
-<a class="card" href="../traceability/142-feature-matrix.csv"><div class="cn">CSV</div>
-<div class="ct">Feature matrix (data)</div>
-<div class="cd">All 142 rows, machine-readable.</div></a>
-<a class="card" href="../ai4rnd-architecture-review.html"><div class="cn">HTML</div>
-<div class="ct">Single-page edition</div>
-<div class="cd">Every document on one page, for offline review or printing.</div></a>
+extra = """<div class="sech">Machine-readable & provenance</div><div class="cards">
+<a class="card" href="../traceability/142-feature-implementation-ownership.csv"><div class="cn">CSV</div>
+<div class="ct">Implementation ownership</div>
+<div class="cd">All 142 rows: owners, decisions, evidence, open questions.</div></a>
+<a class="card" href="../traceability/142-feature-preservation-gate.csv"><div class="cn">CSV</div>
+<div class="ct">Preservation gate</div>
+<div class="cd">Every outcome evaluated under every architecture option.</div></a>
+<a class="card" href="../ai4rnd-architecture-review.html"><div class="cn">1PG</div>
+<div class="ct">Single-file edition</div>
+<div class="cd">All seven documents on one page, for offline review or printing.</div></a>
+<a class="card" href="../source-material/README.md"><div class="cn">ARC</div>
+<div class="ct">Superseded source material</div>
+<div class="cd">The full four-revision analysis history. Not required reading.</div></a>
 </div>"""
 
 (OUT / "index.html").write_text(

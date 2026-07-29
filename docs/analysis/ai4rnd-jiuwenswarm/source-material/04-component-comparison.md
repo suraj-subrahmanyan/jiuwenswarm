@@ -2,7 +2,7 @@
 
 > **Revision 2 note.** This document compares the two systems *as they exist*. The
 > feature-level mapping against the **intended product** is in
-> [`traceability/142-feature-matrix.md`](traceability/142-feature-matrix.md) and summarised in
+> [`traceability/142-feature-matrix.md`](../traceability/142-feature-matrix.md) and summarised in
 > [14-reuse-vs-build-map.md](14-reuse-vs-build-map.md), which supersedes the summary tally at
 > the end of this document.
 >

@@ -1,0 +1,195 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The intended AI4RnD product &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 4</p>
+<div class="navsec">Overview</div>
+<a class="doc" href="00-executive-summary.html">Executive summary</a>
+<div class="navsec">Background</div>
+<a class="doc on" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
+<a class="doc" href="02-jiuwenswarm-openjiuwen-architecture.html">JiuwenSwarm &amp; OpenJiuwen</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="03-integration-options.html">Integration options</a>
+<a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<div class="navsec">Delivery</div>
+<a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="06-evidence-assumptions-open-questions.html">Evidence &amp; open questions</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Background / 01-intended-ai4rnd-product.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-what-the-product-does">1. What the product does</a><a class="l2" href="#2-the-five-level-capability-model">2. The five-level capability model</a><a class="l3" href="#capsule-lifecycle">Capsule lifecycle</a><a class="l2" href="#3-what-each-foundation-group-requires">3. What each foundation group requires</a><a class="l2" href="#4-the-vertical-plane-is-part-of-the-product">4. The vertical plane is part of the product</a><a class="l2" href="#5-current-implementation-state-in-brief">5. Current implementation state, in brief</a></nav><h1 id="the-intended-ai4rnd-product"><a class="anchor" href="#the-intended-ai4rnd-product" aria-hidden="true">#</a>The Intended AI4RnD Product</h1>
+<p><strong>Purpose of this document: define what is being built, independent of how it is built.</strong> The product is defined by <code>AI4RnD Feature List.xlsx</code> — 25 feature groups, 142 features — and this definition is held constant across every architecture discussion in this package.</p>
+<p>The workbook was read directly (not from summaries) and reconciles exactly:</p>
+<div class="tw"><table><thead><tr><th>Sheet</th><th>Plane</th><th>Groups</th><th>Features</th></tr></thead><tbody><tr><td>Workflow Features</td><td>Workflow — what a research run does</td><td>9</td><td>54</td></tr><tr><td>Foundation Features</td><td>Foundation — the machinery underneath</td><td>10</td><td>65</td></tr><tr><td>Vertical Features</td><td>Vertical — the product around both</td><td>6</td><td>23</td></tr><tr><td><strong>Total</strong></td><td></td><td><strong>25</strong></td><td><strong>142</strong></td></tr></tbody></table></div>
+<p>Row-level detail: <a href="../traceability/142-feature-implementation-ownership.csv">ownership CSV</a>.</p>
+<hr>
+<h2 id="1-what-the-product-does"><a class="anchor" href="#1-what-the-product-does" aria-hidden="true">#</a>1. What the product does</h2>
+<p>A user brings a research question, a technical clue, or a pile of material. The product turns it into defended, evidence-backed results:</p>
+<div class="fig"><pre class="mermaid">flowchart TB
+    subgraph WFP[&quot;Workflow plane — the nine R&amp;D lanes&quot;]
+        direction LR
+        I[&quot;Ingestion&quot;] --&gt; RC[&quot;Requirement&lt;br/&gt;compilation&quot;] --&gt; SI[&quot;Search &amp;&lt;br/&gt;ideation&quot;]
+        SI --&gt; OP[&quot;Opportunity&lt;br/&gt;selection&quot;] --&gt; CL[&quot;Claims &amp;&lt;br/&gt;hypotheses&quot;]
+        CL --&gt; POC[&quot;POC&lt;br/&gt;implementation&quot;] --&gt; BM[&quot;Benchmarking&quot;]
+        BM --&gt; EV[&quot;Evaluation&quot;] --&gt; DL[&quot;Delivery&quot;]
+    end
+    subgraph FND[&quot;Foundation plane&quot;]
+        direction LR
+        CC[&quot;Capability&lt;br/&gt;Capsules&quot;] --- OPS[&quot;Operators&quot;] --- EVAL[&quot;Evaluators&quot;]
+        EVAL --- MOD[&quot;Models&quot;] --- RSI[&quot;Governed&lt;br/&gt;RSI&quot;]
+        RSI --- DF[&quot;Data&lt;br/&gt;foundations&quot;] --- HC[&quot;Harness&lt;br/&gt;Core&quot;]
+        HC --- IC[&quot;Intention&lt;br/&gt;Compilers&quot;] --- PL[&quot;Planner&quot;] --- BLD[&quot;Builder&quot;]
+    end
+    subgraph VRT[&quot;Vertical plane&quot;]
+        direction LR
+        VIS[&quot;Visibility&quot;] --- INST[&quot;Installers&quot;] --- UI[&quot;UI&quot;] --- ACC[&quot;Accounts&quot;] --- MSG[&quot;Channels&quot;] --- CFG[&quot;Config&quot;]
+    end
+    WFP --&gt; FND
+    FND --&gt; VRT</pre></div>
+<p><strong>The nine lanes are capabilities, not a fixed pipeline.</strong> A run may skip lanes (a pure literature review never builds a POC), revisit them (failed evaluation sends work back to construction or even to claims), run them in parallel (several hypotheses benchmarked at once), or expand them recursively (a POC lane spawning its own inner search). What is fixed is what each lane must be able to do, and what evidence it owes.</p>
+<h2 id="2-the-five-level-capability-model"><a class="anchor" href="#2-the-five-level-capability-model" aria-hidden="true">#</a>2. The five-level capability model</h2>
+<p>The workbook's most important structural idea is a strict separation of five things that are easily conflated:</p>
+<div class="tw"><table><thead><tr><th>Level</th><th>What it is</th><th>Lifetime</th></tr></thead><tbody><tr><td><strong>Capability Capsule</strong></td><td>A governed, versioned, reusable capability identity</td><td>Independent of any request</td></tr><tr><td><strong>Contract</strong></td><td>The promise made for <em>this</em> request: scope, constraints, acceptance</td><td>One request</td></tr><tr><td><strong>TaskGraph</strong></td><td>The project-specific plan: what must be established, in what dependency order</td><td>One project</td></tr><tr><td><strong>Logical Operator</strong></td><td>A stable, callable action that a plan node invokes directly</td><td>Independent</td></tr><tr><td><strong>Physical Operator</strong></td><td>The concrete executor that actually performs it</td><td>One binding</td></tr></tbody></table></div>
+<p>A Capsule is <strong>not</strong> a workflow template and not a renamed skill. Verified: all 42 capsule manifests in the AI4RnD repository carry the same eight governed sections — applicability rules, an input/output contract with pre/postconditions, composition compatibility, declared effects (read/write/execute/network/cost/risk), resource bindings, verification requirements, permitted and forbidden executors, and provenance. A skill carries a name, a description and a prompt.</p>
+<h3 id="capsule-lifecycle"><a class="anchor" href="#capsule-lifecycle" aria-hidden="true">#</a>Capsule lifecycle</h3>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 440" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Capability Capsule lifecycle">
+<defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="40" y="36" width="170" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="125.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Defined</text>
+<text x="125.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">manifest authored</text>
+<rect x="260" y="36" width="190" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="355.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Certified</text>
+<text x="355.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">schema + policy checks</text>
+<rect x="500" y="36" width="170" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="585.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Registered</text>
+<text x="585.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">discoverable</text>
+<rect x="720" y="36" width="200" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="820.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Selected</text>
+<text x="820.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">matches a step's requirement</text>
+<rect x="970" y="36" width="180" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1060.0" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Bound</text>
+<text x="1060.0" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">to a permitted executor</text>
+<path d="M210 62 L260 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<path d="M450 62 L500 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<path d="M670 62 L720 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<path d="M920 62 L970 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<rect x="970" y="186" width="180" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1060.0" y="209" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Executed</text>
+<text x="1060.0" y="223" font-size="11" text-anchor="middle" fill="var(--muted)">under declared effects</text>
+<rect x="700" y="186" width="200" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="800.0" y="209" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Verified</text>
+<text x="800.0" y="223" font-size="11" text-anchor="middle" fill="var(--muted)">independent verifier</text>
+<rect x="420" y="186" width="210" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="525.0" y="209" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improvement candidate</text>
+<text x="525.0" y="223" font-size="11" text-anchor="middle" fill="var(--muted)">from performance history</text>
+<path d="M1060 88 L1060 186" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<text x="1052" y="142" font-size="11" text-anchor="end" fill="var(--muted)">in-flight runs pin their version</text>
+<path d="M970 212 L900 212" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<path d="M700 212 L630 212" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah3)"/>
+<text x="602" y="174" font-size="11" text-anchor="middle" fill="var(--muted)">performance history</text>
+<rect x="420" y="336" width="210" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="525.0" y="359" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Promoted</text>
+<text x="525.0" y="373" font-size="11" text-anchor="middle" fill="var(--muted)">new version, approved</text>
+<rect x="720" y="336" width="200" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="820.0" y="359" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Rolled back</text>
+<text x="820.0" y="373" font-size="11" text-anchor="middle" fill="var(--muted)">on regression</text>
+<path d="M525 238 L525 336" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<text x="535" y="292" font-size="11" text-anchor="start" fill="var(--muted)">governed approval (RSI loop)</text>
+<path d="M630 362 L720 362" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah3)"/>
+<path d="M420 362 L230 362 L230 110 L560 110 L560 88" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<text x="240" y="130" font-size="11" text-anchor="start" fill="var(--muted)">promotion updates the registry</text>
+<path d="M920 362 L1165 362 L1165 118 L610 118 L610 88" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ah3)"/>
+<text x="700" y="138" font-size="11" text-anchor="start" fill="var(--muted)">rollback restores the prior version</text>
+</svg></div>
+<p>During execution, capsules <strong>shape, constrain, observe and improve</strong> the work. They never hide the plan: a TaskGraph node calls a Logical Operator directly, and the capsule governs which Physical Operator may serve it, under which effects, verified by whom.</p>
+<h2 id="3-what-each-foundation-group-requires"><a class="anchor" href="#3-what-each-foundation-group-requires" aria-hidden="true">#</a>3. What each foundation group requires</h2>
+<div class="tw"><table><thead><tr><th>Group</th><th>Features</th><th>The requirement in one sentence</th></tr></thead><tbody><tr><td>Capability Capsules</td><td>5</td><td>Define, certify, discover, compose and evolve capsules as governed identities</td></tr><tr><td>Operators</td><td>6</td><td>Register logical actions, admit and certify executors, match and bind them, manage the fleet, profile performance, evolve under evaluators</td></tr><tr><td>Evaluators</td><td>6</td><td>Six evaluator families: conformance, engineering correctness, performance/cost, security/compliance/IP, evidence/factuality, lifecycle/human review</td></tr><tr><td>Foundational models</td><td>3</td><td>A capability registry of models, routing and selection, and auditable usage</td></tr><tr><td>RSI (self-improvement)</td><td>8</td><td>Eight governed improvement surfaces — text artifacts, routing, capsules/operators, plan structure, evaluators/rewards, memory/retrieval, model weights, data/benchmarks</td></tr><tr><td>Data foundations</td><td>9</td><td>Persistent memory plus seven typed knowledge graphs (concept, dataset, code, policy, workflow, trace, memory) and TaskGraph lifecycle persistence</td></tr><tr><td>Harness Core</td><td>6</td><td>Run lifecycle, durable messaging, DAG readiness and binding, admission and concurrency, dispatch and supervision, failure recovery and resume</td></tr><tr><td>Intention Compilers</td><td>5</td><td>Turn raw intent into a normalized, unambiguous, constraint-checked, acceptance-bearing Contract</td></tr><tr><td>Planner</td><td>3</td><td>Decompose the Contract into a validated, feasible TaskGraph</td></tr><tr><td>Builder</td><td>14</td><td>Construct code, models, experiment assets, benchmarks, verification assets, decisions, prototypes, integrations, repairs, reports and runtime deliverables — each with build evidence</td></tr></tbody></table></div>
+<p>Two clarifications that matter later:</p>
+<ul><li><strong>"Seven graphs" does not mean seven databases.</strong> The requirement is seven <em>typed views</em> with</li></ul>
+<p>their own schemas, provenance and lifecycle. One authoritative store with typed projections satisfies it.</p>
+<ul><li><strong>RSI is governed, not autonomous.</strong> Every improvement travels through proposal → risk</li></ul>
+<p>classification → frozen-policy check → evaluation → human approval → versioned promotion → monitoring → rollback. An improvement that relaxes a frozen policy must be rejected before evaluation.</p>
+<h2 id="4-the-vertical-plane-is-part-of-the-product"><a class="anchor" href="#4-the-vertical-plane-is-part-of-the-product" aria-hidden="true">#</a>4. The vertical plane is part of the product</h2>
+<p>Visibility and statistics, installers for four platforms plus a web application, CLI/GUI/TUI, account management, message channels (WeChat, Discord, tmux) and system configuration are 23 of the 142 outcomes. They do not follow automatically from any runtime choice — under every architecture option examined, the account subsystem, for example, is new work.</p>
+<h2 id="5-current-implementation-state-in-brief"><a class="anchor" href="#5-current-implementation-state-in-brief" aria-hidden="true">#</a>5. Current implementation state, in brief</h2>
+<p>The AI4RnD repository today is substantially ahead of "concept" and substantially short of the workbook:</p>
+<ul><li><strong>Real and tested:</strong> evidence ledger with citation spans, append-only gate ledger, 42 capsule</li></ul>
+<p>manifests + registry, a 4,189-line plan scheduler, research sources/extractors/evaluators, report capsules, GEPA text optimizer.</p>
+<ul><li><strong>Present but unwired:</strong> benchmark suites, several capsules with no bound runner.</li><li><strong>Absent (verified by search):</strong> the Idea Card schema, falsifiability screening as a stage, all</li></ul>
+<p>seven typed graphs, account management, and most of the RSI surfaces.</p>
+<ul><li><strong>Known-broken:</strong> the citation grounding check, measured at 0.25 precision — the single most</li></ul>
+<p>important correctness gap in the product.</p>
+<p>The carrier today is a tmux cockpit driven by a polling shell script. The workbook's product — channels, web UI, accounts, installers — is what JiuwenSwarm exists to provide.</p></article><div class="pager"><a href="00-executive-summary.html"><div class="d">← Previous</div><div class="t">Executive summary</div></a><a class="nx" href="02-jiuwenswarm-openjiuwen-architecture.html"><div class="d">Next →</div><div class="t">JiuwenSwarm &amp; OpenJiuwen</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

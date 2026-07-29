@@ -5,7 +5,7 @@ Controlling set: every Level-2 row of `AI4RnD Feature List.xlsx` (Workflow 54 + 
 Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 
 > **Revision 3.** 16 rows were re-scored after the openjiuwen execution-mechanism inventory
-> ([16](../16-jiuwen-execution-mechanisms.md)). JiuwenSwarm coverage rose from 20 to **23 FULL**,
+> ([16](../source-material/16-jiuwen-execution-mechanisms.md)). JiuwenSwarm coverage rose from 20 to **23 FULL**,
 > and NONE fell from 72 to **62**. Disposition shifted from PORT (69→61) to REUSE-JW (23→33):
 > durable queueing, admission, resumability and most RSI surfaces already exist upstream.
 

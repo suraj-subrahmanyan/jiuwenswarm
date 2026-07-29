@@ -11,7 +11,7 @@ analytic columns are this analysis's. The workbook reconciles exactly:
 | Vertical Features | Vertical | 6 | 23 |
 | **Total** | | **25** | **142** |
 
-Machine-readable: [`traceability/142-feature-implementation-ownership.csv`](traceability/142-feature-implementation-ownership.csv) · [`traceability/142-feature-preservation-gate.csv`](traceability/142-feature-preservation-gate.csv)
+Machine-readable: [`traceability/142-feature-implementation-ownership.csv`](../traceability/142-feature-implementation-ownership.csv) · [`traceability/142-feature-preservation-gate.csv`](../traceability/142-feature-preservation-gate.csv)
 
 ---
 

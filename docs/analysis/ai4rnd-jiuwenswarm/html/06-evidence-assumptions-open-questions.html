@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evidence &amp; open questions &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 4</p>
+<div class="navsec">Overview</div>
+<a class="doc" href="00-executive-summary.html">Executive summary</a>
+<div class="navsec">Background</div>
+<a class="doc" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
+<a class="doc" href="02-jiuwenswarm-openjiuwen-architecture.html">JiuwenSwarm &amp; OpenJiuwen</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="03-integration-options.html">Integration options</a>
+<a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<div class="navsec">Delivery</div>
+<a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
+<div class="navsec">Evidence</div>
+<a class="doc on" href="06-evidence-assumptions-open-questions.html">Evidence &amp; open questions</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Evidence / 06-evidence-assumptions-open-questions.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-verified-by-execution">1. Verified — by execution</a><a class="l2" href="#2-verified-by-source-reading-not-executed-with-reasons">2. Verified — by source reading (not executed, with reasons)</a><a class="l2" href="#3-architectural-judgments">3. Architectural judgments</a><a class="l2" href="#4-unverified-assumptions">4. Unverified assumptions</a><a class="l2" href="#5-open-product-questions">5. Open product questions</a><a class="l2" href="#6-negative-findings-that-must-not-get-lost">6. Negative findings that must not get lost</a><a class="l2" href="#7-what-verified-does-not-mean-here">7. What "verified" does not mean here</a></nav><h1 id="evidence-assumptions-and-open-questions"><a class="anchor" href="#evidence-assumptions-and-open-questions" aria-hidden="true">#</a>Evidence, Assumptions and Open Questions</h1>
+<p><strong>Purpose of this document: separate what was verified from what was judged and what was assumed, so a reviewer can weigh each claim correctly.</strong> Three labels are used throughout this package:</p>
+<div class="tw"><table><thead><tr><th>Label</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip ok">Verified</span></td><td>executed in this analysis environment, or confirmed by direct source reading (each entry says which)</td></tr><tr><td><span class="chip accent">Architectural judgment</span></td><td>a design decision reasoned from verified facts — could be made differently</td></tr><tr><td><span class="chip warn">Unverified assumption</span></td><td>believed but not demonstrated; each carries its reason</td></tr></tbody></table></div>
+<p>Environment: JiuwenSwarm <code>0.2.3.beta1</code> (source checkout), OpenJiuwen <code>0.1.15.post3</code> (installed package, imported and executed), AI4Research @ <code>d35c511</code>, workbook <code>AI4RnD Feature List.xlsx</code>. 29 executed experiments in total; the full probe scripts, commands and raw outputs are preserved in <a href="../source-material/12-verification-appendix.md">source-material/12-verification-appendix.md</a>.</p>
+<hr>
+<h2 id="1-verified-by-execution"><a class="anchor" href="#1-verified-by-execution" aria-hidden="true">#</a>1. Verified — by execution</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Finding</th><th>How</th></tr></thead><tbody><tr><td>E1</td><td>The workbook reconciles exactly: 25 groups, 142 features (54+65+23)</td><td>read directly with <code>openpyxl</code>; totals recomputed</td></tr><tr><td>E2</td><td>SwarmFlow journal replay works: an interrupted run resumed re-executing only the failed step; a third run replayed with zero live calls</td><td>two-step probe script against the real engine</td></tr><tr><td>E3</td><td><strong>A failed step returns <code>None</code> and the run reports success</strong> after retries are exhausted</td><td>same probe; failing backend on step B</td></tr><tr><td>E4</td><td><strong>The agent-facing SwarmFlow tool rejects <code>resume_id</code> and <code>name</code></strong> with "not supported yet", though both appear in its parameter schema</td><td>invoked the tool with each parameter combination</td></tr><tr><td>E5</td><td>Admission control is a hard precondition: no governor → explicit refusal</td><td>same tool probe</td></tr><tr><td>E6</td><td><strong><code>agent_type</code> is validated and forwarded but consumed by no backend</strong>; unknown option keys raise a precise error</td><td>engine probe + search of all backend implementations</td></tr><tr><td>E7</td><td>Core Workflow accepts a router returning a runtime-computed node list; the run completes. The router is invoked with <strong>no arguments</strong></td><td>built and ran a fan-out graph</td></tr><tr><td>E8</td><td><strong>The built-in guardrail tier loads 0 rules</strong> in a stock install; the loader looks only in the OpenJiuwen package, where no rules file ships</td><td>called the loader; observed the warning and empty result</td></tr><tr><td>E9</td><td>The rules file JiuwenSwarm installs to the user config directory is <strong>written by two files and read by none</strong></td><td>exhaustive search across the JiuwenSwarm tree</td></tr><tr><td>E10</td><td>The evolution trainer requires <code>get_operators()</code>; <strong>exactly one class in OpenJiuwen implements it</strong>. JiuwenSwarm imports only the experience-archive and tool-description-optimizer parts</td><td>search + import census</td></tr><tr><td>E11</td><td>All <strong>42 capsule manifests</strong> carry the same eight governed sections; the registry holds 35 entries (30 stable, 5 draft)</td><td>parsed every manifest and the registry</td></tr><tr><td>E12</td><td>The seven typed graph domains, the Idea Card and account registration are <strong>absent</strong> from the AI4RnD tree; OpenJiuwen's graph memory is referenced zero times in JiuwenSwarm</td><td>exhaustive searches</td></tr><tr><td>E13</td><td>AI4RnD's citation grounding check measured <strong>0.25 precision</strong> on a hand-labelled 9-case set</td><td>executed against the real checker (earlier revision, preserved)</td></tr><tr><td>E14</td><td>AI4RnD's evidence ledger and gate ledger run standalone; out-of-tree Rail plugins register, resolve, invoke and uninit correctly</td><td>executed (earlier revisions, preserved)</td></tr><tr><td>E15</td><td>The prior 142-row matrix matches the workbook row-for-row: zero wording mismatches</td><td>position-by-position comparison</td></tr></tbody></table></div>
+<h2 id="2-verified-by-source-reading-not-executed-with-reasons"><a class="anchor" href="#2-verified-by-source-reading-not-executed-with-reasons" aria-hidden="true">#</a>2. Verified — by source reading (not executed, with reasons)</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Finding</th><th>Why not executed</th></tr></thead><tbody><tr><td>S1</td><td><strong>Unknown model name → silent substitution</strong>: the resolver returns <code>None</code> for a missing pool group and the worker backend falls back to its default model, by documented design</td><td>end-to-end confirmation needs a live team with a populated model pool → provider credentials, excluded by the safety rules</td></tr><tr><td>S2</td><td>A stock install sets a sqlite persistence checkpointer as the process default at startup</td><td>restart-survival known from code path; a full restart drill was not run</td></tr><tr><td>S3</td><td>The SwarmFlow journal path is keyed by team, <strong>session id</strong> and workflow name — a new session replays nothing</td><td>follows directly from the path-resolution code</td></tr><tr><td>S4</td><td>Resume exists internally as a control-plane relaunch, deliberately not a tool</td><td>code comment states the design intent</td></tr><tr><td>S5</td><td>OpenJiuwen's <code>Operator</code> is a tunable-parameter handle, "NOT an executable unit" (verbatim)</td><td>definitional</td></tr></tbody></table></div>
+<h2 id="3-architectural-judgments"><a class="anchor" href="#3-architectural-judgments" aria-hidden="true">#</a>3. Architectural judgments</h2>
+<p>These are choices, not findings. Each could be revisited without any fact above changing.</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Judgment</th><th>Basis</th></tr></thead><tbody><tr><td>J1</td><td>Progressive compilation (Option C) over immediate delegation (D) or a permanent own scheduler (A)</td><td>D fails the preservation gate today (S1, E3, E4); A pays a permanent duplication tax for engines E2/E5/E7 prove work</td></tr><tr><td>J2</td><td>Option D's gate failure is evidence against <em>immediate</em> delegation, <strong>not</strong> proof it can never be safe</td><td>the blocking gaps are small and individually fixable</td></tr><tr><td>J3</td><td>Seven typed graphs as projections over one authoritative store, not seven databases</td><td>the workbook requires typed views with provenance, not physical separation</td></tr><tr><td>J4</td><td>The nine lanes are capabilities, not a rigid sequence</td><td>the workbook defines what lanes must do, not an ordering constraint; repair/replanning requires revisiting</td></tr><tr><td>J5</td><td>Execution mechanism is never a user choice</td><td>exposing it couples product semantics to a user's guess about internals</td></tr><tr><td>J6</td><td>AI4RnD's executable Operator concept must carry a different name inside integration code</td><td>E10/S5 naming collision</td></tr><tr><td>J7</td><td>Effort expressed as work items with acceptance criteria; all earlier LOC and month figures withdrawn</td><td>the figures were extrapolated from reading, and execution (E3, E4, E6) found work they missed</td></tr><tr><td>J8</td><td>The preservation-gate verdicts per row per option</td><td>rule-based on each row's class and decision; the rules and per-row results are in the <a href="../traceability/142-feature-preservation-gate.csv">gate CSV</a></td></tr></tbody></table></div>
+<h2 id="4-unverified-assumptions"><a class="anchor" href="#4-unverified-assumptions" aria-hidden="true">#</a>4. Unverified assumptions</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Assumption</th><th>Risk if wrong</th></tr></thead><tbody><tr><td>U1</td><td>The six packaging/installer rows (Windows, macOS, CLI, TUI) work as documented — labelled UNVERIFIED in the ownership CSV; this environment cannot build platform installers</td><td>P1 platform scope grows</td></tr><tr><td>U2</td><td>jiuwenbox sandbox enforcement holds under adversarial use — needs kernel privileges to test</td><td>security posture weaker than assumed; re-test before relying on it</td></tr><tr><td>U3</td><td>Dynamic Team roles and permissions suffice for open-ended excursions — needs a live team runtime</td><td>open-ended steps fall back to DeepAgent or scripted panels</td></tr><tr><td>U4</td><td>A calibrated entailment check can materially beat 0.25 precision on research citations</td><td><strong>the product's central claim fails</strong>; this is why P3 publishes its bar before building</td></tr><tr><td>U5</td><td>SwarmFlow's determinism lint will accept compiled research sub-plans (spike F4, still open)</td><td>compilation targets narrow to Core Workflow; if that also fails, revert to Option A</td></tr><tr><td>U6</td><td>Real AI4RnD capsules can be bound as evolution subjects without framework changes</td><td>P6 grows; RSI surfaces stay manual longer</td></tr></tbody></table></div>
+<h2 id="5-open-product-questions"><a class="anchor" href="#5-open-product-questions" aria-hidden="true">#</a>5. Open product questions</h2>
+<p>Recorded, not guessed. These need a product owner's decision, not more analysis.</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Question</th><th>Where it bites</th></tr></thead><tbody><tr><td>Q1</td><td><strong>"Cluster setting"</strong> (System Configurations) is a single workbook line with no description. What does a cluster own — execution hosts, model capacity, data residency?</td><td>the one UNRESOLVED row; P1 config surface</td></tr><tr><td>Q2</td><td><strong>tmux</strong> is listed as a message channel in the workbook, but the recommended architecture retires the tmux cockpit as the carrier. Is tmux a supported channel of the product, or legacy tooling?</td><td>channels scope in P1</td></tr><tr><td>Q3</td><td>The workbook references a <strong>"V-05-qualified"</strong> intake tier defined outside the workbook. What are its qualification criteria?</td><td>ingestion lane acceptance</td></tr><tr><td>Q4</td><td>Strategic opportunity screening criteria are organization-specific and undefined in the workbook. Who owns them?</td><td>opportunity lane, P4</td></tr><tr><td>Q5</td><td>Is the <strong>project</strong> the right product unit, or do users also need one-shot runs with no durable record?</td><td>P1 exit review</td></tr></tbody></table></div>
+<h2 id="6-negative-findings-that-must-not-get-lost"><a class="anchor" href="#6-negative-findings-that-must-not-get-lost" aria-hidden="true">#</a>6. Negative findings that must not get lost</h2>
+<p>For a reviewer who reads only one section of this document: the recommendation is shaped by seven verified negatives, and any future change to the architecture should re-check them first.</p>
+<ol><li>Silent model substitution (S1) — fails Option D today.</li><li>Resume advertised but rejected at the agent surface (E4).</li><li>Failed steps degrade to <code>None</code>; the run reports success (E3).</li><li><code>agent_type</code> accepted, forwarded, read by nothing (E6).</li><li>Guardrail tier loads zero rules; the installed rules file is orphaned (E8, E9).</li><li>One of eight RSI surfaces wired end to end (E10).</li><li>Grounding precision 0.25 (E13) — the deepest product-correctness gap, independent of any integration choice.</li></ol>
+<p>A pattern worth remembering: <strong>this codebase fails loudly on typos and silently on unimplemented features.</strong> Reading source overstates what is reachable; every reuse decision in this package is therefore labelled by whether it was executed.</p>
+<h2 id="7-what-verified-does-not-mean-here"><a class="anchor" href="#7-what-verified-does-not-mean-here" aria-hidden="true">#</a>7. What "verified" does not mean here</h2>
+<p>HTML, link and diagram checks in this package validate the <em>documents</em>, not the product. No claim of product-runtime correctness is based on them. Product-runtime claims come only from the experiments in §1, and their limits are stated in §2 and §4.</p>
+<hr>
+<p><em>Provenance: the full analysis history — 21 working documents across four revisions, including the correction log of what each revision got wrong and why — is preserved under <a href="../source-material/README.md">source-material/</a>. The primary documents supersede it.</em></p></article><div class="pager"><a href="05-feature-ownership-implementation-plan.html"><div class="d">← Previous</div><div class="t">Ownership &amp; implementation plan</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

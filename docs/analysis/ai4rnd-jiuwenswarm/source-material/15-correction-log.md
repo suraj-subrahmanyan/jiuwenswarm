@@ -176,7 +176,7 @@ Re-checked against the new evidence; these stand:
 | JiuwenSwarm's test suite passes 2,816/2,816 | [V-7]; unchanged. |
 | 19 AI4RnD modules are implemented-but-unwired | [V-8]; unchanged — but **fewer of them are worth wiring**, since `actor_*` and much of `graph_scheduler` now duplicate openjiuwen. |
 | DeepSearch is not a competitor to the intended product | [V-14]; unchanged. |
-| JiuwenSwarm covers 20/142 features fully | **revised to 23/142 FULL**, with NONE falling 72→62 — the mechanism inventory re-scored 16 features. See [traceability](traceability/142-feature-matrix.md). |
+| JiuwenSwarm covers 20/142 features fully | **revised to 23/142 FULL**, with NONE falling 72→62 — the mechanism inventory re-scored 16 features. See [traceability](../traceability/142-feature-matrix.md). |
 
 ---
 

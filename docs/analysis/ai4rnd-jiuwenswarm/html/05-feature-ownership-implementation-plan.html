@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ownership &amp; implementation plan &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 4</p>
+<div class="navsec">Overview</div>
+<a class="doc" href="00-executive-summary.html">Executive summary</a>
+<div class="navsec">Background</div>
+<a class="doc" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
+<a class="doc" href="02-jiuwenswarm-openjiuwen-architecture.html">JiuwenSwarm &amp; OpenJiuwen</a>
+<div class="navsec">Decision</div>
+<a class="doc" href="03-integration-options.html">Integration options</a>
+<a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<div class="navsec">Delivery</div>
+<a class="doc on" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="06-evidence-assumptions-open-questions.html">Evidence &amp; open questions</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Delivery / 05-feature-ownership-implementation-plan.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-the-totals">1. The totals</a><a class="l2" href="#2-ownership-by-feature-group">2. Ownership by feature group</a><a class="l2" href="#3-not-all-rows-are-equal-the-dependency-critical-ten">3. Not all rows are equal — the dependency-critical ten</a><a class="l2" href="#4-the-plan">4. The plan</a><a class="l3" href="#p1-project-contract-and-platform-surface">P1 — Project, Contract and platform surface</a><a class="l3" href="#p2-discovery-spikes-and-the-integration-bridge">P2 — Discovery spikes and the integration bridge</a><a class="l3" href="#p3-trustworthy-evidence-evaluators-and-the-capability-regist">P3 — Trustworthy evidence, evaluators and the capability registry</a><a class="l3" href="#p4-workflow-lanes-and-the-builder">P4 — Workflow lanes and the Builder</a><a class="l3" href="#p5-data-foundations-and-delivery">P5 — Data foundations and delivery</a><a class="l3" href="#p6-governed-rsi-accounts-and-operational-hardening">P6 — Governed RSI, accounts and operational hardening</a><a class="l2" href="#5-decision-points">5. Decision points</a></nav><h1 id="feature-ownership-and-implementation-plan"><a class="anchor" href="#feature-ownership-and-implementation-plan" aria-hidden="true">#</a>Feature Ownership and Implementation Plan</h1>
+<p><strong>Purpose of this document: say who owns each part of the product, what work exists, and in what order to do it.</strong> The full row-level detail — all 142 features with semantic owner, runtime implementer, persistence authority, verification authority, product surface, decision, evidence and open questions per row — lives in the CSVs and stays authoritative:</p>
+<ul><li><a href="../traceability/142-feature-implementation-ownership.csv">142-feature-implementation-ownership.csv</a></li><li><a href="../traceability/142-feature-preservation-gate.csv">142-feature-preservation-gate.csv</a></li></ul>
+<p>This document summarizes them and adds the dependency structure the CSVs cannot express.</p>
+<hr>
+<h2 id="1-the-totals"><a class="anchor" href="#1-the-totals" aria-hidden="true">#</a>1. The totals</h2>
+<div class="tw"><table><thead><tr><th>Implementation decision</th><th>Rows</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip bad">BUILD</span></td><td>53</td><td>exists in neither system — required under <strong>every</strong> architecture option</td></tr><tr><td><span class="chip warn">ADAPT</span></td><td>32</td><td>exists on one side but must change shape</td></tr><tr><td><span class="chip ok">REUSE</span></td><td>23</td><td>use as-is (6 of these are packaging rows, unverifiable here, labelled so)</td></tr><tr><td><span class="chip accent">PORT</span></td><td>20</td><td>move working AI4RnD code onto the new foundation</td></tr><tr><td><span class="chip accent">EXTEND</span></td><td>11</td><td>JiuwenSwarm feature plus a research-specific layer</td></tr><tr><td><span class="chip neutral">DEFER</span></td><td>2</td><td>model-weight RSI and model construction — cost, not capability</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>1</td><td>"Cluster setting": one workbook line, no definition to build from</td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Ownership</th><th>Semantic</th><th>Runtime</th></tr></thead><tbody><tr><td>AI4RnD Core</td><td>118</td><td>53</td></tr><tr><td>AI4RnD–Jiuwen Integration</td><td>—</td><td>32</td></tr><tr><td>JiuwenSwarm Application</td><td>19</td><td>27</td></tr><tr><td>OpenJiuwen Runtime</td><td>—</td><td>25</td></tr><tr><td>External / new product work</td><td>4</td><td>4</td></tr><tr><td>Unresolved</td><td>1</td><td>1</td></tr></tbody></table></div>
+<p>The 118-versus-53 gap between what AI4RnD <em>defines</em> and what it <em>runs</em> is the integration surface, and is why the bridge exists.</p>
+<h2 id="2-ownership-by-feature-group"><a class="anchor" href="#2-ownership-by-feature-group" aria-hidden="true">#</a>2. Ownership by feature group</h2>
+<div class="tw"><table><thead><tr><th>Plane · group</th><th>Rows</th><th>Semantic owner</th><th>Dominant runtime</th><th>Decisions</th><th>Phase</th></tr></thead><tbody><tr><td>W · Ingestion</td><td>7</td><td>AI4RnD</td><td>JiuwenSwarm App</td><td>adapt 2 · port 2 · reuse/extend/build</td><td>P1</td></tr><tr><td>W · Requirement compilation</td><td>7</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 5 · build 2</td><td>P1</td></tr><tr><td>W · Search &amp; ideation</td><td>8</td><td>AI4RnD</td><td>Bridge</td><td>port 7 · build 1</td><td>P2</td></tr><tr><td>W · Opportunity selection</td><td>7</td><td>AI4RnD</td><td>AI4RnD</td><td>build 5 · adapt 2</td><td>P4</td></tr><tr><td>W · Claims &amp; hypotheses</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>port 2 · build 2 · adapt 1</td><td>P4</td></tr><tr><td>W · POC implementation</td><td>5</td><td>AI4RnD</td><td>OpenJiuwen</td><td>reuse 2 · build 2 · adapt 1</td><td>P4</td></tr><tr><td>W · Benchmarking</td><td>5</td><td>AI4RnD</td><td>Bridge</td><td>port 2 · mixed</td><td>P4</td></tr><tr><td>W · Evaluation</td><td>6</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 3 · build 2 · port 1</td><td>P3</td></tr><tr><td>W · Delivery</td><td>4</td><td>AI4RnD</td><td>Bridge</td><td>build 2 · port 1 · adapt 1</td><td>P5</td></tr><tr><td>F · Capability capsule</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>extend 2 · mixed</td><td>P3/P6</td></tr><tr><td>F · Operators</td><td>6</td><td>AI4RnD</td><td>Bridge</td><td>build 4 · port 1 · adapt 1</td><td>P3/P6</td></tr><tr><td>F · Evaluator</td><td>6</td><td>AI4RnD</td><td>AI4RnD</td><td>build 4 · adapt 2</td><td>P3</td></tr><tr><td>F · Foundational models</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>extend 2 · build 1</td><td>P1</td></tr><tr><td>F · RSI</td><td>8</td><td>AI4RnD</td><td>Bridge</td><td>build 5 · adapt 2 · defer 1</td><td>P6</td></tr><tr><td>F · Data foundations</td><td>9</td><td>AI4RnD</td><td>AI4RnD</td><td>build 7 · extend/adapt</td><td>P5</td></tr><tr><td>F · Harness Core</td><td>6</td><td>AI4RnD</td><td>OpenJiuwen</td><td>reuse 4 · adapt 2</td><td>P2</td></tr><tr><td>F · Intention compilers</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 4 · build 1</td><td>P1</td></tr><tr><td>F · Planner</td><td>3</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 3</td><td>P2</td></tr><tr><td>F · Builder</td><td>14</td><td>AI4RnD</td><td>OpenJiuwen</td><td>build 7 · reuse 3 · port 3 · defer 1</td><td>P4/P6</td></tr><tr><td>V · Visibility / statistics</td><td>4</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>extend 3 · build 1</td><td>P2</td></tr><tr><td>V · Installer / CLI / webapp</td><td>5</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 5 (unverified here)</td><td>P1</td></tr><tr><td>V · UI</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 2 · extend 1</td><td>P1</td></tr><tr><td>V · Account management</td><td>4</td><td>External / new</td><td>External / new</td><td>build 4</td><td>P6</td></tr><tr><td>V · Message channels</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 2 · port 1 (tmux — open question)</td><td>P1</td></tr><tr><td>V · System configurations</td><td>4</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse/extend · 1 unresolved</td><td>P1</td></tr></tbody></table></div>
+<p>Verification authority follows semantic ownership throughout: AI4RnD's evaluators and gates verify research outcomes; platform tests verify application rows; the writer of an artifact never verifies it.</p>
+<h2 id="3-not-all-rows-are-equal-the-dependency-critical-ten"><a class="anchor" href="#3-not-all-rows-are-equal-the-dependency-critical-ten" aria-hidden="true">#</a>3. Not all rows are equal — the dependency-critical ten</h2>
+<p>These capabilities gate everything else. Slippage here blocks the plan; slippage elsewhere narrows it.</p>
+<div class="tw"><table><thead><tr><th>Critical capability</th><th>Why it gates</th><th>Depends on</th></tr></thead><tbody><tr><td>1 · Project &amp; Contract foundation</td><td>every other outcome hangs off a durable project record</td><td>—</td></tr><tr><td>2 · Intention Compiler</td><td>no trustworthy Contract → nothing downstream is well-defined</td><td>1</td></tr><tr><td>3 · Capability Capsules &amp; operator binding</td><td>honest stall, effects enforcement, writer≠verifier all live here</td><td>1</td></tr><tr><td>4 · TaskGraph lifecycle</td><td>project-scoped plan state; the runtime journal is session-scoped and cannot carry it</td><td>1</td></tr><tr><td>5 · Evidence &amp; evaluator correctness</td><td>the gates are only as good as the evidence</td><td>1, 4</td></tr><tr><td>6 · Grounding / entailment</td><td>measured at <strong>0.25 precision</strong> today; the product's central claim fails until this is rebuilt and re-measured</td><td>5</td></tr><tr><td>7 · Model routing</td><td>silent substitution upstream; must fail loudly here until fixed</td><td>3</td></tr><tr><td>8 · Data foundations</td><td>one store, seven typed projections; all evidence durability lands here</td><td>5</td></tr><tr><td>9 · Governed RSI</td><td>only one of eight surfaces wired; everything routes through one approval loop</td><td>3, 5</td></tr><tr><td>10 · Failure recovery</td><td>resume unreachable, failures degrade to <code>None</code>; the bridge must close both</td><td>4</td></tr></tbody></table></div>
+<h2 id="4-the-plan"><a class="anchor" href="#4-the-plan" aria-hidden="true">#</a>4. The plan</h2>
+<p>Six phases, dependency-driven. <strong>No calendar or effort estimates</strong> — earlier revisions' numbers were extrapolations and are withdrawn; sequence is knowable, duration is a staffing decision. Each phase states objective, major work, acceptance evidence and exit criteria.</p>
+<div class="fig"><pre class="mermaid">flowchart LR
+    P1[&quot;P1 · Project, Contract&lt;br/&gt;&amp; platform surface&quot;] --&gt; P2[&quot;P2 · Spikes &amp;&lt;br/&gt;integration bridge&quot;]
+    P2 --&gt; P3[&quot;P3 · Evidence, evaluators&lt;br/&gt;&amp; capability registry&quot;]
+    P3 --&gt; P4[&quot;P4 · Workflow lanes&lt;br/&gt;&amp; Builder&quot;]
+    P3 --&gt; P5[&quot;P5 · Data foundations&lt;br/&gt;&amp; delivery&quot;]
+    P4 --&gt; P6[&quot;P6 · Governed RSI,&lt;br/&gt;accounts &amp; hardening&quot;]
+    P5 --&gt; P6</pre></div>
+<h3 id="p1-project-contract-and-platform-surface"><a class="anchor" href="#p1-project-contract-and-platform-surface" aria-hidden="true">#</a>P1 — Project, Contract and platform surface</h3>
+<p><em>Objective:</em> a durable research project exists as a product object on JiuwenSwarm. <em>Major work:</em> project record and store (project-scoped, not session-scoped); Intention Compiler; intake on existing channels; project view in the web UI; model/provider and settings surfaces. <em>Acceptance evidence:</em> a request on any channel creates a project preserving the raw request; the project survives an agent-server restart; an unconfirmed or ambiguous Contract blocks work. <em>Exit:</em> users select objective and depth only — no execution mechanism appears anywhere.</p>
+<h3 id="p2-discovery-spikes-and-the-integration-bridge"><a class="anchor" href="#p2-discovery-spikes-and-the-integration-bridge" aria-hidden="true">#</a>P2 — Discovery spikes and the integration bridge</h3>
+<p><em>Objective:</em> prove the compilation assumption, then build the bridge on it. <em>Major work — spikes first:</em></p>
+<ul><li>**F4 (retained, unchanged in intent): compile and validate at least three representative</li></ul>
+<p>AI4RnD plans** — (1) source-heavy research, (2) POC construction plus benchmarking, (3) failed verification followed by repair and replanning — through the compiler to SwarmFlow and/or Core Workflow, and run the deterministic parts.</p>
+<ul><li>F5: demonstrate write-scope exclusion at compile time (conflicting steps never share a parallel</li></ul>
+<p>group).</p>
+<ul><li>Two spikes already passed during analysis and need only re-confirmation in product context:</li></ul>
+<p>runtime-computed fan-out in Core Workflow, and persistent checkpointing in a stock install.</p>
+<p><em>Major work — bridge:</em> the compiler (sub-plan → execution specification); dispatch with reachable resume and cancel; the fact converter with strict failure semantics; loud-failure model binding; repair of the inert guardrail rules file, with a startup assertion that the rule count is non-zero. <em>Acceptance evidence:</em> an interrupted run resumes re-executing only unfinished work; a step whose result is <code>None</code> blocks its gate; guardrail rules load non-empty. <em>Exit:</em> F4 passes for at least one execution target. If it fails for both, reopen <a href="03-integration-options.html">03-integration-options.md</a> at Option A.</p>
+<h3 id="p3-trustworthy-evidence-evaluators-and-the-capability-regist"><a class="anchor" href="#p3-trustworthy-evidence-evaluators-and-the-capability-regist" aria-hidden="true">#</a>P3 — Trustworthy evidence, evaluators and the capability registry</h3>
+<p><em>Objective:</em> the product's central claim — verifiable research — becomes true. <em>Major work:</em> project-scoped evidence ledger and claim graph; <strong>replacement grounding/entailment check with the target precision published before building and the measurement published after</strong>; append-only gate ledger; capability registry wiring the 42 existing capsule manifests; capability binding with honest stall and discriminated reasons; effects enforcement at binding; writer≠verifier at candidate-set construction; the six evaluator families. <em>Acceptance evidence:</em> every claim resolves to a citation span at character and byte offsets; entailment precision measured on a labelled set, materially above 0.25; an unbindable requirement stalls rather than substitutes; conflicting write scopes never co-schedule. <em>Exit:</em> the evidence chain from source to verdict is machine-checkable end to end.</p>
+<h3 id="p4-workflow-lanes-and-the-builder"><a class="anchor" href="#p4-workflow-lanes-and-the-builder" aria-hidden="true">#</a>P4 — Workflow lanes and the Builder</h3>
+<p><em>Objective:</em> the nine lanes work as composable capabilities. <em>Major work:</em> port search/ideation sources and extractors; build the Idea Card schema and opportunity portfolio (absent today); build falsifiability screening and hypothesis contracting; POC construction on code mode/worktrees; benchmarking with protocols as versioned artifacts; the 14 Builder outcomes. <em>Acceptance evidence:</em> a run reaches a decision with an Idea Card, a falsifiability verdict, a benchmark against a named baseline and an evaluation dossier; a non-falsifiable hypothesis is blocked before construction; concurrent builds never share a worktree. <em>Exit:</em> lanes can be skipped, revisited, parallelized and recursively expanded — demonstrated by the three F4 plan shapes running end to end.</p>
+<h3 id="p5-data-foundations-and-delivery"><a class="anchor" href="#p5-data-foundations-and-delivery" aria-hidden="true">#</a>P5 — Data foundations and delivery</h3>
+<p><em>Objective:</em> knowledge outlives runs. <em>Major work:</em> one authoritative event-sourced store with the seven typed graph projections; TaskGraph lifecycle persistence; research retrieval over project memory; the delivery lane with authorized distribution and lifecycle closure. <em>Acceptance evidence:</em> any claim resolves to its concepts, datasets, code, runs and decisions in one query; a closed project's evidence is frozen with distribution authorization recorded. <em>Exit:</em> nothing the product asserts depends on session-scoped state.</p>
+<h3 id="p6-governed-rsi-accounts-and-operational-hardening"><a class="anchor" href="#p6-governed-rsi-accounts-and-operational-hardening" aria-hidden="true">#</a>P6 — Governed RSI, accounts and operational hardening</h3>
+<p><em>Objective:</em> the system improves itself only under governance, and ships as a product. <em>Major work:</em> bind AI4RnD subjects (capsules, prompts, routing, evaluators) to the evolution framework; proposal store, risk classes, frozen-policy check, approval inbox; capsule version pinning; the account subsystem (all new); packaging across the four platforms; runtime resource visibility; budget enforcement per project. <em>Acceptance evidence:</em> a proposal relaxing a frozen policy is rejected before evaluation; a promotion is rolled back in a drill and in-flight runs are unaffected; a reviewer answers <em>what changed, why, is it better</em> from the inbox alone. <em>Exit:</em> all 142 outcomes delivered, deferred-with-reason, or explicitly resolved as product decisions (see the two open rows in <a href="06-evidence-assumptions-open-questions.html">06-evidence-assumptions-open-questions.md</a>).</p>
+<h2 id="5-decision-points"><a class="anchor" href="#5-decision-points" aria-hidden="true">#</a>5. Decision points</h2>
+<div class="tw"><table><thead><tr><th>After</th><th>Decide</th></tr></thead><tbody><tr><td>P1</td><td>Is the project the right product unit, or do users want one-shot runs?</td></tr><tr><td>P2</td><td>Did F4 pass? Both targets failing reverts the architecture to Option A.</td></tr><tr><td>P3</td><td>Did entailment clear the published bar? If not, stop widening and fix the core.</td></tr><tr><td>P4</td><td>Are ported lanes better than Jiuwen-native alternatives, or was PORT wrong anywhere?</td></tr><tr><td>P6</td><td>Is evolution producing measured improvement, or churn?</td></tr></tbody></table></div></article><div class="pager"><a href="04-recommended-target-architecture.html"><div class="d">← Previous</div><div class="t">Recommended architecture</div></a><a class="nx" href="06-evidence-assumptions-open-questions.html"><div class="d">Next →</div><div class="t">Evidence &amp; open questions</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>

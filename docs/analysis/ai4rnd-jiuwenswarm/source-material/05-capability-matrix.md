@@ -3,7 +3,7 @@
 Every AI4RnD requirement classified against what JiuwenSwarm provides.
 
 > **Revision 2 note.** This matrix was built against AI4RnD *as it exists*. The controlling
-> matrix is now [`traceability/142-feature-matrix.md`](traceability/142-feature-matrix.md),
+> matrix is now [`traceability/142-feature-matrix.md`](../traceability/142-feature-matrix.md),
 > which covers all 142 intended Level-2 features. This document is retained because its
 > per-capability reasoning remains valid, with four corrections from execution:
 >

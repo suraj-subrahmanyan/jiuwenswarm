@@ -265,7 +265,7 @@ firm disposition.
 ## 7. Scale of the target versus what exists
 
 Measured against the 142 rows (full detail in
-[`traceability/142-feature-matrix.md`](traceability/142-feature-matrix.md)):
+[`traceability/142-feature-matrix.md`](../traceability/142-feature-matrix.md)):
 
 | AI4RnD maturity | Count | Meaning |
 |---|---|---|

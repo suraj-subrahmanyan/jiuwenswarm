@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Integration options &middot; AI4RnD &times; JiuwenSwarm</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
+<p class="rev">Architecture review &middot; Rev 4</p>
+<div class="navsec">Overview</div>
+<a class="doc" href="00-executive-summary.html">Executive summary</a>
+<div class="navsec">Background</div>
+<a class="doc" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
+<a class="doc" href="02-jiuwenswarm-openjiuwen-architecture.html">JiuwenSwarm &amp; OpenJiuwen</a>
+<div class="navsec">Decision</div>
+<a class="doc on" href="03-integration-options.html">Integration options</a>
+<a class="doc" href="04-recommended-target-architecture.html">Recommended architecture</a>
+<div class="navsec">Delivery</div>
+<a class="doc" href="05-feature-ownership-implementation-plan.html">Ownership &amp; implementation plan</a>
+<div class="navsec">Evidence</div>
+<a class="doc" href="06-evidence-assumptions-open-questions.html">Evidence &amp; open questions</a>
+<div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
+<main><div class="crumb">Decision / 03-integration-options.md</div><article><nav class="toc"><div class="toc-h">On this page</div><a class="l2" href="#1-the-five-options">1. The five options</a><a class="l2" href="#2-preservation-gate-results">2. Preservation-gate results</a><a class="l2" href="#3-why-c-over-a-and-b">3. Why C over A and B</a><a class="l2" href="#4-what-is-permanently-ai4rnd-s-under-every-option">4. What is permanently AI4RnD's, under every option</a></nav><h1 id="integration-options"><a class="anchor" href="#integration-options" aria-hidden="true">#</a>Integration Options</h1>
+<p><strong>Purpose of this document: compare the five coherent ways to put AI4RnD on the JiuwenSwarm foundation, and show why progressive compilation (Option C) wins.</strong></p>
+<p>One rule governs the comparison: <strong>an option is a complete architecture only if it preserves all 142 workbook outcomes.</strong> Every outcome was evaluated under every option (<a href="../traceability/142-feature-preservation-gate.csv">preservation-gate CSV</a>). Execution mechanisms — DeepAgent, SwarmFlow, Core Workflow, Dynamic Team — are <em>not</em> options: each implements 0 of the 142 outcomes alone. They appear inside every option as the machinery ready work runs on.</p>
+<hr>
+<h2 id="1-the-five-options"><a class="anchor" href="#1-the-five-options" aria-hidden="true">#</a>1. The five options</h2>
+<p><strong>A — AI4RnD-led control plane on Jiuwen execution.</strong> AI4RnD keeps its own scheduler, contracts, capsules, evidence and gates unchanged. Jiuwen replaces only the physical executors (agents instead of tmux panes). Maximum preservation of working AI4RnD code; forfeits the verified Jiuwen engines (durable graphs, journal replay, admission control) and maintains a parallel scheduler forever.</p>
+<p><strong>B — Jiuwen-native lifecycle with AI4RnD semantic control.</strong> Core Workflow runs the outer research lifecycle as durable stages with checkpoints and human turns. AI4RnD keeps the project TaskGraph, capsules, contracts, evidence and RSI, and Jiuwen mechanisms execute the stages. Commits to the delegation immediately.</p>
+<p><strong>C — Progressive compilation (recommended).</strong> Same target picture as B, plus a migration discipline: AI4RnD-side scheduling and safety logic is retired <strong>per capability, only after a compatibility test passes</strong> — never on a schedule. Starts with the outer lifecycle on Core Workflow, deterministic sub-plans on SwarmFlow, and AI4RnD retaining capability binding, model routing, failure detection, gate evaluation and run-state authority. Each verified gap that closes upstream retires the corresponding AI4RnD fallback.</p>
+<p><strong>D — Full delegation now.</strong> AI4RnD keeps semantics but removes its execution-side machinery immediately, trusting Jiuwen for persistence, gates-relevant completion signals, cancellation, recovery and routing.</p>
+<p><strong>E — Standalone baseline / defer.</strong> Keep AI4RnD as it is (tmux carrier, own scheduler) and postpone integration. Changes nothing, gains nothing: no channels, no sandbox, no UI, no packaging — and the 53 never-built outcomes stay unbuilt.</p>
+<h2 id="2-preservation-gate-results"><a class="anchor" href="#2-preservation-gate-results" aria-hidden="true">#</a>2. Preservation-gate results</h2>
+<div class="tw"><table><thead><tr><th>Verdict</th><th>A</th><th>B</th><th>C ★</th><th>D</th><th>E</th></tr></thead><tbody><tr><td><span class="chip ok">PRESERVED</span></td><td>70</td><td>76</td><td>76</td><td>58</td><td>82</td></tr><tr><td><span class="chip warn">PRESERVED WITH ADAPTATION</span></td><td>12</td><td>6</td><td>6</td><td>23</td><td>0</td></tr><tr><td><span class="chip bad">NEW BUILD REQUIRED</span></td><td>58</td><td>58</td><td>58</td><td>57</td><td>58</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>2</td><td>2</td><td>2</td><td>3</td><td>2</td></tr><tr><td><span class="chip bad">DROPPED</span></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>1</strong></td><td><strong>0</strong></td></tr></tbody></table></div>
+<p>Two facts stand out.</p>
+<p><strong>First: the big number never moves.</strong> 57–58 outcomes require new construction under <em>every</em> option, because they exist in neither system (all seven typed graphs, the Idea Card, account management, most evaluators, most RSI surfaces…). Any comparison that makes one option look dramatically cheaper is comparing execution plumbing, not the product.</p>
+<p><strong>Second: only D drops an outcome.</strong> Model Routing &amp; Selection is lost under D because OpenJiuwen silently substitutes the default model when a requested one is missing, and under D no AI4RnD layer remains to catch it. D also leaves failure recovery unresolved: resume is not reachable from the agent surface, and a failed step returns <code>None</code> while the run reports success.</p>
+<p>**This is evidence against <em>immediate</em> full delegation — not proof that full delegation can never be safe.** All three blocking gaps are small and fixable. If they close upstream, D stops dropping outcomes, and C's mature form <em>is</em> D. The gate measures the systems as they are today.</p>
+<h2 id="3-why-c-over-a-and-b"><a class="anchor" href="#3-why-c-over-a-and-b" aria-hidden="true">#</a>3. Why C over A and B</h2>
+<div class="tw"><table><thead><tr><th>Consideration</th><th>A</th><th>B</th><th>C ★</th></tr></thead><tbody><tr><td>Preserves all 142 outcomes</td><td>yes</td><td>yes</td><td>yes</td></tr><tr><td>Uses the verified Jiuwen engines (durable graphs, replay, admission)</td><td>no</td><td>yes</td><td>yes</td></tr><tr><td>Maintains a duplicate scheduler indefinitely</td><td>yes</td><td>no</td><td>shrinking</td></tr><tr><td>Survives the known runtime gaps without new risk</td><td>yes</td><td>only if bridged correctly on day one</td><td>yes — fallbacks stay until tests pass</td></tr><tr><td>Migration reversible if a gap proves worse than measured</td><td>n/a</td><td>partly</td><td>yes, by construction</td></tr></tbody></table></div>
+<p>A pays a permanent tax (two schedulers, ~4,700 lines of duplicated readiness/queue/lease logic) to avoid a risk that can be managed more cheaply. B is the right destination but the wrong commitment schedule: it deletes fallbacks on the strength of reading the engine, and this analysis's execution testing showed exactly where reading overstates reachability. C differs from B only in <em>when</em> each fallback dies — and ties each retirement to a named, falsifiable test:</p>
+<ul><li>silent model substitution fixed → retire AI4RnD-side model routing;</li><li>resume exposed through a supported surface → retire AI4RnD-side re-drive logic;</li><li>failed steps propagate as failures → slim the run-state authority;</li><li>typed executor binding honored end to end → retire bridge-side type enforcement.</li></ul>
+<h2 id="4-what-is-permanently-ai4rnd-s-under-every-option"><a class="anchor" href="#4-what-is-permanently-ai4rnd-s-under-every-option" aria-hidden="true">#</a>4. What is permanently AI4RnD's, under every option</h2>
+<p>Regardless of how far delegation eventually goes, the product keeps final authority over: <strong>semantic readiness</strong> (is this step <em>meaningfully</em> ready, not just dependency-ready), <strong>evidence sufficiency</strong>, <strong>gate decisions</strong>, <strong>repair and replanning</strong>, and <strong>project completion</strong>. These are product semantics, not scheduling — no execution engine can decide them, and no option proposes that one should.</p></article><div class="pager"><a href="02-jiuwenswarm-openjiuwen-architecture.html"><div class="d">← Previous</div><div class="t">JiuwenSwarm &amp; OpenJiuwen</div></a><a class="nx" href="04-recommended-target-architecture.html"><div class="d">Next →</div><div class="t">Recommended architecture</div></a></div></main>
+</div>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+(function(){
+  var KEY='ai4rnd-theme', r=document.documentElement;
+  var saved=localStorage.getItem(KEY); if(saved) r.setAttribute('data-theme',saved);
+  function dark(){ var a=r.getAttribute('data-theme');
+    return a? a==='dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+  document.getElementById('tt').onclick=function(){
+    var next = dark()?'light':'dark';
+    r.setAttribute('data-theme',next); localStorage.setItem(KEY,next);
+    location.reload();
+  };
+
+  var FONT='"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif';
+  var LIGHT={background:'#ffffff',mainBkg:'#fafafb',primaryColor:'#fafafb',
+    primaryTextColor:'#1a1b1d',primaryBorderColor:'#d3d4d9',secondaryColor:'#f4f4f6',
+    secondaryTextColor:'#1a1b1d',secondaryBorderColor:'#d3d4d9',tertiaryColor:'#ffffff',
+    tertiaryTextColor:'#1a1b1d',tertiaryBorderColor:'#e6e6ea',
+    nodeBorder:'#d3d4d9',clusterBkg:'#ffffff',clusterBorder:'#e6e6ea',
+    lineColor:'#8b8d94',textColor:'#1a1b1d',titleColor:'#a60822',
+    edgeLabelBackground:'#ffffff',labelBackground:'#ffffff',
+    noteBkgColor:'#f4f4f6',noteTextColor:'#54565c',noteBorderColor:'#e6e6ea',
+    actorBkg:'#fafafb',actorBorder:'#d3d4d9',actorTextColor:'#1a1b1d',
+    signalColor:'#54565c',signalTextColor:'#1a1b1d',
+    labelBoxBkgColor:'#f4f4f6',labelBoxBorderColor:'#d3d4d9',labelTextColor:'#1a1b1d',
+    loopTextColor:'#54565c',altBackground:'#fafafb',
+    sectionBkgColor:'#f4f4f6',sectionBkgColor2:'#fafafb',altSectionBkgColor:'#ffffff',
+    taskBkgColor:'#f4f4f6',taskBorderColor:'#d3d4d9',taskTextColor:'#1a1b1d',
+    taskTextDarkColor:'#1a1b1d',taskTextOutsideColor:'#54565c',
+    activeTaskBkgColor:'#cf0a2c',activeTaskBorderColor:'#a60822',
+    doneTaskBkgColor:'#e6e6ea',doneTaskBorderColor:'#d3d4d9',
+    critBkgColor:'#fbefd0',critBorderColor:'#b26a00',
+    gridColor:'#e6e6ea',todayLineColor:'#cf0a2c',
+    transitionColor:'#8b8d94',stateBkg:'#fafafb',stateBorder:'#d3d4d9'};
+  var DARK={background:'#131316',mainBkg:'#191a1d',primaryColor:'#191a1d',
+    primaryTextColor:'#e8e8ea',primaryBorderColor:'#3a3b40',secondaryColor:'#1f2024',
+    secondaryTextColor:'#e8e8ea',secondaryBorderColor:'#3a3b40',tertiaryColor:'#131316',
+    tertiaryTextColor:'#e8e8ea',tertiaryBorderColor:'#2a2b30',
+    nodeBorder:'#3a3b40',clusterBkg:'#131316',clusterBorder:'#2a2b30',
+    lineColor:'#8b8d94',textColor:'#e8e8ea',titleColor:'#ff8397',
+    edgeLabelBackground:'#131316',labelBackground:'#131316',
+    noteBkgColor:'#1f2024',noteTextColor:'#a4a6ac',noteBorderColor:'#2a2b30',
+    actorBkg:'#191a1d',actorBorder:'#3a3b40',actorTextColor:'#e8e8ea',
+    signalColor:'#a4a6ac',signalTextColor:'#e8e8ea',
+    labelBoxBkgColor:'#1f2024',labelBoxBorderColor:'#3a3b40',labelTextColor:'#e8e8ea',
+    loopTextColor:'#a4a6ac',altBackground:'#191a1d',
+    sectionBkgColor:'#1f2024',sectionBkgColor2:'#191a1d',altSectionBkgColor:'#131316',
+    taskBkgColor:'#1f2024',taskBorderColor:'#3a3b40',taskTextColor:'#e8e8ea',
+    taskTextDarkColor:'#e8e8ea',taskTextOutsideColor:'#a4a6ac',
+    activeTaskBkgColor:'#ff5d74',activeTaskBorderColor:'#ff8397',
+    doneTaskBkgColor:'#2a2b30',doneTaskBorderColor:'#3a3b40',
+    critBkgColor:'#3a2e18',critBorderColor:'#e0a355',
+    gridColor:'#2a2b30',todayLineColor:'#ff5d74',
+    transitionColor:'#8b8d94',stateBkg:'#191a1d',stateBorder:'#3a3b40'};
+  if(window.mermaid){
+    var v = dark()? DARK : LIGHT; v.fontFamily = FONT; v.fontSize = '13px';
+    mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'base',
+      themeVariables:v, flowchart:{curve:'basis',useMaxWidth:false,htmlLabels:true},
+      sequence:{useMaxWidth:false}, gantt:{useMaxWidth:false}});
+  } else {
+    document.querySelectorAll('pre.mermaid').forEach(function(el){
+      el.classList.add('raw');
+      var n=document.createElement('div'); n.className='fignote';
+      n.textContent='Diagram source (renderer unavailable offline)';
+      el.parentNode.insertBefore(n, el);
+    });
+  }
+})();
+</script></body></html>
