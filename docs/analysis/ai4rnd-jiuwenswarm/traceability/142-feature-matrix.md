@@ -4,13 +4,18 @@ Controlling set: every Level-2 row of `AI4RnD Feature List.xlsx` (Workflow 54 + 
 
 Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 
+> **Revision 3.** 16 rows were re-scored after the openjiuwen execution-mechanism inventory
+> ([16](../16-jiuwen-execution-mechanisms.md)). JiuwenSwarm coverage rose from 20 to **23 FULL**,
+> and NONE fell from 72 to **62**. Disposition shifted from PORT (69→61) to REUSE-JW (23→33):
+> durable queueing, admission, resumability and most RSI surfaces already exist upstream.
+
 ## Legend
 
 | Column | Values |
 |---|---|
 | **Firmness** | `FIRM` a stated target · `DEBATED` design still moving (per workbook notes) · `ASPIRE` directional only |
 | **AI4RnD maturity** | `ACTIVE` wired into a runtime path · `IMPL-UNWIRED` implemented + tested but no live caller · `SCAFFOLD` partial/thin · `SPEC` described only · `ABSENT` not present |
-| **JW coverage** | `FULL` usable as-is · `PARTIAL` exists with gaps · `NONE` |
+| **JW coverage** | `FULL` usable as-is · `PARTIAL` exists with gaps · `NONE` — *"JW" means JiuwenSwarm **and** openjiuwen* |
 | **Evidence class** | `EXEC` executed in this analysis · `SRC` source-read · `DOC` documentation only |
 | **Disposition** | `REUSE-JW` · `PORT` bring AI4RnD code across · `ADAPT` rework · `BUILD` new · `DEFER` |
 
@@ -20,11 +25,11 @@ Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 
 **AI4RnD maturity** — `ACTIVE` 68 · `IMPL-UNWIRED` 27 · `SCAFFOLD` 21 · `SPEC` 16 · `ABSENT` 10
 
-**JiuwenSwarm coverage** — `NONE` 72 · `PARTIAL` 50 · `FULL` 20
+**JiuwenSwarm + openjiuwen coverage** — `NONE` 62 · `PARTIAL` 57 · `FULL` 23
 
-**Disposition** — `PORT` 69 · `BUILD` 27 · `REUSE-JW` 23 · `ADAPT` 21 · `DEFER` 2
+**Disposition** — `PORT` 61 · `REUSE-JW` 33 · `ADAPT` 25 · `BUILD` 22 · `DEFER` 1
 
-**Evidence class** — `EXEC` 70 · `SRC` 70 · `DOC` 2
+**Evidence class** — `EXEC` 74 · `SRC` 66 · `DOC` 2
 
 
 ---
@@ -173,14 +178,14 @@ Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 
 | # | Level-2 feature | Firm | AI4RnD | JW | Ev | Disposition | Evidence | Still to verify |
 |---|---|---|---|---|---|---|---|---|
-| 75 | 1. Text-Based Artifacts (GEPA / MIPROv2 / TextGrad) | FIRM | IMPL-UNWIRED | NONE | EXEC | **PORT** | AI4R integrations/gepa_optimizer/ (3540 LOC, propose/run/review/promote/rollback, budget caps, hard_policy_checker); MIPROv2+TextGrad ABSENT | wire GEPA; others unbuilt |
-| 76 | 2. Runtime and Resource Routing (Bayesian Optimization / Bandits / Cost-Aware RL) | ASPIRE | ABSENT | NONE | EXEC | **BUILD** | No bandit/Bayesian-optimisation code found (word-boundary search) | — |
-| 77 | 3. Capability Capsules and Physical Operators (Trajectory Mining / Code Evolution / CEGIS) | DEBATED | SCAFFOLD | NONE | EXEC | **BUILD** | AI4R skill_to_capsule_compiler + evolution_engine; Voyager/CEGIS ABSENT | — |
-| 78 | 4. DAG and Agent Organization (AFlow / MCTS / ADAS) | ASPIRE | ABSENT | NONE | EXEC | **BUILD** | AFlow/MCTS/ADAS absent (only 1 incidental ADAS match) | — |
-| 79 | 5. Evaluator, Reward, Contract, and Governance (Judge Calibration / Reward Modeling / CEGIS) | DEBATED | SCAFFOLD | NONE | SRC | **BUILD** | AI4R gate/judge config exists; judge calibration + reward modelling absent | — |
-| 80 | 6. Memory, Retrieval, and Evidence (Memory Learning / Self-RAG / Reranker Training) | DEBATED | SCAFFOLD | PARTIAL | SRC | **BUILD** | AI4R memory/wiki schema; Self-RAG/reranker training absent; JW memory index | — |
-| 81 | 7. Model Policies and Weights (SFT / LoRA / DPO / GRPO / Agent RL) | ASPIRE | ABSENT | NONE | EXEC | **DEFER** | SFT/LoRA/DPO/GRPO absent (matches are persona md + report appendix) | needs training infra |
-| 82 | 8. Data, Benchmarks, Curriculum, and Observability (Active Learning / Hard-Case Mining / Credit Assignment) | DEBATED | SCAFFOLD | NONE | EXEC | **BUILD** | AI4R failure_miner.py(109) + experience bank; active learning absent | — |
+| 75 | 1. Text-Based Artifacts (GEPA / MIPROv2 / TextGrad) | FIRM | IMPL-UNWIRED | PARTIAL | EXEC | **REUSE-JW** | openjiuwen optimizer/llm_call + TunableKind='prompt'; AI4R GEPA 3540 LOC (may duplicate) | dedupe GEPA vs openjiuwen optimizer |
+| 76 | 2. Runtime and Resource Routing (Bayesian Optimization / Bandits / Cost-Aware RL) | ASPIRE | ABSENT | PARTIAL | EXEC | **REUSE-JW** | openjiuwen TunableKind tool_selector/memory_selector + optimizer/tool_call; agent_rl | bind AI4RnD routing policy as Operator |
+| 77 | 3. Capability Capsules and Physical Operators (Trajectory Mining / Code Evolution / CEGIS) | DEBATED | SCAFFOLD | PARTIAL | EXEC | **ADAPT** | openjiuwen optimizer/skill_call + EvolutionStore + skill_package; AI4R skill_to_capsule_compiler | capsule as Operator subject |
+| 78 | 4. DAG and Agent Organization (AFlow / MCTS / ADAS) | ASPIRE | ABSENT | NONE | EXEC | **BUILD** | RSI-4 DAG/organisation search absent from BOTH (confirmed against openjiuwen too) | the one genuinely absent surface |
+| 79 | 5. Evaluator, Reward, Contract, and Governance (Judge Calibration / Reward Modeling / CEGIS) | DEBATED | SCAFFOLD | PARTIAL | EXEC | **REUSE-JW** | openjiuwen evaluator/metrics{exact_match,llm_as_judge} + agent_rl/reward.py + online/judge | AI4RnD metrics as metrics/ impls |
+| 80 | 6. Memory, Retrieval, and Evidence (Memory Learning / Self-RAG / Reranker Training) | DEBATED | SCAFFOLD | PARTIAL | EXEC | **REUSE-JW** | openjiuwen core/operator/memory_call + optimizer/memory_call; JW memory index | — |
+| 81 | 7. Model Policies and Weights (SFT / LoRA / DPO / GRPO / Agent RL) | ASPIRE | ABSENT | PARTIAL | EXEC | **REUSE-JW** | openjiuwen agent_rl/rl_trainer{ppo_step,verl_converter,verl_executor}, offline+online | was 'absent'; needs infra to run |
+| 82 | 8. Data, Benchmarks, Curriculum, and Observability (Active Learning / Hard-Case Mining / Credit Assignment) | DEBATED | SCAFFOLD | PARTIAL | EXEC | **REUSE-JW** | openjiuwen dataset/{case,case_loader} + trajectory/{builder,extractor,aggregator,store} | AI4R failure_miner feeds hard cases |
 
 ### Foundation › Data foundations
 
@@ -194,18 +199,18 @@ Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 | 88 | 6. Workflow Graph Management | FIRM | IMPL-UNWIRED | NONE | SRC | **PORT** | AI4R workflow_contract registry + config/workflows/ | — |
 | 89 | 7. Trace Graph Management | FIRM | ACTIVE | NONE | EXEC | **PORT** | AI4R gate_ledger + events.jsonl + route_proof.py (trace graph in practice) | — |
 | 90 | 8. Memory Graph Management | FIRM | SCAFFOLD | NONE | SRC | **PORT** | AI4R runtime/schema/xref.yaml bidirectional link contract | — |
-| 91 | 9. TaskGraph Persistence & Lifecycle Management | FIRM | ACTIVE | NONE | EXEC | **PORT** | AI4R task_graph_io.py(351)+task_graph_state_io.py(491)+node_runstate.py | — |
+| 91 | 9. TaskGraph Persistence & Lifecycle Management | FIRM | ACTIVE | PARTIAL | EXEC | **ADAPT** | openjiuwen Checkpointer/Storage save-recover + SwarmFlow journal; AI4R task_graph_state_io | persistent KV backend? Q24 |
 
 ### Foundation › Harness Core
 
 | # | Level-2 feature | Firm | AI4RnD | JW | Ev | Disposition | Evidence | Still to verify |
 |---|---|---|---|---|---|---|---|---|
 | 92 | 1. Runtime Control Loop & Run Lifecycle Management | FIRM | ACTIVE | FULL | EXEC | **REUSE-JW** | JW DeepAgent dual-layer task loop (verified 11 rail events); AI4R coordinator.sh | — |
-| 93 | 2. Message Bus & Durable Task Queue | FIRM | IMPL-UNWIRED | PARTIAL | EXEC | **PORT** | AI4R actor_mailbox.py(102)+queue.sh+task_queue.py; JW in-proc queues | durable queue is a real gap in JW |
-| 94 | 3. DAG Scheduler, TaskGraph Readiness & Operator Binding | FIRM | ACTIVE | NONE | EXEC | **PORT** | AI4R graph_scheduler validate/topo/write-scope batching; 321 graph tests pass | — |
-| 95 | 4. Execution Admission, Lease & Concurrency Control | FIRM | IMPL-UNWIRED | PARTIAL | EXEC | **PORT** | AI4R actor_lease.py(238)+pane_lease.py+concurrency_policy.py(320) | — |
+| 93 | 2. Message Bus & Durable Task Queue | FIRM | IMPL-UNWIRED | FULL | EXEC | **REUSE-JW** | openjiuwen SwarmFlow Journal (WAL, call_signature memoisation) + BackgroundTaskController | was 'real gap in JW' - WRONG |
+| 94 | 3. DAG Scheduler, TaskGraph Readiness & Operator Binding | FIRM | ACTIVE | PARTIAL | EXEC | **ADAPT** | openjiuwen Pregel get_ready_nodes/supersteps/barrier; binding+write-scope still AI4RnD | 85% of graph_scheduler duplicates |
+| 95 | 4. Execution Admission, Lease & Concurrency Control | FIRM | IMPL-UNWIRED | FULL | EXEC | **REUSE-JW** | openjiuwen SemaphoreAdmission + ConcurrencyGovernor + WorkflowAdmission + RunAgentAdmission | actor_* port cancelled |
 | 96 | 5. Main Loop Dispatch & Runtime Supervision | FIRM | ACTIVE | FULL | EXEC | **REUSE-JW** | JW agent dispatch in-process; AI4R graph_node_dispatcher(12948) tmux (drop) | — |
-| 97 | 6. Failure Recovery & Resumability | FIRM | ACTIVE | PARTIAL | SRC | **PORT** | AI4R recover_detector/failure_handler/.finalized idempotency; JW rewind | — |
+| 97 | 6. Failure Recovery & Resumability | FIRM | ACTIVE | FULL | EXEC | **REUSE-JW** | openjiuwen Pregel _is_resume + channel restore; SwarmFlow journal replay; resume_id | — |
 
 ### Foundation › Intention compilers
 
@@ -222,8 +227,8 @@ Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 | # | Level-2 feature | Firm | AI4RnD | JW | Ev | Disposition | Evidence | Still to verify |
 |---|---|---|---|---|---|---|---|---|
 | 103 | 1. Task Contract Decomposition | FIRM | ACTIVE | PARTIAL | EXEC | **PORT** | AI4R epic_decomposer.py(926)+apo_plan_compiler.py(1093); JW TaskPlanningRail | — |
-| 104 | 2. TaskGraph Construction | FIRM | ACTIVE | NONE | EXEC | **PORT** | AI4R task_graph.json construction + plan IR | — |
-| 105 | 3. TaskGraph Validation & Feasibility Analysis | FIRM | ACTIVE | NONE | EXEC | **PORT** | AI4R plan_validator.py(1564) 'compiles implies dispatchable' | — |
+| 104 | 2. TaskGraph Construction | FIRM | ACTIVE | PARTIAL | EXEC | **ADAPT** | openjiuwen Workflow build API + PregelBuilder; AI4RnD keeps semantic plan only | compile, do not schedule |
+| 105 | 3. TaskGraph Validation & Feasibility Analysis | FIRM | ACTIVE | PARTIAL | EXEC | **PORT** | AI4R plan_validator 1564 LOC; openjiuwen validates graph structure only | keep contract/coverage validation |
 
 ### Foundation › Builder
 
@@ -249,7 +254,7 @@ Machine-readable copy: [`142-feature-matrix.csv`](142-feature-matrix.csv).
 | # | Level-2 feature | Firm | AI4RnD | JW | Ev | Disposition | Evidence | Still to verify |
 |---|---|---|---|---|---|---|---|---|
 | 120 | 1. Workflow & Platform Status Visibility | FIRM | ACTIVE | PARTIAL | SRC | **ADAPT** | AI4R status-server.py(14400)+React; JW web UI | rewrite as JW view |
-| 121 | 2. Execution Trace Search & Inspection | FIRM | ACTIVE | PARTIAL | SRC | **PORT** | AI4R events.jsonl+gate_ledger search; JW logs+OTel | — |
+| 121 | 2. Execution Trace Search & Inspection | FIRM | ACTIVE | PARTIAL | EXEC | **REUSE-JW** | openjiuwen trajectory store + WorkflowProgressEvent; AI4R events.jsonl | — |
 | 122 | 3. Runtime status visibility | FIRM | IMPL-UNWIRED | PARTIAL | SRC | **ADAPT** | AI4R resource_telemetry.py; JW psutil-based status | — |
 | 123 | 4. Resource Usage, Cost & Capacity Management | FIRM | SCAFFOLD | PARTIAL | EXEC | **PORT** | AI4R token-tracker.sh+codex budget circuit breaker; JW TokenBudgetEvaluator(per-loop) | cross-run budget missing both |
 

@@ -518,3 +518,177 @@ point for feature 70 either.)
 | 10 | AI4RnD maturity judged by reading | **48/48 import, 29/48 wired** — 19 implemented-but-unwired modules found | EXEC |
 | 11 | JiuwenSwarm health unknown | **2,816 tests pass, 0 fail** | EXEC |
 | 12 | AI4RnD test health unknown | **556 pass, 2 root-environment artifacts** | EXEC |
+
+---
+
+# Revision 3 — Jiuwen execution-mechanism probes
+
+Same environment as V-1…V-14 (`.venv-jw`, `openjiuwen==0.1.15.post3`, `jiuwenswarm` editable).
+
+## V-15 · Core Workflow and the Pregel engine exist and build ⭐
+
+```bash
+./.venv-jw/bin/python exp3_workflow.py
+```
+
+```
+AgentRail/Pregel primitives
+  PregelBuilder methods : ['add_branch', 'add_edge', 'add_node', 'build']
+  Channel contract      : ['is_ready', 'accept', 'consume', 'snapshot', 'restore']
+  BarrierMessage exists : True | GraphInterrupt: True
+  PregelLoop members    : ['_is_resume', '_run_step', '_save_state_on_error', 'init', 'run_step']
+
+Built a fan-out + barrier graph
+  build() signature     : (store=None, after_step_callback=None)
+  built Pregel          : Pregel
+  run() signature       : (config) -> None | dict | dict[str, Interrupt | tuple[Interrupt,...] | None]
+
+Core Workflow API — all present
+  set_start_comp · add_workflow_comp · set_end_comp · add_connection ·
+  add_stream_connection · add_conditional_connection · invoke · stream · draw
+  router type: Callable[..., Hashable | list[Hashable]]        <-- dynamic fan-out
+
+Components
+  flow      ['branch_comp','branch_router','end_comp','start_comp','workflow_comp']
+  llm       ['intent_detection_comp','llm_comp','questioner_comp']
+  tool      ['tool_comp']
+  resource  ['knowledge_retrieval_comp','memory_retrieval_comp','memory_write_comp']
+  condition ['array','condition','expression','number']
+
+Checkpointer hooks
+  pre/post_workflow_execute · pre/post_agent_execute · pre/post_agent_team_execute ·
+  interrupt_agent_execute · session_exists · release · graph_store
+Storage contract: save · recover · clear · exists
+```
+
+**Findings.** A Pregel bulk-synchronous engine with channel `snapshot`/`restore`, barrier
+messages, graph interrupts and resume detection sits under Core Workflow. `workflow_comp`
+makes workflows nestable. Conditional routers may return a **list**, giving runtime fan-out.
+
+**This is the finding that overturns Revision 2's Stage 3.** See
+[15-correction-log.md §1](15-correction-log.md) and [17-taskgraph-verdict.md](17-taskgraph-verdict.md).
+
+## V-16 · SwarmFlow script contract — META purity and determinism lint ⭐
+
+```bash
+./.venv-jw/bin/python exp5_swarmflow.py   # then direct calls to loader
+```
+
+```
+extract_workflow_meta(source, filename) -> dict
+load_workflow_meta(path) -> dict
+load_workflow_source(path) -> LoadedWorkflow
+
+_BANNED_MODULE_CALLS: {'time': {'time','monotonic','perf_counter','time_ns','monotonic_ns'},
+                       'random': None, 'uuid': None}
+_BANNED_ATTRS       : {'now','today','utcnow'}
+_THUNK_CALLEES      : {'agent','workflow'}
+
+sfprobe/good.py                 -> OK {'name':'evidence-sweep','description':'demo',
+                                       'phases':['search','extract']}
+sfprobe/bad_meta.py             -> REJECTED MetaError: `META` must be a pure literal
+                                   (no names/calls/concatenation)
+```
+
+**Findings.** A SwarmFlow workflow is ordinary Python with a pure-literal `META` and
+`async def run(args)`. Purity is enforced by `ast.literal_eval` — executed and confirmed by
+rejection. The loader lints determinism hazards because the engine replays from a journal.
+
+Source-confirmed alongside: `Journal` (WAL, `call_signature`, `get_cached`, `hits`),
+`SemaphoreAdmission` / `ConcurrencyGovernor`, `SwarmflowTool.run_background` + `resume_id`,
+`BackgroundTaskController.pause/resume`, `_check_abort`, `WorkflowProgressEvent`.
+
+**Exposure:** `SWARMFLOW_ENABLED_CONFIG_PATH = ("modes","team","jiuwen_team","enable_swarmflow")`
+— a config flag inside team mode, with phases projected to `team.task` / `team.member`
+(`team_helpers.py:2159-2288`). Users never select SwarmFlow.
+
+## V-17 · openjiuwen has a self-evolution framework ⭐
+
+```bash
+./.venv-jw/bin/python exp4_evolving.py
+```
+
+```
+Operator (core/operator/base.py)
+  docstring       : "Base class for self-evolution parameter handles."
+  explicitly      : "Operator is NOT an executable unit."
+  abstract methods: ['get_state','get_tunables','load_state','operator_id','set_parameter']
+  TunableSpec     : ('name','kind','path','constraint')
+  kinds shipped   : llm_call · memory_call · skill_call · tool_call
+
+Evaluation
+  Case            : ['inputs','label','tools','case_id']
+  EvaluatedCase   : ['case','answer','score','reason','per_metric']
+  metrics         : ['exact_match','llm_as_judge','base']
+
+Trainer
+  train(agent, train_cases, val_cases, ...)
+  _select_best_candidate_on_val(agent, operators, candidates, val_cases)
+  _snapshot_operators_state / _restore_operators_state
+  _save_checkpoint_if_needed(improved=) / _resume_if_needed
+  apply_updates(operators, updates) / evaluate -> (score, [EvaluatedCase])
+
+Updater  : bind · process · update · requires_forward_data · get_state · load_state
+           impls: single_dim, multi_dim          <-- credit assignment
+Signals  : from_eval · from_conv · team
+agent_rl : offline/ online/{gateway,inference,judge,launcher,rail,scheduler}
+           rl_trainer/{ppo_step, verl_converter, verl_executor} · reward.py
+Checkpointing: EvolutionStore(append_record, archive_evolutions, archive_skill_body,
+               create_skill, ensure_skill_id, ...) · skill_package(pack/unpack/install)
+Sharing  : hub_client · experience_sharer · share_stager
+```
+
+**Findings.** Candidate generation, validation-set selection, snapshot/rollback, freeze
+markers, credit assignment, evaluation datasets, LLM-judge metrics and PPO-based RL all exist.
+
+**Revision 2 declared six of eight RSI surfaces "absent from both systems" after searching only
+AI4RnD.** Corrected: one of eight is absent (RSI-4, DAG/agent-organisation search). See
+[15 §2](15-correction-log.md) and [18-evolution-governance.md](18-evolution-governance.md).
+
+## V-18 · The "Operator" naming collision
+
+| | openjiuwen `Operator` | AI4RnD "operator" |
+|---|---|---|
+| Definition | tunable-parameter handle for self-evolution | executable work unit / worker |
+| Source | *"Operator is NOT an executable unit. Execution is handled by the consumer (Agent)"* | `logical-operators.json`, `physical-operators.json` |
+| Interface | `get_tunables`, `set_parameter`, `get_state`, `load_state`, `operator_id` | `required_capabilities`, dispatch, quota, health |
+
+**EXEC.** Resolution adopted: AI4RnD's executable units are renamed **Step** (logical) and
+**Runner** (physical); "Operator" is reserved for openjiuwen's meaning.
+
+## V-19 · Mechanism comparison, consolidated
+
+Full table: [16 §10](16-jiuwen-execution-mechanisms.md#10-comparison-table). The three rows
+where every Jiuwen mechanism scores ✗ and AI4RnD scores ✅:
+
+- typed contracts / evidence requirements on nodes
+- capability routing with honest stall
+- write-scope conflict exclusion
+
+These are the entire justification for AI4RnD-owned runtime code — about **450 LOC**, against
+the ~5,200 LOC Revision 2 planned to port.
+
+---
+
+## Revision 3 corrections table
+
+| # | Revision 2 claim | Corrected finding | Class |
+|---|---|---|---|
+| 13 | AI4RnD must port `graph_scheduler` (4,189 LOC) | Pregel + Core Workflow + SwarmFlow provide ~85% of it | EXEC |
+| 14 | Durable queue + leases are "a real gap in JiuwenSwarm"; port `actor_*` | `ConcurrencyGovernor`, `SemaphoreAdmission`, `Journal`, `BackgroundTaskController` already provide it | EXEC/SRC |
+| 15 | RSI surfaces 2,4,5,6,7,8 absent from both systems | only RSI-4 is absent; `agent_evolving` covers the rest | EXEC |
+| 16 | RSI needs ~16 weeks of construction | ~6–8 weeks, mostly binding + approval surface | derived |
+| 17 | "Operator" had three colliding meanings (all inside AI4RnD) | four — openjiuwen adds one with the opposite sense | EXEC |
+| 18 | JiuwenSwarm covers 20/142 features fully | **23/142 FULL**, NONE 72→62, after the mechanism inventory | derived |
+| 19 | Recommended a separate service with its own scheduler | in-process project subsystem compiling to Jiuwen mechanisms | derived |
+
+## Blocked in Revision 3
+
+| Test | Why |
+|---|---|
+| End-to-end Core Workflow `invoke()` with a live model | needs provider credentials |
+| SwarmFlow `run()` with real agents | needs a team runtime + credentials |
+| Checkpointer persistence across a real restart | needs a configured KV backend — **Q24** |
+| `Trainer.train` on real cases | needs credentials and a golden set |
+| Write-scope admission prototype | design work, not yet built |
+

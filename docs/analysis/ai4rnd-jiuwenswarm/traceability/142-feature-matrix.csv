@@ -73,14 +73,14 @@ id,sheet,l1,l2,firmness,ai4rnd_maturity,jw_coverage,evidence,evidence_class,disp
 72,Foundation,Foundational models,1. Model Capability Registry,FIRM,ACTIVE,PARTIAL,AI4R model_registry.py(167)+config/model-registry.json; JW models config,EXEC,ADAPT,
 73,Foundation,Foundational models,2. Model Routing & Selection,FIRM,ACTIVE,PARTIAL,AI4R model-scenario-routing.json + operator_model_selection; JW per-role model,EXEC,ADAPT,
 74,Foundation,Foundational models,3. Model Usage Auditing,FIRM,ACTIVE,PARTIAL,AI4R model_call_runtime.py(290) + token-tracker.sh; JW usage_summary events,EXEC,ADAPT,
-75,Foundation,RSI,1. Text-Based Artifacts (GEPA / MIPROv2 / TextGrad),FIRM,IMPL-UNWIRED,NONE,"AI4R integrations/gepa_optimizer/ (3540 LOC, propose/run/review/promote/rollback, budget caps, hard_policy_checker); MIPROv2+TextGrad ABSENT",EXEC,PORT,wire GEPA; others unbuilt
-76,Foundation,RSI,2. Runtime and Resource Routing (Bayesian Optimization / Bandits / Cost-Aware RL),ASPIRE,ABSENT,NONE,No bandit/Bayesian-optimisation code found (word-boundary search),EXEC,BUILD,
-77,Foundation,RSI,3. Capability Capsules and Physical Operators (Trajectory Mining / Code Evolution / CEGIS),DEBATED,SCAFFOLD,NONE,AI4R skill_to_capsule_compiler + evolution_engine; Voyager/CEGIS ABSENT,EXEC,BUILD,
-78,Foundation,RSI,4. DAG and Agent Organization (AFlow / MCTS / ADAS),ASPIRE,ABSENT,NONE,AFlow/MCTS/ADAS absent (only 1 incidental ADAS match),EXEC,BUILD,
-79,Foundation,RSI,"5. Evaluator, Reward, Contract, and Governance (Judge Calibration / Reward Modeling / CEGIS)",DEBATED,SCAFFOLD,NONE,AI4R gate/judge config exists; judge calibration + reward modelling absent,SRC,BUILD,
-80,Foundation,RSI,"6. Memory, Retrieval, and Evidence (Memory Learning / Self-RAG / Reranker Training)",DEBATED,SCAFFOLD,PARTIAL,AI4R memory/wiki schema; Self-RAG/reranker training absent; JW memory index,SRC,BUILD,
-81,Foundation,RSI,7. Model Policies and Weights (SFT / LoRA / DPO / GRPO / Agent RL),ASPIRE,ABSENT,NONE,SFT/LoRA/DPO/GRPO absent (matches are persona md + report appendix),EXEC,DEFER,needs training infra
-82,Foundation,RSI,"8. Data, Benchmarks, Curriculum, and Observability (Active Learning / Hard-Case Mining / Credit Assignment)",DEBATED,SCAFFOLD,NONE,AI4R failure_miner.py(109) + experience bank; active learning absent,EXEC,BUILD,
+75,Foundation,RSI,1. Text-Based Artifacts (GEPA / MIPROv2 / TextGrad),FIRM,IMPL-UNWIRED,PARTIAL,openjiuwen optimizer/llm_call + TunableKind='prompt'; AI4R GEPA 3540 LOC (may duplicate),EXEC,REUSE-JW,dedupe GEPA vs openjiuwen optimizer
+76,Foundation,RSI,2. Runtime and Resource Routing (Bayesian Optimization / Bandits / Cost-Aware RL),ASPIRE,ABSENT,PARTIAL,openjiuwen TunableKind tool_selector/memory_selector + optimizer/tool_call; agent_rl,EXEC,REUSE-JW,bind AI4RnD routing policy as Operator
+77,Foundation,RSI,3. Capability Capsules and Physical Operators (Trajectory Mining / Code Evolution / CEGIS),DEBATED,SCAFFOLD,PARTIAL,openjiuwen optimizer/skill_call + EvolutionStore + skill_package; AI4R skill_to_capsule_compiler,EXEC,ADAPT,capsule as Operator subject
+78,Foundation,RSI,4. DAG and Agent Organization (AFlow / MCTS / ADAS),ASPIRE,ABSENT,NONE,RSI-4 DAG/organisation search absent from BOTH (confirmed against openjiuwen too),EXEC,BUILD,the one genuinely absent surface
+79,Foundation,RSI,"5. Evaluator, Reward, Contract, and Governance (Judge Calibration / Reward Modeling / CEGIS)",DEBATED,SCAFFOLD,PARTIAL,"openjiuwen evaluator/metrics{exact_match,llm_as_judge} + agent_rl/reward.py + online/judge",EXEC,REUSE-JW,AI4RnD metrics as metrics/ impls
+80,Foundation,RSI,"6. Memory, Retrieval, and Evidence (Memory Learning / Self-RAG / Reranker Training)",DEBATED,SCAFFOLD,PARTIAL,openjiuwen core/operator/memory_call + optimizer/memory_call; JW memory index,EXEC,REUSE-JW,
+81,Foundation,RSI,7. Model Policies and Weights (SFT / LoRA / DPO / GRPO / Agent RL),ASPIRE,ABSENT,PARTIAL,"openjiuwen agent_rl/rl_trainer{ppo_step,verl_converter,verl_executor}, offline+online",EXEC,REUSE-JW,was 'absent'; needs infra to run
+82,Foundation,RSI,"8. Data, Benchmarks, Curriculum, and Observability (Active Learning / Hard-Case Mining / Credit Assignment)",DEBATED,SCAFFOLD,PARTIAL,"openjiuwen dataset/{case,case_loader} + trajectory/{builder,extractor,aggregator,store}",EXEC,REUSE-JW,AI4R failure_miner feeds hard cases
 83,Foundation,Data foundations,1. Persistent Memory & Context Retrieval,FIRM,ACTIVE,FULL,JW MemoryIndexManager(1224) SQLite+vector+watcher; AI4R context_store,SRC,REUSE-JW,
 84,Foundation,Data foundations,2. Concept Graph Management,FIRM,SCAFFOLD,NONE,AI4R runtime/schema/entities.yaml typed entity contract,SRC,PORT,
 85,Foundation,Data foundations,3. Dataset Graph Management,FIRM,SPEC,NONE,Dataset graph specified; no module,SRC,BUILD,
@@ -89,21 +89,21 @@ id,sheet,l1,l2,firmness,ai4rnd_maturity,jw_coverage,evidence,evidence_class,disp
 88,Foundation,Data foundations,6. Workflow Graph Management,FIRM,IMPL-UNWIRED,NONE,AI4R workflow_contract registry + config/workflows/,SRC,PORT,
 89,Foundation,Data foundations,7. Trace Graph Management,FIRM,ACTIVE,NONE,AI4R gate_ledger + events.jsonl + route_proof.py (trace graph in practice),EXEC,PORT,
 90,Foundation,Data foundations,8. Memory Graph Management,FIRM,SCAFFOLD,NONE,AI4R runtime/schema/xref.yaml bidirectional link contract,SRC,PORT,
-91,Foundation,Data foundations,9. TaskGraph Persistence & Lifecycle Management,FIRM,ACTIVE,NONE,AI4R task_graph_io.py(351)+task_graph_state_io.py(491)+node_runstate.py,EXEC,PORT,
+91,Foundation,Data foundations,9. TaskGraph Persistence & Lifecycle Management,FIRM,ACTIVE,PARTIAL,openjiuwen Checkpointer/Storage save-recover + SwarmFlow journal; AI4R task_graph_state_io,EXEC,ADAPT,persistent KV backend? Q24
 92,Foundation,Harness Core,1. Runtime Control Loop & Run Lifecycle Management,FIRM,ACTIVE,FULL,JW DeepAgent dual-layer task loop (verified 11 rail events); AI4R coordinator.sh,EXEC,REUSE-JW,
-93,Foundation,Harness Core,2. Message Bus & Durable Task Queue,FIRM,IMPL-UNWIRED,PARTIAL,AI4R actor_mailbox.py(102)+queue.sh+task_queue.py; JW in-proc queues,EXEC,PORT,durable queue is a real gap in JW
-94,Foundation,Harness Core,"3. DAG Scheduler, TaskGraph Readiness & Operator Binding",FIRM,ACTIVE,NONE,AI4R graph_scheduler validate/topo/write-scope batching; 321 graph tests pass,EXEC,PORT,
-95,Foundation,Harness Core,"4. Execution Admission, Lease & Concurrency Control",FIRM,IMPL-UNWIRED,PARTIAL,AI4R actor_lease.py(238)+pane_lease.py+concurrency_policy.py(320),EXEC,PORT,
+93,Foundation,Harness Core,2. Message Bus & Durable Task Queue,FIRM,IMPL-UNWIRED,FULL,"openjiuwen SwarmFlow Journal (WAL, call_signature memoisation) + BackgroundTaskController",EXEC,REUSE-JW,was 'real gap in JW' - WRONG
+94,Foundation,Harness Core,"3. DAG Scheduler, TaskGraph Readiness & Operator Binding",FIRM,ACTIVE,PARTIAL,openjiuwen Pregel get_ready_nodes/supersteps/barrier; binding+write-scope still AI4RnD,EXEC,ADAPT,85% of graph_scheduler duplicates
+95,Foundation,Harness Core,"4. Execution Admission, Lease & Concurrency Control",FIRM,IMPL-UNWIRED,FULL,openjiuwen SemaphoreAdmission + ConcurrencyGovernor + WorkflowAdmission + RunAgentAdmission,EXEC,REUSE-JW,actor_* port cancelled
 96,Foundation,Harness Core,5. Main Loop Dispatch & Runtime Supervision,FIRM,ACTIVE,FULL,JW agent dispatch in-process; AI4R graph_node_dispatcher(12948) tmux (drop),EXEC,REUSE-JW,
-97,Foundation,Harness Core,6. Failure Recovery & Resumability,FIRM,ACTIVE,PARTIAL,AI4R recover_detector/failure_handler/.finalized idempotency; JW rewind,SRC,PORT,
+97,Foundation,Harness Core,6. Failure Recovery & Resumability,FIRM,ACTIVE,FULL,openjiuwen Pregel _is_resume + channel restore; SwarmFlow journal replay; resume_id,EXEC,REUSE-JW,
 98,Foundation,Intention compilers,1. Intent Classification & Compilation Variant Selection,FIRM,ACTIVE,NONE,AI4R intent_gateway.py(736) classification lanes,EXEC,PORT,
 99,Foundation,Intention compilers,"2. Goal, Scope and Context normalization",FIRM,ACTIVE,NONE,AI4R intent_engine_adapter.py(851),EXEC,PORT,
 100,Foundation,Intention compilers,3. Ambiguity Resolution & Readiness,FIRM,ACTIVE,PARTIAL,AI4R readiness checks; JW structured_ask_user rail,SRC,ADAPT,
 101,Foundation,Intention compilers,4. Constraint Compilation,FIRM,IMPL-UNWIRED,PARTIAL,AI4R workflow_contract constraints; JW permissions/budget,SRC,PORT,
 102,Foundation,Intention compilers,5. Task Contract & Acceptance Compilation,FIRM,ACTIVE,NONE,AI4R workflow_contract instantiate + version/hash (executed via intake),EXEC,PORT,
 103,Foundation,Planner,1. Task Contract Decomposition,FIRM,ACTIVE,PARTIAL,AI4R epic_decomposer.py(926)+apo_plan_compiler.py(1093); JW TaskPlanningRail,EXEC,PORT,
-104,Foundation,Planner,2. TaskGraph Construction,FIRM,ACTIVE,NONE,AI4R task_graph.json construction + plan IR,EXEC,PORT,
-105,Foundation,Planner,3. TaskGraph Validation & Feasibility Analysis,FIRM,ACTIVE,NONE,AI4R plan_validator.py(1564) 'compiles implies dispatchable',EXEC,PORT,
+104,Foundation,Planner,2. TaskGraph Construction,FIRM,ACTIVE,PARTIAL,openjiuwen Workflow build API + PregelBuilder; AI4RnD keeps semantic plan only,EXEC,ADAPT,"compile, do not schedule"
+105,Foundation,Planner,3. TaskGraph Validation & Feasibility Analysis,FIRM,ACTIVE,PARTIAL,AI4R plan_validator 1564 LOC; openjiuwen validates graph structure only,EXEC,PORT,keep contract/coverage validation
 106,Foundation,Builder,1. Build Contract Interpretation,FIRM,ACTIVE,PARTIAL,AI4R contract interpretation in dispatch prompts; JW code mode,SRC,ADAPT,
 107,Foundation,Builder,2. Build Preparation,FIRM,ACTIVE,FULL,JW workspace/worktree/deps; AI4R run_preflight,SRC,REUSE-JW,
 108,Foundation,Builder,3. Code Construction,FIRM,ACTIVE,FULL,JW code agent + LSP + edit tools,EXEC,REUSE-JW,
@@ -119,7 +119,7 @@ id,sheet,l1,l2,firmness,ai4rnd_maturity,jw_coverage,evidence,evidence_class,disp
 118,Foundation,Builder,13. Report/Paper/Deliverable Construction,FIRM,ACTIVE,PARTIAL,AI4R research compile/html_artifact/render_sprint_html; JW skills(docx/pptx),EXEC,ADAPT,
 119,Foundation,Builder,14. Runtime Deliverable Construction,FIRM,SCAFFOLD,PARTIAL,AI4R release/+docker/; JW pip+desktop packaging,SRC,REUSE-JW,
 120,Vertical,Visibility / Statistics,1. Workflow & Platform Status Visibility,FIRM,ACTIVE,PARTIAL,AI4R status-server.py(14400)+React; JW web UI,SRC,ADAPT,rewrite as JW view
-121,Vertical,Visibility / Statistics,2. Execution Trace Search & Inspection,FIRM,ACTIVE,PARTIAL,AI4R events.jsonl+gate_ledger search; JW logs+OTel,SRC,PORT,
+121,Vertical,Visibility / Statistics,2. Execution Trace Search & Inspection,FIRM,ACTIVE,PARTIAL,openjiuwen trajectory store + WorkflowProgressEvent; AI4R events.jsonl,EXEC,REUSE-JW,
 122,Vertical,Visibility / Statistics,3. Runtime status visibility,FIRM,IMPL-UNWIRED,PARTIAL,AI4R resource_telemetry.py; JW psutil-based status,SRC,ADAPT,
 123,Vertical,Visibility / Statistics,"4. Resource Usage, Cost & Capacity Management",FIRM,SCAFFOLD,PARTIAL,AI4R token-tracker.sh+codex budget circuit breaker; JW TokenBudgetEvaluator(per-loop),EXEC,PORT,cross-run budget missing both
 124,Vertical,Installer & CLI & Webapp,1. Windows App,FIRM,SCAFFOLD,FULL,JW signed Windows desktop+auto-update; AI4R install.ps1 WSL2 (experimental),DOC,REUSE-JW,

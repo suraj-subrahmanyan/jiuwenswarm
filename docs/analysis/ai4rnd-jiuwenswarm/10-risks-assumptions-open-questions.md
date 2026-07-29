@@ -188,3 +188,67 @@ were discovered by execution in this revision, and neither is visible from readi
 | Option G is the runner-up, not a distant one | **Medium** | judgement |
 | Effort estimates | **Low-Medium** | structural, not empirical |
 | Feature-level maturity classifications | **Medium** | 21 SCAFFOLD rows are the softest |
+
+---
+
+# Revision 3 — additions and reversals
+
+## New assumptions
+
+| # | Assumption | Basis | If wrong |
+|---|---|---|---|
+| A12 | An AI4RnD plan can be compiled to SwarmFlow or Core Workflow | API confirmed by execution [V-15, V-16]; compilation itself unproven | Stage 0 F2/F4 test it; fallback is a separate service |
+| A13 | The determinism lint is compatible with research patterns | run ids/timestamps can be passed via `args`, matching AI4RnD's deterministic-ID design | F4 |
+| A14 | A persistent `Checkpointer` backend is configurable in JiuwenSwarm | `persistence.py` implements `BaseKVStore`; default wiring unverified | **Q24** / F3 |
+| A15 | Write-scope exclusion can be a compile-time invariant | AI4RnD owns plan→script generation | F5; fallback is a custom `AgentAdmission` |
+| A16 | AI4RnD subjects can be expressed as openjiuwen `Operator`s | `TunableKind` is an open string; `Trainer` is subject-agnostic | RSI reuse shrinks; Stage 5 grows |
+| A17 | In-process project state will not contend with the AgentServer | `NativeHarness` is built for long-lived agents | Option 8 step 2 — isolate the store |
+
+## Reversed
+
+| # | Was | Now |
+|---|---|---|
+| A7 | writer≠verifier moves to AI4RnD's router | **unchanged and reinforced** |
+| — | "durable queue + leases are a JiuwenSwarm gap" | **reversed** — `ConcurrencyGovernor`, `Journal`, `BackgroundTaskController` [V-15/16] |
+| — | "6 of 8 RSI surfaces absent from both" | **reversed** — 1 of 8 absent [V-17] |
+| R5 | DeepSearch overlap risk | remains Low |
+| R7 | "19 unwired modules need wiring" | **narrowed** — several (`actor_*`, most of `graph_scheduler`) should be **dropped**, not wired |
+
+## New open questions
+
+| # | Question | For | Why it matters |
+|---|---|---|---|
+| **Q24** | Which `Checkpointer` KV backend is active in a default JiuwenSwarm install? | JiuwenSwarm | determines whether durability is config or build (F3) |
+| Q25 | Is `WorkflowController`'s intent detection usable for AI4RnD objective selection, or is objective an AI4RnD concept? | both | affects whether objectives are registered workflows |
+| Q26 | Can a Core Workflow component carry arbitrary metadata (for contract annotation), or must AI4RnD keep a side map? | JiuwenSwarm | affects plan↔runtime traceability |
+| Q27 | Does `Trainer` tolerate non-agent subjects (a capsule, a routing policy) as `Operator` owners? | JiuwenSwarm | the core RSI-reuse assumption (A16) |
+| Q28 | Is the tmux cockpit a user requirement? | AI4RnD | unchanged from Rev 2 (Q4); still unanswered |
+| Q29 | Should AI4RnD objectives be registered as openjiuwen `WorkflowCard`s so Auto Route can select them? | both | would make research objectives discoverable from ordinary chat |
+| Q30 | Who owns the capsule↔skill bridge when a capsule's bound skill is itself evolved by JiuwenSwarm's ordinary skill evolution? | both | two evolution loops touching one artifact |
+
+## Revised risks
+
+| # | Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|
+| R16 | Compilation to both targets fails | Low–Med | **High** | Stage 0 F2/F4 — one target suffices |
+| R17 | `Trainer` cannot host AI4RnD subjects (A16 wrong) | Medium | Medium | Q27; fallback is AI4RnD's own GEPA, already built |
+| R18 | Two evolution loops (JW skill evolution + AI4RnD governance) conflict on one skill | Medium | Medium | Q30; governance applies only to capsule-bound skills |
+| R19 | In-process project contends with AgentServer | Low–Med | Medium | A17 / Option 8 step 2 |
+| R20 | The compiler becomes the new complexity sink | **Medium** | Medium | keep it ~800 LOC; if it grows past ~2k, reconsider |
+| R6 | Grounding cannot be made trustworthy | Medium | **High** | **eased** — `llm_as_judge` + judge calibration exist |
+| R10 | Guardrail gap ships to production | Medium | High | unchanged — Stage 2 exit gate |
+
+## Confidence — Revision 3
+
+| Conclusion | Confidence | Basis |
+|---|---|---|
+| openjiuwen has a durable, resumable graph engine | **High** | executed [V-15] |
+| SwarmFlow is deterministic, journalled and resumable | **High** | executed [V-16] + source |
+| openjiuwen has a self-evolution framework | **High** | executed [V-17] |
+| AI4RnD should not build a scheduler | **High** | follows from the above |
+| SwarmFlow is the right default compilation target | **Medium** | plausible; F4 untested |
+| AI4RnD is "mode + persistent project + registry" | **Medium-High** | follows from the 142-feature scope |
+| Execution mechanism must not be user-facing | **High** | upstream already hides it (config flag + team projection) |
+| ~450 LOC of AI4RnD runtime code suffices | **Medium** | derived from the capability gap, not built |
+| 14-month estimate | **Low-Medium** | structural, not empirical |
+

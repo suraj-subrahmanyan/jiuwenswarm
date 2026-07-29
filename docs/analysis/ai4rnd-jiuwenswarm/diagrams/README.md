@@ -26,6 +26,12 @@ standalone reference; several also appear in context in the analysis documents.
 | 19 | [RSI feedback loop](#19-rsi-feedback-loop) | [08](../08-recommended-architecture.md) §4 |
 | 20 | [Recommended target architecture (complete)](#20-recommended-target-architecture--complete-product) | [08](../08-recommended-architecture.md) §1 |
 | 21 | [Maturity overlay](#21-maturity-overlay--where-the-product-actually-stands) | [13](../13-maturity-map.md) |
+| 22 | [Jiuwen execution mechanism stack](#22-jiuwen-execution-mechanism-stack) | [16](../16-jiuwen-execution-mechanisms.md) §0 |
+| 23 | [Plan → compiler → runtime separation](#23-plan--compiler--runtime-separation) | [17](../17-taskgraph-verdict.md) §1 |
+| 24 | [Compilation decision](#24-compilation-decision) | [08](../08-recommended-architecture.md) §4 |
+| 25 | [Revision 3 target architecture](#25-revision-3-target-architecture) | [08](../08-recommended-architecture.md) §1 |
+| 26 | [Governed evolution loop](#26-governed-evolution-loop) | [18](../18-evolution-governance.md) §2 |
+| 27 | [Product layering](#27-product-layering-mode--project--registry) | [19](../19-product-layers-and-ux.md) §1 |
 
 ---
 
@@ -770,3 +776,124 @@ flowchart LR
     JF --> DR
     JP --> DA2
 ```
+
+---
+
+## 22. Jiuwen execution mechanism stack
+
+```mermaid
+flowchart TB
+    subgraph L5["Product — JiuwenSwarm"]
+        MODE["Modes: plan · performance · team"]
+    end
+    subgraph L4["Orchestration — agent_teams"]
+        TEAM["Teams · leader/teammate · spawn"]
+        SF["SwarmFlow: journal(WAL) · admission ·<br/>progress · background · abort"]
+        NH["NativeHarness: start/stop/pause/abort/subscribe"]
+    end
+    subgraph L3["Agent runtime — harness"]
+        DA["DeepAgent · 11 rail events"]
+        WFA["WorkflowAgent + WorkflowController<br/>intent detection · interrupt · resume"]
+    end
+    subgraph L2["Workflow — core"]
+        WF["Workflow: components · connections ·<br/>conditional routers (list fan-out)"]
+    end
+    subgraph L1["Graph — core"]
+        PG["PregelGraph: supersteps · channels ·<br/>barrier · GraphInterrupt · snapshot/restore"]
+        CK["Checkpointer · Storage · Store"]
+    end
+    MODE --> TEAM --> SF --> DA
+    TEAM --> NH --> DA --> WFA --> WF --> PG --> CK
+```
+
+## 23. Plan → compiler → runtime separation
+
+```mermaid
+flowchart LR
+    LP["<b>Logical plan</b><br/>AI4RnD owns<br/>questions · deps · capabilities ·<br/>write_scope · acceptance · evidence"]
+    CMP["<b>Compiler</b><br/>AI4RnD owns · ~800 LOC"]
+    RT["<b>Runtime graph</b><br/>openjiuwen owns<br/>readiness · batching · retries ·<br/>checkpoint · resume · admission"]
+    LP --> CMP --> RT
+    RT -.->|evidence + route records| LP
+```
+
+## 24. Compilation decision
+
+```mermaid
+flowchart TB
+    N["plan node"] --> Q1{"shape known<br/>before running?"}
+    Q1 -->|no| SF["<b>SwarmFlow</b><br/>parallel / loop block"]
+    Q1 -->|yes| Q2{"open-ended?"}
+    Q2 -->|yes| TM["<b>Team excursion</b><br/>bounded"]
+    Q2 -->|no| CW["<b>Core Workflow</b><br/>fixed phases + interrupt"]
+    SF & CW & TM --> WS["write-scope invariant:<br/>conflicting steps never<br/>share a parallel group"]
+```
+
+## 25. Revision 3 target architecture
+
+```mermaid
+flowchart TB
+    subgraph S1["1 Product surface — JiuwenSwarm"]
+        M["Research mode · channels · session · project views"]
+    end
+    subgraph S2["2-4 Project control plane — AI4RnD on NativeHarness"]
+        PR["Project record"] --> PL["Logical plan (artifact)"] --> CO["Compiler"]
+    end
+    subgraph S5["5 Execution — openjiuwen"]
+        CW2["Core Workflow"] & SF2["SwarmFlow"] & TM2["Team"]
+        RT2["Pregel · Checkpointer · ConcurrencyGovernor"]
+    end
+    subgraph W["Step wrapper — AI4RnD ~450 LOC"]
+        RO["capability routing"] & WSC["write-scope"] & EC["evidence capture"]
+    end
+    subgraph S6["6-8 Governance — AI4RnD"]
+        LEDG["evidence + gate ledger"] --> EVO["proposal → test → approve → promote/rollback"]
+        REG2["capsule registry"]
+        OJE2["openjiuwen agent_evolving<br/>Trainer · Updater · Operator"]
+    end
+    M --> PR
+    CO --> CW2 & SF2 & TM2 --> RT2
+    CW2 & SF2 & TM2 --> W
+    REG2 --> RO
+    W --> LEDG
+    EVO --> OJE2
+    EVO -.->|promote| REG2
+    LEDG --> M
+```
+
+## 26. Governed evolution loop
+
+```mermaid
+flowchart TB
+    R["runs"] --> L["gate ledger + trajectory"]
+    L --> S["signal/from_eval · failure clusters"]
+    S --> P["<b>ImprovementProposal</b><br/>AI4RnD — new"]
+    P --> C["Updater.process → candidates<br/><i>openjiuwen</i>"]
+    C --> I["isolated run<br/>Trainer.forward + sandbox"]
+    I --> V["_select_best_candidate_on_val<br/><i>openjiuwen</i>"]
+    V --> F["frozen-rule check<br/>Operator freeze + policy checker"]
+    F --> A{"<b>approval</b><br/>auto / human<br/>AI4RnD — new"}
+    A -->|yes| PR2["promote: EvolutionStore +<br/>capsule version bump"]
+    A -->|no| RJ["reject (recorded)"]
+    PR2 --> MO["monitor"] -->|regression| RB["rollback<br/>_restore_operators_state"]
+    RB --> PR2
+    MO -->|stable| R
+    RJ -.->|hard case| L
+    PR2 --> IN["Improvements inbox"]
+```
+
+## 27. Product layering: mode → project → registry
+
+```mermaid
+flowchart TB
+    M2["<b>Mode</b> — 'Research'<br/>entry point + capability profile · thin"]
+    P2["<b>Project subsystem</b> — persistent<br/>contract · plan · evidence · gates · artifacts"]
+    C2["<b>Capability registry</b> — workspace-scoped<br/>capsules · versions · evaluation sets · improvements"]
+    E2["<b>Execution</b> — Jiuwen mechanisms"]
+    M2 -->|creates / opens| P2
+    P2 -->|consumes| C2
+    P2 -->|compiles to| E2
+    E2 -->|evidence| P2
+    P2 -->|proposals| C2
+```
+
