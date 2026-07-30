@@ -5,8 +5,8 @@
 <text x="24" y="38" class="title">AI4RnD — Evidence, Data and Governed RSI Design</text>
 <text x="24" y="62" class="m">How execution facts become claims and verdicts, then controlled improvement candidates</text>
 <rect x="30" y="90" width="1040" height="220" rx="10" fill="#e9f2ec" stroke="#84a98c" stroke-width="1.2"/>
-<text x="44" y="114" class="h">A. Evidence ingestion and immutable lineage</text>
-<text x="44" y="133" class="m">Evidence records preserve original content identity and exact support spans</text>
+<text x="44" y="114" class="h">A. Evidence lineage [CURRENT RESEARCH STORE → TARGET INTEGRATION]</text>
+<text x="44" y="133" class="m">The research SQLite schema supplies hashes, spans and claim links; harness-wide integration is not current</text>
 <rect x="50" y="155" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="61" y="177" class="n">Source</text>
 <text x="61" y="195" class="s">URI/repository/dataset/run</text>
@@ -17,16 +17,16 @@
 <text x="271" y="211" class="s">version + parser facts</text>
 <rect x="470" y="155" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="481" y="177" class="n">Span / measurement</text>
-<text x="481" y="195" class="s">char+byte offsets</text>
-<text x="481" y="211" class="s">metric protocol + raw result</text>
+<text x="481" y="195" class="s">span_start · span_end</text>
+<text x="481" y="211" class="s">content + content hash</text>
 <rect x="680" y="155" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="691" y="177" class="n">Evidence item</text>
 <text x="691" y="195" class="s">typed payload</text>
 <text x="691" y="211" class="s">provenance + confidence</text>
 <rect x="890" y="155" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="901" y="177" class="n">Claim link</text>
-<text x="901" y="195" class="s">supports · refutes · contextual</text>
-<text x="901" y="211" class="s">link confidence</text>
+<text x="901" y="195" class="s">supports · refutes · qualifies</text>
+<text x="901" y="211" class="s">link strength</text>
 <path d="M230 210 H255" class="flow"/>
 <path d="M440 210 H465" class="flow"/>
 <path d="M650 210 H675" class="flow"/>
@@ -63,8 +63,8 @@
 <path d="M770 533 V555" class="flow"/>
 <path d="M980 533 V555" class="flow"/>
 <rect x="30" y="690" width="1040" height="300" rx="10" fill="#eef6f8" stroke="#73a0aa" stroke-width="1.2"/>
-<text x="44" y="714" class="h">C. Authoritative data foundation and typed projections</text>
-<text x="44" y="733" class="m">One event/artifact truth can serve several graph schemas; the graphs are views with distinct lifecycle rules</text>
+<text x="44" y="714" class="h">C. Data foundation [TARGET]</text>
+<text x="44" y="733" class="m">Today four stores are separate; target records support typed projections with distinct lifecycle rules</text>
 <rect x="50" y="755" width="250" height="145" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="61" y="777" class="n">Authoritative records</text>
 <text x="61" y="795" class="s">Contracts · TaskGraph versions</text>
@@ -155,5 +155,5 @@
 <text x="562" y="1530" class="s">model weights</text>
 <rect x="800" y="1508" width="230" height="34" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
 <text x="812" y="1530" class="s">data/benchmark</text>
-<text x="50" y="1554" class="tiny">Current maturity: GEPA text-artifact path is implemented/tested but isolated; Capsule/operator and data/benchmark on-ramps are partial; the full eight-surface loop is not wired.</text>
+<text x="50" y="1554" class="tiny">Current maturity: GEPA text-artifact path is isolated; Capsule on-ramp is partial; no data/benchmark candidate type; the eight-surface loop is not wired.</text>
 </svg>

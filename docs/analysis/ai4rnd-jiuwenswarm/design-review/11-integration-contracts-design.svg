@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1900" viewBox="0 0 1100 1900" font-family="Helvetica,Arial,'Segoe UI',sans-serif" role="img" aria-labelledby="title desc">
+<title id="title">AI4RnD × OpenJiuwen — Integration Contract Design</title><desc id="desc">Five normative boundary objects preserve AI4RnD meaning while OpenJiuwen executes bounded attempts</desc>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+<style>.title{font-size:24px;font-weight:700;fill:#0f172a}.h{font-size:15px;font-weight:700;fill:#1e293b}.n{font-size:12.5px;font-weight:700;fill:#1e293b}.s{font-size:10.5px;fill:#475569}.m{font-size:11px;fill:#64748b}.tiny{font-size:9.5px;fill:#64748b}.tag{font-size:10px;font-weight:700;fill:#475569;letter-spacing:.04em}.flow{stroke:#475569;stroke-width:1.7;fill:none;marker-end:url(#arr)}.flow2{stroke:#475569;stroke-width:1.7;fill:none;marker-start:url(#arr);marker-end:url(#arr)}.dash{stroke:#64748b;stroke-width:1.3;stroke-dasharray:5 4;fill:none;marker-end:url(#arr)}.box{fill:#fff;stroke:#64748b;stroke-width:1;rx:7}</style><rect width="1100" height="1900" fill="#fff"/>
+<text x="24" y="38" class="title">AI4RnD × OpenJiuwen — Integration Contract Design</text>
+<text x="24" y="62" class="m">Five normative boundary objects preserve AI4RnD meaning while OpenJiuwen executes bounded attempts</text>
+<rect x="30" y="78" width="130" height="24" rx="12" fill="#f3edf8" stroke="#9873bb" stroke-width="1"/>
+<text x="95.0" y="94" class="tag" text-anchor="middle">TARGET CONTRACT</text>
+<rect x="175" y="78" width="145" height="24" rx="12" fill="#f3eee4" stroke="#b3a689" stroke-width="1"/>
+<text x="247.5" y="94" class="tag" text-anchor="middle">REUSE WITH FENCE</text>
+<rect x="335" y="78" width="112" height="24" rx="12" fill="#fff0ee" stroke="#d16d62" stroke-width="1"/>
+<text x="391.0" y="94" class="tag" text-anchor="middle">CURRENT GAP</text>
+<text x="470" y="94" class="tiny">Solid arrows: control and execution · dashed arrows: facts, evidence and reconciliation</text>
+<rect x="30" y="120" width="1040" height="245" rx="10" fill="#f3edf8" stroke="#9873bb" stroke-width="1.2"/>
+<text x="44" y="144" class="h">1. AI4RnD semantic authority</text>
+<text x="44" y="163" class="m">Only verified semantic readiness can mint a PlanSlice; runtime availability never defines product meaning</text>
+<rect x="50" y="190" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="212" class="n">Contract version</text>
+<text x="61" y="230" class="s">objective · scope · budget</text>
+<text x="61" y="246" class="s">acceptance · evidence owed</text>
+<rect x="255" y="190" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="266" y="212" class="n">TaskGraph version</text>
+<text x="266" y="230" class="s">ready nodes · dependencies</text>
+<text x="266" y="246" class="s">write scope · repair lineage</text>
+<rect x="460" y="190" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="471" y="212" class="n">Capsule + action</text>
+<text x="471" y="230" class="s">Capsule version · effects</text>
+<text x="471" y="246" class="s">Logical Operator identity</text>
+<rect x="665" y="190" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="676" y="212" class="n">Readiness validator</text>
+<text x="676" y="230" class="s">inputs · gates · budget</text>
+<text x="676" y="246" class="s">schema · capability feasibility</text>
+<rect x="870" y="190" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="881" y="212" class="n">PlanSlice</text>
+<text x="881" y="230" class="s">slice_id · plan_version · digest</text>
+<text x="881" y="246" class="s">operator nodes · dep/order edges</text>
+<path d="M230 245 H250" class="flow"/>
+<path d="M435 245 H455" class="flow"/>
+<path d="M640 245 H660" class="flow"/>
+<path d="M845 245 H865" class="flow"/>
+<text x="50" y="335" class="s">Invariant: the same idempotency key with a different content digest is a hard conflict; a replan creates a new plan/slice version.</text>
+<rect x="30" y="405" width="1040" height="335" rx="10" fill="#fff8e7" stroke="#c3a158" stroke-width="1.2"/>
+<text x="44" y="429" class="h">2. Integration bridge — admission, binding and compilation</text>
+<text x="44" y="448" class="m">The bridge translates and validates; it may not invent meaning, relax policy, or substitute an unqualified executor</text>
+<rect x="50" y="480" width="180" height="118" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="502" class="n">Resolve Capsule</text>
+<text x="61" y="520" class="s">pin version + guards</text>
+<text x="61" y="536" class="s">enforce effects + secrets rule</text>
+<rect x="255" y="480" width="180" height="118" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="266" y="502" class="n">Enumerate candidates</text>
+<text x="266" y="520" class="s">operators · models · tools</text>
+<text x="266" y="536" class="s">resources · skills · health</text>
+<rect x="460" y="480" width="180" height="118" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="471" y="502" class="n">BindingDecision</text>
+<text x="471" y="520" class="s">qualified resource selection</text>
+<text x="471" y="536" class="s">exact bindings or STALL · no mechanism</text>
+<rect x="665" y="480" width="180" height="118" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="676" y="502" class="n">Compile mechanism</text>
+<text x="676" y="520" class="s">agent · graph · flow · team</text>
+<text x="676" y="536" class="s">emit normalized common spec</text>
+<rect x="870" y="480" width="180" height="118" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="881" y="502" class="n">ExecutionSpec</text>
+<text x="881" y="520" class="s">attempt · epoch · mechanism</text>
+<text x="881" y="536" class="s">policy/guard digest · typed I/O</text>
+<path d="M230 539 H250" class="flow"/>
+<path d="M435 539 H455" class="flow"/>
+<path d="M640 539 H660" class="flow"/>
+<path d="M845 539 H865" class="flow"/>
+<rect x="50" y="630" width="980" height="76" rx="8" fill="#eef6f8" stroke="#73a0aa" stroke-width="1.2"/>
+<text x="64" y="653" class="n">Bridge mapping — authoritative cross-system lineage</text>
+<text x="64" y="673" class="s">project · slice · binding · execution · attempt ↔ native run/checkpoint · idempotency key · attempt lease epoch</text>
+<text x="64" y="691" class="tiny">Every contract: same explicit key + digest deduplicates; same key + different digest hard-conflicts.</text>
+<path d="M960 300 V400" class="dash"/>
+<rect x="30" y="780" width="1040" height="305" rx="10" fill="#f3eee4" stroke="#b3a689" stroke-width="1.2"/>
+<text x="44" y="804" class="h">3. OpenJiuwen native attempt</text>
+<text x="44" y="823" class="m">OpenJiuwen owns bounded physical execution and operational recovery—not Contract satisfaction, evidence truth or gate permission</text>
+<rect x="50" y="850" width="150" height="105" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="872" class="n">Attempt admission</text>
+<text x="61" y="890" class="s">idempotency · lease epoch</text>
+<text x="61" y="906" class="s">budget · timeout · cancel</text>
+<rect x="230" y="850" width="150" height="105" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="241" y="872" class="n">Mechanism dispatch</text>
+<text x="241" y="890" class="s">read spec discriminator</text>
+<text x="241" y="906" class="s">invoke exactly one option</text>
+<rect x="410" y="850" width="140" height="105" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="421" y="872" class="n">DeepAgent</text>
+<text x="421" y="890" class="s">adaptive bounded turn</text>
+<text x="421" y="906" class="s">ReAct + task loop</text>
+<rect x="565" y="850" width="140" height="105" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="576" y="872" class="n">Workflow / Pregel</text>
+<text x="576" y="890" class="s">known topology</text>
+<text x="576" y="906" class="s">checkpoint + interrupt</text>
+<rect x="720" y="850" width="140" height="105" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="731" y="872" class="n">SwarmFlow [FENCE]</text>
+<text x="731" y="890" class="s">parallel / pipeline / map</text>
+<text x="731" y="906" class="s">empty-success gap</text>
+<rect x="875" y="850" width="140" height="105" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="886" y="872" class="n">Dynamic Team</text>
+<text x="886" y="890" class="s">delegation · tasks</text>
+<text x="886" y="906" class="s">review + remediation</text>
+<path d="M200 902 H225" class="flow"/>
+<path d="M380 902 H395 V830 H945" stroke="#475569" stroke-width="1.7" fill="none"/>
+<path d="M480 830 V845" class="flow"/>
+<path d="M635 830 V845" class="flow"/>
+<path d="M790 830 V845" class="flow"/>
+<path d="M945 830 V845" class="flow"/>
+<text x="712" y="817" class="tag" text-anchor="middle">SELECT EXACTLY ONE MECHANISM</text>
+<rect x="50" y="985" width="980" height="70" rx="8" fill="#e8eef7" stroke="#7d97b8" stroke-width="1.2"/>
+<text x="64" y="1004" class="n">Shared resources and derived attempt state</text>
+<text x="64" y="1026" class="s">code/tools · worktree · MCP · sandbox · native run/checkpoint · progress · cancel acknowledgement · retry counter</text>
+<text x="64" y="1044" class="tiny">Resume keeps the attempt only with checkpoint continuity; otherwise mint a new attempt. Runtime completion cannot release dependencies.</text>
+<path d="M960 706 V775" class="flow"/>
+<rect x="30" y="1125" width="1040" height="325" rx="10" fill="#e9f2ec" stroke="#84a98c" stroke-width="1.2"/>
+<text x="44" y="1149" class="h">4. Typed return and independent assurance</text>
+<text x="44" y="1168" class="m">Execution facts become product truth only after receipt validation, independent evaluation and an authoritative gate record</text>
+<rect x="50" y="1200" width="230" height="145" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="1222" class="n">AttemptReceipt</text>
+<text x="61" y="1240" class="s">attempt + epoch + native run</text>
+<text x="61" y="1256" class="s">runtime_outcome enum or absent</text>
+<text x="61" y="1272" class="s">receipt_disposition separate</text>
+<rect x="300" y="1200" width="230" height="145" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="311" y="1222" class="n">Receipt validator</text>
+<text x="311" y="1240" class="s">identity · digest · lineage</text>
+<text x="311" y="1256" class="s">VALID · INVALID · QUARANTINED</text>
+<text x="311" y="1272" class="s">RECONCILING · CONFLICT</text>
+<rect x="550" y="1200" width="230" height="145" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="561" y="1222" class="n">Independent evaluators</text>
+<text x="561" y="1240" class="s">Contract · engineering · cost</text>
+<text x="561" y="1256" class="s">evidence/science · security</text>
+<text x="561" y="1272" class="s">writer ≠ verifier</text>
+<rect x="800" y="1200" width="230" height="145" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="811" y="1222" class="n">EvaluationGateRecord</text>
+<text x="811" y="1240" class="s">evaluation findings + gate disposition</text>
+<text x="811" y="1256" class="s">one immutable envelope</text>
+<text x="811" y="1272" class="s">duplicate delivery: no transition</text>
+<path d="M280 1272 H295" class="flow"/>
+<path d="M530 1272 H545" class="flow"/>
+<path d="M780 1272 H795" class="flow"/>
+<rect x="50" y="1375" width="980" height="42" rx="8" fill="#fff0ee" stroke="#d16d62" stroke-width="1.2"/>
+<text x="64" y="1401" class="s">One terminal receipt per attempt+epoch; identical redelivery deduplicates; contradiction quarantines/reconciles and never overwrites.</text>
+<path d="M970 1051 V1120" class="dash"/>
+<rect x="30" y="1490" width="1040" height="340" rx="10" fill="#eef6f8" stroke="#73a0aa" stroke-width="1.2"/>
+<text x="44" y="1514" class="h">5. Product outcomes and recovery</text>
+<text x="44" y="1533" class="m">Only the gate/reconciliation authority selects an outcome; every transition is durable, attributable and versioned</text>
+<rect x="50" y="1555" width="180" height="92" rx="10" fill="#e9f2ec" stroke="#475569" stroke-width="1"/>
+<text x="61" y="1577" class="n">Release</text>
+<text x="61" y="1595" class="s">gate permits progress</text>
+<text x="61" y="1611" class="s">release dependants</text>
+<rect x="250" y="1555" width="180" height="92" rx="10" fill="#fff8e7" stroke="#475569" stroke-width="1"/>
+<text x="261" y="1577" class="n">Repair</text>
+<text x="261" y="1595" class="s">same plan node</text>
+<text x="261" y="1611" class="s">new attempt + lineage</text>
+<rect x="450" y="1555" width="180" height="92" rx="10" fill="#f3edf8" stroke="#475569" stroke-width="1"/>
+<text x="461" y="1577" class="n">Replan</text>
+<text x="461" y="1595" class="s">new TaskGraph version</text>
+<text x="461" y="1611" class="s">new PlanSlice digest</text>
+<rect x="650" y="1555" width="180" height="92" rx="10" fill="#fff0ee" stroke="#475569" stroke-width="1"/>
+<text x="661" y="1577" class="n">Stall / stop / quarantine</text>
+<text x="661" y="1595" class="s">named reason · never progress</text>
+<text x="661" y="1611" class="s">human may resolve or close</text>
+<rect x="850" y="1555" width="180" height="92" rx="10" fill="#e8eef7" stroke="#475569" stroke-width="1"/>
+<text x="861" y="1577" class="n">Human gate</text>
+<text x="861" y="1595" class="s">approval dossier</text>
+<text x="861" y="1611" class="s">record decision</text>
+<rect x="50" y="1690" width="230" height="92" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="1712" class="n">Cancel</text>
+<text x="61" y="1730" class="s">persist intent → runtime ack</text>
+<text x="61" y="1746" class="s">quarantine late result</text>
+<rect x="300" y="1690" width="230" height="92" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="311" y="1712" class="n">Resume</text>
+<text x="311" y="1730" class="s">same attempt only if</text>
+<text x="311" y="1746" class="s">checkpoint continuity holds</text>
+<rect x="550" y="1690" width="230" height="92" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="561" y="1712" class="n">Restart</text>
+<text x="561" y="1730" class="s">UNKNOWN → RECONCILING</text>
+<text x="561" y="1746" class="s">until native state matches</text>
+<rect x="800" y="1690" width="230" height="92" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="811" y="1712" class="n">Fence stale work</text>
+<text x="811" y="1730" class="s">lease epoch rejects old result</text>
+<text x="811" y="1746" class="s">new attempt supersedes</text>
+<text x="50" y="1812" class="n">Five distinct decisions: runtime outcome ≠ receipt disposition ≠ Contract satisfaction ≠ evidence support ≠ gate permission.</text>
+</svg>

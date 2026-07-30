@@ -46,7 +46,7 @@
 <text x="281" y="437" class="s">cross-process rebuild seed</text>
 <rect x="490" y="350" width="210" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="501" y="372" class="n">Resolved components</text>
-<text x="501" y="390" class="s">model pool + allocator</text>
+<text x="501" y="390" class="s">model pool + allocator [GAP]</text>
 <text x="501" y="406" class="s">Ability cards + resources</text>
 <text x="501" y="422" class="s">Rail instances + callbacks</text>
 <text x="501" y="438" class="s">Skill/workspace managers</text>
@@ -78,13 +78,13 @@
 <text x="81" y="884" class="s">system prompt + history + skill guidance + memory + available ability cards</text>
 <rect x="70" y="946" width="680" height="72" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="81" y="968" class="n">4 · Allocate and call model</text>
-<text x="81" y="986" class="s">before-model Rails → exact pool allocation → provider client → response/exception Rails</text>
+<text x="81" y="986" class="s">before-model Rails → allocator [GAP: missing request may silently fall back] → provider client → response/exception Rails</text>
 <rect x="70" y="1048" width="680" height="72" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="81" y="1070" class="n">5 · Parse response</text>
 <text x="81" y="1088" class="s">text may finish the ReAct turn; tool requests enter the ability path</text>
 <rect x="70" y="1150" width="680" height="96" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="81" y="1172" class="n">6 · Authorize and execute each ability</text>
-<text x="81" y="1190" class="s">before-tool Rails → argument validation → permission ALLOW/ASK/DENY → resource runner</text>
+<text x="81" y="1190" class="s">before-tool Rail enforces permission → validate arguments → ALLOW/ASK/DENY → runner</text>
 <text x="81" y="1206" class="s">Tool/MCP/sub-agent/workflow/SysOperation returns ToolMessage or typed exception</text>
 <rect x="70" y="1276" width="680" height="72" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="81" y="1298" class="n">7 · Consume observation</text>
@@ -120,22 +120,23 @@
 <text x="840" y="882" class="n"></text>
 <text x="840" y="904" class="n">Tool call</text>
 <text x="840" y="926" class="n">before · after · exception</text>
-<text x="840" y="944" class="tiny">Possible actions:</text>
-<text x="840" y="958" class="tiny">context/ability injection</text>
-<text x="840" y="972" class="tiny">approval · interrupt · retry</text>
-<text x="840" y="986" class="tiny">force-complete · telemetry</text>
+<text x="840" y="930" class="tiny">Possible actions:</text>
+<text x="840" y="944" class="tiny">context/ability injection</text>
+<text x="840" y="958" class="tiny">approval · interrupt · retry</text>
+<text x="840" y="972" class="tiny">force-complete · telemetry</text>
+<text x="840" y="986" class="tiny">ReAct after-hook: success-only</text>
 <rect x="820" y="1045" width="250" height="400" rx="10" fill="#fff8e7" stroke="#c3a158" stroke-width="1.2"/>
 <text x="834" y="1069" class="h">E. Services used by a turn</text>
 <text x="834" y="1088" class="m">Shared contracts used by the loop</text>
 <rect x="840" y="1100" width="210" height="56" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
-<text x="851" y="1122" class="n">Model pool + allocator</text>
-<text x="851" y="1140" class="s">entry · capability · client config</text>
+<text x="851" y="1122" class="n">Model allocator [GAP]</text>
+<text x="851" y="1140" class="s">missing requested model may use default</text>
 <rect x="840" y="1170" width="210" height="56" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="851" y="1192" class="n">AbilityManager + runner</text>
 <text x="851" y="1210" class="s">metadata cards · executable resources</text>
 <rect x="840" y="1240" width="210" height="56" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
-<text x="851" y="1262" class="n">Permission engine</text>
-<text x="851" y="1280" class="s">allow · ask · deny</text>
+<text x="851" y="1262" class="n">Permission engine [GAP]</text>
+<text x="851" y="1280" class="s">ALLOW/ASK/DENY · 0 builtin rules load</text>
 <rect x="840" y="1310" width="210" height="56" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="851" y="1332" class="n">Workspace / SysOperation</text>
 <text x="851" y="1350" class="s">private · team · worktree · sandbox</text>

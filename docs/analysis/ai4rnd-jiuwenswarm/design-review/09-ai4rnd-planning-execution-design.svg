@@ -67,12 +67,12 @@
 <text x="44" y="664" class="h">C. Capsule, Operator and worker binding</text>
 <text x="44" y="683" class="m">Capability admission is a hard gate; scoring happens only after qualification</text>
 <rect x="50" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
-<text x="61" y="727" class="n">Capsule loader</text>
+<text x="61" y="727" class="n">Capsule loader [PARTIAL]</text>
 <text x="61" y="745" class="s">applicability · contract</text>
 <text x="61" y="761" class="s">effects · composition</text>
 <text x="61" y="777" class="s">verification · compatibility</text>
 <rect x="260" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
-<text x="271" y="727" class="n">Stage expansion</text>
+<text x="271" y="727" class="n">Stage expansion [PARTIAL]</text>
 <text x="271" y="745" class="s">guard → resource</text>
 <text x="271" y="761" class="s">capability → verifier</text>
 <text x="271" y="777" class="s">skill/MCP plan</text>
