@@ -4,7 +4,8 @@
 JiuwenSwarm, keep all product semantics inside AI4RnD, and hand execution to OpenJiuwen
 progressively — one capability at a time, each migration gated by a passing compatibility test.**
 
-This package consolidates four revisions of analysis into seven documents. Everything here is
+This summary condenses the canonical [Architecture Report](REPORT.md) — the one self-contained
+stakeholder deliverable; the numbered analyses, including this one, are supporting material. It is
 backed by direct source reading of all three codebases and 29 executed experiments; the evidence
 for every claim is catalogued in
 [06-evidence-assumptions-open-questions.md](06-evidence-assumptions-open-questions.md).
@@ -100,8 +101,8 @@ recommendation:
 
 ## 5. What it takes to build
 
-Of the 142 outcomes: **53 must be built new** (they exist in neither system — true under *every*
-architecture option), 32 adapted, 23 reused, 20 ported from AI4RnD, 11 extensions of JiuwenSwarm,
+Of the 142 outcomes: **50 must be built new** (they exist in neither system — true under *every*
+architecture option), 35 adapted, 23 reused, 20 ported from AI4RnD, 11 extensions of JiuwenSwarm,
 2 deferred, 1 unresolved. The plan in
 [05-feature-ownership-implementation-plan.md](05-feature-ownership-implementation-plan.md) is
 dependency-driven — six phases, each with acceptance evidence and exit criteria, no invented
@@ -119,6 +120,6 @@ trustworthy evidence and capability binding → workflow lanes → data foundati
 
 ---
 
-*Reading order: this summary → [04-recommended-target-architecture.md](04-recommended-target-architecture.md)
-for the design → [05-feature-ownership-implementation-plan.md](05-feature-ownership-implementation-plan.md)
-for the work. Documents 01–03 give the background; 06 carries the evidence.*
+*Reading order: the [Architecture Report](REPORT.md) is the canonical, self-contained
+deliverable. For deeper cuts: 04/07 for design, 05 for the work, 01–03 for background, 06 for
+evidence.*

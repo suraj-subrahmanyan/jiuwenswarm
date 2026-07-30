@@ -387,12 +387,13 @@ R("FN-04", dec="EXTEND", conf="MEDIUM", ec="SRC",
   a4="composition.consumes/produces/compatible_with/incompatible_with/requires_after on all 42",
   jw="No composition model between skills", ev="Parsed composition section on all 42 manifests",
   miss="Composition planner that uses the declared compatibility", acc="Incompatible capsules never appear in one plan")
-R("FN-05", dec="BUILD", conf="HIGH", ec="EXEC",
-  a4="No version promotion or performance history in the manifest schema",
+R("FN-05", dec="ADAPT", conf="HIGH", ec="SRC",
+  a4="GEPA Promoter implements promote/rollback with sha256 sidecars, tmp-vs-production path guards and atomic writes; the manifest schema itself carries no versions/history/RSI-target keys",
   jw="agent_evolving has Trainer/Updater but only ReactAgentEvolve implements get_operators()",
-  ev="Manifest key census: no benchmarks, performance_history, planning_strategies or rsi_targets keys; grep 'def get_operators' in openjiuwen returns one implementor",
-  miss="Capsule version promotion, rollback, performance history and RSI target declaration",
+  ev="AI4Research integrations/gepa_optimizer/promote.py (Promoter.promote/rollback, 354 LOC, unit-tested); manifest key census: no benchmarks/performance_history/rsi_targets keys",
+  miss="Wire Promoter to the capsule registry; extend the manifest schema with versions, history and RSI targets",
   acc="A promoted capsule version can be rolled back and in-flight runs keep their pinned version",
+  note="Rev 5 correction: promotion/rollback machinery already exists in GEPA and was previously overlooked - this row was BUILD, now ADAPT",
   phase="P6")
 
 R("FN-06", dec="PORT", conf="MEDIUM", ec="SRC", a4="Operator definitions in the capsule operator bindings checker",
@@ -418,11 +419,12 @@ R("FN-09", dec="ADAPT", conf="MEDIUM", ec="SRC", a4="Physical operator profiles 
 R("FN-10", dec="BUILD", conf="MEDIUM", ec="INF", a4="No runtime capability profiling", jw="Observability spans exist",
   ev="openjiuwen observability rail", miss="Per-operator capability profile built from run evidence",
   acc="Operator selection uses measured performance, not declared performance", graph="Trace graph")
-R("FN-11", dec="BUILD", conf="MEDIUM", ec="SRC", a4="GEPA optimizer present (integrations/gepa_optimizer)",
+R("FN-11", dec="ADAPT", conf="MEDIUM", ec="SRC", a4="GEPA supplies candidate generation, Budget stoppers (spend/evals/walltime/plateau/stop-file), frozen-policy checking and Promoter rollback; CLI defaults to dry-run",
   jw="agent_evolving Trainer performs candidate selection on a validation set",
-  ev="AI4Research integrations/gepa_optimizer/; openjiuwen agent_evolving/trainer/trainer.py",
-  miss="Evaluator-driven operator evolution wired to a governed promotion gate",
-  acc="An operator change is promoted only after measured improvement and approval", phase="P6")
+  ev="AI4Research integrations/gepa_optimizer/ (budgets.py, hard_policy_checker.py, promote.py, unit tests); openjiuwen agent_evolving/trainer/trainer.py",
+  miss="Wire GEPA's loop to operator profiles and to the approval inbox",
+  acc="An operator change is promoted only after measured improvement and approval",
+  note="Rev 5 correction: was BUILD - the governance machinery exists in GEPA; the missing work is wiring, not construction", phase="P6")
 
 R("FN-12", dec="ADAPT", conf="HIGH", ec="EXEC", a4="contract.postconditions and invariants on all 42 manifests",
   jw="Schema validation exists for tool inputs and outputs",
@@ -480,12 +482,12 @@ R("FN-21", dec="ADAPT", conf="HIGH", ec="SRC", a4="GEPA optimizer for prompt and
 R("FN-22", dec="BUILD", conf="MEDIUM", ec="SRC", a4="Routing strategies in graph_scheduler",
   jw="Bandit or cost-aware routing is not present", ev="No routing optimizer found in either tree",
   miss="Runtime and resource routing optimisation", acc="Routing policy improves against a measured objective")
-R("FN-23", dec="BUILD", conf="HIGH", ec="EXEC", a4="Capsules exist but carry no RSI target declaration",
+R("FN-23", dec="ADAPT", conf="HIGH", ec="SRC", a4="GEPA's typed candidate envelope already declares CAPSULE, SKILL, ROUTING_POLICY, REWRITE_RULES and COST_MODEL as its mutable families; capsule manifests carry no RSI-target keys yet",
   jw="Trainer.train requires an agent implementing get_operators(); only ReactAgentEvolve does",
-  ev="grep 'def get_operators' across openjiuwen returns exactly one implementor",
-  miss="Bind capsules and physical operators as evolution subjects",
+  ev="AI4Research integrations/gepa_optimizer/candidate_schema.py CandidateType enum; grep 'def get_operators' across openjiuwen returns exactly one implementor",
+  miss="Operator-protocol adapters exposing capsule tunables to Trainer/Updater; wire GEPA candidates to the registry",
   acc="A capsule can be registered as an evolution subject and improved under governance",
-  note="Corrects the earlier claim that agent_evolving is broadly reusable - today its only subject is one ReAct agent class")
+  note="Rev 5 correction: was BUILD - GEPA already types capsules as candidates and openjiuwen's Operator protocol is the adapter seam, so this is adaptation on both sides, not new construction")
 R("FN-24", dec="BUILD", conf="MEDIUM", ec="SRC", a4="No DAG or organisation search", jw="No AFlow/ADAS equivalent",
   ev="No graph-structure optimizer found in either tree", miss="DAG and agent organisation evolution",
   acc="A plan template improves measurably across runs")

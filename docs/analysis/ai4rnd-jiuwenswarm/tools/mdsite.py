@@ -8,13 +8,15 @@ for done (no green), pill controls, 4px rhythm.
 from __future__ import annotations
 import html, os, re, pathlib, sys, json
 
-ROOT = pathlib.Path(sys.argv[1]).resolve()
+ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OUT = ROOT / "html"
-OUT.mkdir(exist_ok=True)
+if __name__ == "__main__":
+    OUT.mkdir(exist_ok=True)
 
 # ---------------------------------------------------------------- document set
 DOCS = [
-    ("00-executive-summary.md",                    "Executive summary",                 "Overview"),
+    ("REPORT.md",                                  "The Architecture Report",           "Report"),
+    ("00-executive-summary.md",                    "Executive summary",                 "Supporting analyses — Overview"),
     ("01-intended-ai4rnd-product.md",              "The intended AI4RnD product",       "Background"),
     ("02-jiuwenswarm-openjiuwen-architecture.md",  "JiuwenSwarm & OpenJiuwen",          "Background"),
     ("03-integration-options.md",                  "Integration options",               "Decision"),
@@ -23,7 +25,7 @@ DOCS = [
     ("05-feature-ownership-implementation-plan.md","Ownership & implementation plan",   "Delivery"),
     ("06-evidence-assumptions-open-questions.md",  "Evidence & open questions",         "Evidence"),
 ]
-SECTIONS = ["Overview", "Background", "Decision", "Delivery", "Evidence"]
+SECTIONS = ["Report", "Supporting analyses — Overview", "Background", "Decision", "Delivery", "Evidence"]
 SLUG = {src: re.sub(r'[^a-z0-9]+', '-', src.lower().replace(".md", "")).strip('-') + ".html"
         for src, _, _ in DOCS}
 
@@ -545,6 +547,8 @@ def page(title: str, active: str, body: str, crumb: str = "") -> str:
 
 
 # ---------------------------------------------------------------- build pages
+if __name__ != "__main__":
+    import sys as _s; _s.exit if False else None
 order = [s for s, _, _ in DOCS]
 built = 0
 for idx, (src, title, sec) in enumerate(DOCS):
@@ -577,6 +581,7 @@ for idx, (src, title, sec) in enumerate(DOCS):
 
 # ---------------------------------------------------------------- index page
 DESC = {
+ "REPORT.md":"The canonical, self-contained stakeholder report. Everything needed to decide is on this one page.",
  "00-executive-summary.md":"The recommendation and why, in five minutes. Start here.",
  "01-intended-ai4rnd-product.md":"What is being built: the 142-outcome definition, the capsule model, current state.",
  "02-jiuwenswarm-openjiuwen-architecture.md":"What the foundation reliably provides, what exists but is unreachable, what is missing.",
@@ -591,24 +596,23 @@ NUM = {s: (s.split("/")[-1][:2] if s[:2].isdigit() or s.split("/")[-1][:2].isdig
 
 hero = f"""<div class="hero">
 <h1>AI4RnD on JiuwenSwarm</h1>
-<p class="lede">Build AI4RnD as a <strong>first-class, persistent research product</strong> on
-JiuwenSwarm. AI4RnD keeps all product semantics &mdash; contracts, plans, capsules, evidence,
-gates, governed self-improvement. OpenJiuwen executes. Migration of low-level scheduling is
-<strong>progressive, gated by compatibility tests</strong>. All 142 workbook outcomes preserved.</p>
+<p class="lede">Build the complete intended AI4RnD product — an <strong>evidence-governed
+autonomous R&amp;D system</strong> — as a first-class, persistent subsystem on JiuwenSwarm.
+AI4RnD keeps product semantics; OpenJiuwen executes; delegation is <strong>progressive, gated
+by compatibility tests</strong>. All 142 workbook outcomes preserved.</p>
 <div class="stats">
+  <div class="stat"><div class="n">1</div>
+    <div class="k">canonical report — self-contained; nothing else is required reading</div></div>
   <div class="stat"><div class="n">142<span style="font-size:15px;color:var(--subtle)">/142</span></div>
-    <div class="k">product outcomes preserved under the recommended architecture</div></div>
-  <div class="stat"><div class="n">53</div>
-    <div class="k">outcomes needing new construction &mdash; under every option</div></div>
+    <div class="k">outcomes preserved under the recommended architecture</div></div>
+  <div class="stat"><div class="n">50</div>
+    <div class="k">outcomes needing new construction — under every option</div></div>
   <div class="stat"><div class="n">29</div>
     <div class="k">executed experiments behind the evidence labels</div></div>
-  <div class="stat"><div class="n">7</div>
-    <div class="k">verified negative findings shaping the design</div></div>
 </div>
-<p style="font-size:13px;color:var(--subtle);margin-top:10px">Seven documents. The
-<a href="00-executive-summary.html">executive summary</a> is the five-minute version; dense
-evidence lives in <a href="06-evidence-assumptions-open-questions.html">document 06</a> and the
-CSVs below.</p>
+<p style="font-size:13px;color:var(--subtle);margin-top:10px">Start with
+<a href="report.html">the Architecture Report</a>. The eight analyses below are supporting
+material — deeper cuts of the same recommendation, never required.</p>
 </div>"""
 
 cards = ""
@@ -635,9 +639,12 @@ extra = """<div class="sech">Machine-readable & provenance</div><div class="card
 <a class="card" href="../traceability/142-feature-preservation-gate.csv"><div class="cn">CSV</div>
 <div class="ct">Preservation gate</div>
 <div class="cd">Every outcome evaluated under every architecture option.</div></a>
+<a class="card" href="../ai4rnd-architecture-report.html"><div class="cn">RPT</div>
+<div class="ct">The report, standalone</div>
+<div class="cd">Self-contained offline HTML of the canonical report.</div></a>
 <a class="card" href="../ai4rnd-architecture-review.html"><div class="cn">1PG</div>
-<div class="ct">Single-file edition</div>
-<div class="cd">All seven documents on one page, for offline review or printing.</div></a>
+<div class="ct">Supporting analyses, one page</div>
+<div class="cd">All nine supporting documents concatenated — superseded by the report above for decision-making.</div></a>
 <a class="card" href="../source-material/README.md"><div class="cn">ARC</div>
 <div class="ct">Superseded source material</div>
 <div class="cd">The full four-revision analysis history. Not required reading.</div></a>

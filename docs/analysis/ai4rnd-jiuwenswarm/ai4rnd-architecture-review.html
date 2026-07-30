@@ -216,12 +216,799 @@ section h1{padding-top:8px}
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
 <p class="rev">Architecture review &middot; Rev 4</p>
-<div class="navsec">Overview</div><a href="#d-00-executive-summary">Executive summary</a><div class="navsec">Background</div><a href="#d-01-intended-ai4rnd-product">The intended AI4RnD product</a><a href="#d-02-jiuwenswarm-openjiuwen-architecture">JiuwenSwarm &amp; OpenJiuwen</a><div class="navsec">Decision</div><a href="#d-03-integration-options">Integration options</a><a href="#d-04-recommended-target-architecture">Recommended architecture</a><a href="#d-07-functional-architecture">Functional architecture</a><div class="navsec">Delivery</div><a href="#d-05-feature-ownership-implementation-plan">Ownership &amp; implementation plan</a><div class="navsec">Evidence</div><a href="#d-06-evidence-assumptions-open-questions">Evidence &amp; open questions</a>
+<div class="navsec">Report</div><a href="#d-report">The Architecture Report</a><div class="navsec">Supporting analyses — Overview</div><a href="#d-00-executive-summary">Executive summary</a><div class="navsec">Background</div><a href="#d-01-intended-ai4rnd-product">The intended AI4RnD product</a><a href="#d-02-jiuwenswarm-openjiuwen-architecture">JiuwenSwarm &amp; OpenJiuwen</a><div class="navsec">Decision</div><a href="#d-03-integration-options">Integration options</a><a href="#d-04-recommended-target-architecture">Recommended architecture</a><a href="#d-07-functional-architecture">Functional architecture</a><div class="navsec">Delivery</div><a href="#d-05-feature-ownership-implementation-plan">Ownership &amp; implementation plan</a><div class="navsec">Evidence</div><a href="#d-06-evidence-assumptions-open-questions">Evidence &amp; open questions</a>
 <div class="side-foot">Single-page edition<br>jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>
 AI4Research @ d35c511</div></aside>
-<main><section id="d-00-executive-summary"><div class="crumb">Overview / 00-executive-summary.md</div><h1 id="executive-summary"><a class="anchor" href="#executive-summary" aria-hidden="true">#</a>Executive Summary</h1>
+<main><section id="d-report"><div class="crumb">Report / REPORT.md</div><h1 id="ai4rnd-on-jiuwenswarm-the-architecture-report"><a class="anchor" href="#ai4rnd-on-jiuwenswarm-the-architecture-report" aria-hidden="true">#</a>AI4RnD on JiuwenSwarm — The Architecture Report</h1>
+<p><strong>Recommendation: build the complete intended AI4RnD product as a first-class, persistent subsystem on JiuwenSwarm, with AI4RnD permanently owning product semantics, OpenJiuwen supplying execution, and a thin integration bridge compiling ready work onto the runtime progressively — each delegation gated by a passing compatibility test. All 142 workbook outcomes are preserved; none is dropped, weakened or renamed into something less capable.</strong></p>
+<p>This report is self-contained: a technically informed reader needs no other document to understand the product, the current systems, the recommended architecture, its end-to-end behaviour, ownership and state boundaries, component sourcing, implementation direction, evidence, risks and open decisions. The row-level matrices, probe transcripts and the full analysis history remain available as supporting material and are linked where relevant, but nothing below depends on them.</p>
+<p><strong>How to read the evidence labels.</strong> Every load-bearing claim carries one of: <strong>EXEC</strong> — executed in this analysis environment; <strong>SRC</strong> — verified by direct source reading of the pinned dependencies (JiuwenSwarm <code>0.2.3.beta1</code>, OpenJiuwen <code>0.1.15.post3</code>, AI4Research <code>d35c511</code>); <strong>DOC</strong> — documented only; <strong>INF</strong> — inferred; <strong>UNKNOWN</strong> — explicitly not determinable here. 29 experiments were executed in total.</p>
+<hr>
+<h2 id="1-what-ai4rnd-is-intended-to-become"><a class="anchor" href="#1-what-ai4rnd-is-intended-to-become" aria-hidden="true">#</a>1. What AI4RnD is intended to become</h2>
+<p><strong>AI4RnD is an evidence-governed autonomous R&amp;D system.</strong> It discovers needs and opportunities, researches and ideates, forms explicit technical claims and falsifiable hypotheses, builds proof-of-concept software, runs experiments and benchmarks, evaluates results against declared acceptance criteria, and delivers defended conclusions — while retaining what it learned as organizational knowledge and improving its own capabilities under governance.</p>
+<p>Its verification spine is <strong>claims refinement</strong>: nothing the system asserts reaches a user without resolving to evidence, and nothing is built before its hypothesis can state what would refute it. An earlier revision of this analysis used that spine as the whole identity ("a claims refinery"). That framing was too narrow — it made the product sound like a literature-review engine. The refinery is the spine; the product is the whole R&amp;D body around it: opportunity discovery, POC construction, benchmarking, datasets, capability development, delivery and self-improvement are first-class outcomes, not accessories to citation checking.</p>
+<p>The product is defined by a 142-feature workbook, read directly in this analysis (<strong>EXEC</strong>) and reconciling exactly:</p>
+<div class="tw"><table><thead><tr><th>Sheet</th><th>Plane</th><th>Groups</th><th>Features</th></tr></thead><tbody><tr><td>Workflow Features</td><td>what a research run does — nine lanes from ingestion to delivery</td><td>9</td><td>54</td></tr><tr><td>Foundation Features</td><td>the machinery underneath — capsules, operators, evaluators, models, RSI, data, harness, compilers, planner, builder</td><td>10</td><td>65</td></tr><tr><td>Vertical Features</td><td>the product around both — visibility, installers, UI, accounts, channels, configuration</td><td>6</td><td>23</td></tr><tr><td><strong>Total</strong></td><td></td><td><strong>25</strong></td><td><strong>142</strong></td></tr></tbody></table></div>
+<p>This definition is held constant everywhere below. <strong>Current code is evidence of maturity and a source of reusable assets; it is never the boundary of the target product.</strong> Every sourcing decision in §7 is an implementation strategy and redefines nothing.</p>
+<h3 id="1-1-the-intended-architecture-independent-of-any-foundation"><a class="anchor" href="#1-1-the-intended-architecture-independent-of-any-foundation" aria-hidden="true">#</a>1.1 The intended architecture, independent of any foundation</h3>
+<p>Before choosing an implementation substrate, this is the shape the workbook demands — five responsibilities and the relationships between them:</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 596" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Intended AI4RnD product architecture">
+<defs><marker id="ki" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="8" y="8" width="1174" height="92" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="30" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Engagement — how people and signals reach the product, and how it reports back</text>
+<rect x="40" y="40" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="165" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Channels · UI · CLI</text>
+<text x="165" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">requests · clues · material</text>
+<rect x="330" y="40" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="455" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project visibility</text>
+<text x="455" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">progress · gates · budgets</text>
+<rect x="620" y="40" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="745" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Approvals</text>
+<text x="745" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">contracts · gates · improvements</text>
+<rect x="910" y="40" width="240" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1030" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Accounts · configuration</text>
+<text x="1030" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">installers · settings</text>
+<rect x="8" y="108" width="1174" height="116" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="130" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Project control — one authority for meaning, readiness and completion</text>
+<rect x="40" y="144" width="260" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="170" y="169" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Intention Compiler</text>
+<text x="170" y="183" font-size="11" text-anchor="middle" fill="var(--muted)">need → confirmed Contract</text>
+<rect x="340" y="144" width="260" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="470" y="162" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Planner</text>
+<text x="470" y="176" font-size="11" text-anchor="middle" fill="var(--muted)">Contract → semantic TaskGraph</text>
+<text x="470" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">claims · dependencies · acceptance</text>
+<rect x="640" y="144" width="240" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="760" y="162" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Readiness & run state</text>
+<text x="760" y="176" font-size="11" text-anchor="middle" fill="var(--muted)">what may start · what truly</text>
+<text x="760" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">succeeded · repair & replan</text>
+<rect x="920" y="144" width="230" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1035" y="162" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Gates & closure</text>
+<text x="1035" y="176" font-size="11" text-anchor="middle" fill="var(--muted)">verdicts · delivery ·</text>
+<text x="1035" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">authorized distribution</text>
+<rect x="8" y="232" width="1174" height="116" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="254" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Capability & verification foundation — governed, versioned, improvable</text>
+<rect x="40" y="268" width="300" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="190" y="286" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capability Capsules</text>
+<text x="190" y="300" font-size="11" text-anchor="middle" fill="var(--muted)">identity · contract · effects ·</text>
+<text x="190" y="314" font-size="11" text-anchor="middle" fill="var(--muted)">compatibility · certification</text>
+<rect x="380" y="268" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="505" y="286" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Logical Operators</text>
+<text x="505" y="300" font-size="11" text-anchor="middle" fill="var(--muted)">stable callable actions</text>
+<text x="505" y="314" font-size="11" text-anchor="middle" fill="var(--muted)">invoked by plan nodes</text>
+<rect x="670" y="268" width="230" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="785" y="286" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evaluator families</text>
+<text x="785" y="300" font-size="11" text-anchor="middle" fill="var(--muted)">conformance · engineering · perf ·</text>
+<text x="785" y="314" font-size="11" text-anchor="middle" fill="var(--muted)">security · factuality · human</text>
+<rect x="940" y="268" width="210" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1045" y="286" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">GEPA + governed RSI</text>
+<text x="1045" y="300" font-size="11" text-anchor="middle" fill="var(--muted)">candidates · budgets · frozen</text>
+<text x="1045" y="314" font-size="11" text-anchor="middle" fill="var(--muted)">policy · approval · rollback</text>
+<rect x="8" y="356" width="1174" height="104" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="378" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Execution abstraction — the product never binds to one engine</text>
+<rect x="40" y="388" width="540" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="310" y="413" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Logical Operator invocation → any qualified physical executor</text>
+<text x="310" y="427" font-size="11" text-anchor="middle" fill="var(--muted)">agents · pipelines · staged workflows · teams · sandboxes · deterministic tools</text>
+<rect x="620" y="388" width="530" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="885" y="413" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Binding rules</text>
+<text x="885" y="427" font-size="11" text-anchor="middle" fill="var(--muted)">declared effects enforced · permitted/forbidden executors · honest stall</text>
+<rect x="8" y="468" width="1174" height="104" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="490" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Durable product state — outlives every session and run</text>
+<rect x="40" y="500" width="270" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="175" y="523" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project records</text>
+<text x="175" y="537" font-size="11" text-anchor="middle" fill="var(--muted)">Contract & TaskGraph versions</text>
+<rect x="350" y="500" width="270" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="485" y="523" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence & verdict ledgers</text>
+<text x="485" y="537" font-size="11" text-anchor="middle" fill="var(--muted)">append-only · attributed</text>
+<rect x="660" y="500" width="240" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="780" y="516" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Knowledge graphs</text>
+<text x="780" y="530" font-size="11" text-anchor="middle" fill="var(--muted)">concept · dataset · code · policy ·</text>
+<text x="780" y="544" font-size="11" text-anchor="middle" fill="var(--muted)">workflow · trace · memory</text>
+<rect x="940" y="500" width="210" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1045" y="516" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improvement history</text>
+<text x="1045" y="530" font-size="11" text-anchor="middle" fill="var(--muted)">versions · promotions ·</text>
+<text x="1045" y="544" font-size="11" text-anchor="middle" fill="var(--muted)">rollbacks</text>
+<path d="M165 84 L165 108" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M470 84 L470 108" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M760 84 L760 108" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M1035 84 L1035 108" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M170 200 L170 232" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M470 200 L470 232" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M760 200 L760 232" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M1035 200 L1035 232" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M310 324 L310 356" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M885 324 L885 356" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ki)"/>
+<path d="M310 444 L310 468" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ki)"/>
+<path d="M885 444 L885 468" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ki)"/>
+</svg></div>
+<p>Three structural commitments in this picture matter more than any component name:</p>
+<ul><li><strong>One authority for meaning.</strong> A single project-control layer decides what a request means,</li></ul>
+<p>what work exists, what may start, what truly succeeded, and when the Contract is satisfied.</p>
+<ul><li><strong>Capabilities are governed objects, not prompt files.</strong> The capability layer owns identity,</li></ul>
+<p>contracts, effects, compatibility and certification — and is itself the main subject of improvement.</p>
+<ul><li><strong>Execution is an abstraction.</strong> Plan nodes invoke Logical Operators; <em>which</em> physical</li></ul>
+<p>executor serves an invocation is a binding decision under declared rules. The product never hard-couples to one engine — which is precisely what makes the JiuwenSwarm question answerable on evidence rather than on faith.</p>
+<h3 id="1-2-the-user-journey"><a class="anchor" href="#1-2-the-user-journey" aria-hidden="true">#</a>1.2 The user journey</h3>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 314" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="The user journey">
+<defs><marker id="ahj" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="40" y="56" width="190" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="135.0" y="83" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">A need</text>
+<text x="135.0" y="97" font-size="11" text-anchor="middle" fill="var(--muted)">question · clue · material</text>
+<rect x="290" y="56" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="400.0" y="83" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Understand</text>
+<text x="400.0" y="97" font-size="11" text-anchor="middle" fill="var(--muted)">mint the Research Contract</text>
+<rect x="570" y="56" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="680.0" y="76" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Frame</text>
+<text x="680.0" y="90" font-size="11" text-anchor="middle" fill="var(--muted)">mint falsifiable claims</text>
+<text x="680.0" y="104" font-size="11" text-anchor="middle" fill="var(--muted)">and the plan</text>
+<rect x="850" y="56" width="250" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="975.0" y="76" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Establish</text>
+<text x="975.0" y="90" font-size="11" text-anchor="middle" fill="var(--muted)">build · benchmark · evaluate</text>
+<text x="975.0" y="104" font-size="11" text-anchor="middle" fill="var(--muted)">mint verdicts</text>
+<path d="M230 86 L290 86" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M510 86 L570 86" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M790 86 L850 86" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M975 56 L975 28 L680 28 L680 56" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<text x="827" y="22" font-size="11" text-anchor="middle" fill="var(--muted)">claim refuted — reframe honestly</text>
+<rect x="290" y="216" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="400.0" y="236" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Deliver</text>
+<text x="400.0" y="250" font-size="11" text-anchor="middle" fill="var(--muted)">the evidence-backed</text>
+<text x="400.0" y="264" font-size="11" text-anchor="middle" fill="var(--muted)">deliverable</text>
+<rect x="570" y="216" width="220" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="680.0" y="236" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Close & retain</text>
+<text x="680.0" y="250" font-size="11" text-anchor="middle" fill="var(--muted)">freeze evidence ·</text>
+<text x="680.0" y="264" font-size="11" text-anchor="middle" fill="var(--muted)">keep the knowledge</text>
+<rect x="850" y="216" width="250" height="60" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="975.0" y="236" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Improve — governed</text>
+<text x="975.0" y="250" font-size="11" text-anchor="middle" fill="var(--muted)">better capsules · prompts ·</text>
+<text x="975.0" y="264" font-size="11" text-anchor="middle" fill="var(--muted)">routing · evaluators</text>
+<path d="M940 116 L940 186 L400 186 L400 216" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<text x="668" y="178" font-size="11" text-anchor="middle" fill="var(--muted)">Contract satisfied — deliver</text>
+<path d="M510 246 L570 246" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#ahj)"/>
+<path d="M790 246 L850 246" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahj)"/>
+<text x="820" y="240" font-size="11" text-anchor="middle" fill="var(--muted)">run history</text>
+<path d="M1010 216 L1010 146 L400 146 L400 116" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahj)"/>
+<text x="668" y="140" font-size="11" text-anchor="middle" fill="var(--muted)">next runs start stronger — the loop outlives every journey</text>
+</svg></div>
+<p>The journey begins when a need exists — a question, a qualified signal, or imported material — and ends twice: for the requester, with an authorized, evidence-linked deliverable; for the organization, with frozen evidence and retained knowledge. One loop deliberately outlives every journey: governed improvement. The nine workbook lanes live inside these phases as individually addressable capabilities — a literature-only project never builds a POC; a refuted claim re-enters framing; lanes can run in parallel or recursively. A refuted hypothesis is a <em>success</em> of the verification machinery, never a failure of the run.</p>
+<h3 id="1-3-capability-capsules-precisely"><a class="anchor" href="#1-3-capability-capsules-precisely" aria-hidden="true">#</a>1.3 Capability Capsules, precisely</h3>
+<p>The workbook's central capability idea is a five-level separation that survives every architecture decision in this report:</p>
+<div class="tw"><table><thead><tr><th>Level</th><th>What it is</th><th>Lifetime</th></tr></thead><tbody><tr><td><strong>Capability Capsule</strong></td><td>governed, versioned, reusable capability identity</td><td>independent of any request</td></tr><tr><td><strong>Contract</strong></td><td>the promise for <em>this</em> request: scope, constraints, acceptance</td><td>one request</td></tr><tr><td><strong>TaskGraph</strong></td><td>the project-specific plan</td><td>one project</td></tr><tr><td><strong>Logical Operator</strong></td><td>a stable callable action a plan node invokes directly</td><td>independent</td></tr><tr><td><strong>Physical Operator</strong></td><td>the concrete executor</td><td>one binding</td></tr></tbody></table></div>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 470" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Capability Capsule anatomy">
+<defs><marker id="kc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="8" y="8" width="1174" height="220" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="30" font-size="12.5" font-weight="640" fill="var(--primary-ink)">One Capsule — a governed capability identity (all 42 existing manifests carry every section)</text>
+<rect x="40" y="44" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="172" y="69" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Applicability</text>
+<text x="172" y="83" font-size="11" text-anchor="middle" fill="var(--muted)">task types · positive and negative signals</text>
+<rect x="325" y="44" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="458" y="69" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Typed contract</text>
+<text x="458" y="83" font-size="11" text-anchor="middle" fill="var(--muted)">inputs · outputs · pre/postconditions · invariants</text>
+<rect x="610" y="44" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="742" y="69" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Declared effects</text>
+<text x="742" y="83" font-size="11" text-anchor="middle" fill="var(--muted)">read · write · execute · network · cost · risk</text>
+<rect x="895" y="44" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1028" y="69" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Composition</text>
+<text x="1028" y="83" font-size="11" text-anchor="middle" fill="var(--muted)">consumes · produces · compatible · incompatible · ordering</text>
+<rect x="40" y="110" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="172" y="135" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Executor compatibility</text>
+<text x="172" y="149" font-size="11" text-anchor="middle" fill="var(--muted)">permitted and forbidden physical operators</text>
+<rect x="325" y="110" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="458" y="135" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Verification</text>
+<text x="458" y="149" font-size="11" text-anchor="middle" fill="var(--muted)">self-check · external verifier · pass conditions</text>
+<rect x="610" y="110" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="742" y="135" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Provenance & certification</text>
+<text x="742" y="149" font-size="11" text-anchor="middle" fill="var(--muted)">owner · origin · certified status</text>
+<rect x="895" y="110" width="265" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1028" y="140" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Versions & history</text>
+<text x="1028" y="154" font-size="11" text-anchor="middle" fill="var(--muted)">lifecycle · evaluation & performance record</text>
+<text x="1153" y="122" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">TO ADD</text>
+<text x="600" y="200" font-size="11" text-anchor="middle" fill="var(--muted)">Plan nodes call Logical Operators directly; the Capsule governs which executor may serve them, under which effects, verified by whom — it never hides the plan.</text>
+<rect x="8" y="268" width="1174" height="120" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="290" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Execution bindings beneath the Capsule — implementation detail, never identity</text>
+<rect x="40" y="306" width="208" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="144" y="329" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Skills</text>
+<text x="144" y="343" font-size="11" text-anchor="middle" fill="var(--muted)">prompt packages</text>
+<rect x="268" y="306" width="208" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="372" y="329" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Tools & MCP</text>
+<text x="372" y="343" font-size="11" text-anchor="middle" fill="var(--muted)">typed calls</text>
+<rect x="496" y="306" width="208" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="600" y="329" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Agents & teams</text>
+<text x="600" y="343" font-size="11" text-anchor="middle" fill="var(--muted)">DeepAgent · Team</text>
+<rect x="724" y="306" width="208" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="828" y="329" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Models</text>
+<text x="828" y="343" font-size="11" text-anchor="middle" fill="var(--muted)">pool entries</text>
+<rect x="952" y="306" width="208" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1056" y="329" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Data & secrets</text>
+<text x="1056" y="343" font-size="11" text-anchor="middle" fill="var(--muted)">refs, never inline</text>
+<path d="M600 228 L600 268" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kc)"/>
+<text x="612" y="252" font-size="11" text-anchor="start" fill="var(--muted)">binds to — replaceable without changing the Capsule</text>
+<rect x="8" y="404" width="1174" height="54" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="600" y="436" font-size="11" text-anchor="middle" fill="var(--muted)">A JiuwenSwarm skill is one possible binding. It has a name, a description and a prompt — none of the eight governed sections above. The Capsule is the product object; bindings are parts.</text>
+</svg></div>
+<p>All 42 capsule manifests in the current repository already carry every governed section (<strong>EXEC</strong> — parsed in this analysis; registry: 35 entries, 30 stable). What the schema does not yet carry — versions, evaluation history, RSI targets — is named work in §8, not a redefinition. Skills, tools, agents, workflows, models and APIs are <strong>bindings beneath a Capsule</strong>; replacing a binding never changes the Capsule's identity or governance.</p>
+<hr>
+<h2 id="2-what-exists-today"><a class="anchor" href="#2-what-exists-today" aria-hidden="true">#</a>2. What exists today</h2>
+<p>Two honest as-is pictures, kept deliberately separate from the target. Nothing in this section is design; every status is verified.</p>
+<h3 id="2-1-current-ai4rnd"><a class="anchor" href="#2-1-current-ai4rnd" aria-hidden="true">#</a>2.1 Current AI4RnD</h3>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 560" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Current AI4RnD implementation, as verified">
+<defs><marker id="ka" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="8" y="8" width="1174" height="88" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="30" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Carrier — how it runs today</text>
+<rect x="40" y="40" width="300" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="190" y="64" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">tmux cockpit + polling coordinator</text>
+<text x="190" y="78" font-size="11" text-anchor="middle" fill="var(--muted)">shell state machine drives panes</text>
+<text x="333" y="52" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">ACTIVE · REJECTED IN TARGET</text>
+<rect x="380" y="40" width="360" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="560" y="64" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">graph_scheduler (4,189 lines)</text>
+<text x="560" y="78" font-size="11" text-anchor="middle" fill="var(--muted)">readiness · batching · retries · binding, fused with plan semantics</text>
+<text x="733" y="52" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">ACTIVE · RETIRES</text>
+<rect x="780" y="40" width="370" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="965" y="64" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">TaskGraph persistence</text>
+<text x="965" y="78" font-size="11" text-anchor="middle" fill="var(--muted)">task_graph_io · state_io</text>
+<text x="1143" y="52" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ACTIVE</text>
+<rect x="8" y="104" width="1174" height="88" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="126" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Research pipeline</text>
+<rect x="40" y="136" width="270" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="175" y="160" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Sources & extractors</text>
+<text x="175" y="174" font-size="11" text-anchor="middle" fill="var(--muted)">arXiv · HF · GitHub · YouTube</text>
+<text x="303" y="148" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ACTIVE</text>
+<rect x="350" y="136" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="475" y="160" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Survey & claim compiler</text>
+<text x="475" y="174" font-size="11" text-anchor="middle" fill="var(--muted)">planner · sections · claims</text>
+<text x="593" y="148" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ACTIVE</text>
+<rect x="640" y="136" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="765" y="160" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Grounding check</text>
+<text x="765" y="174" font-size="11" text-anchor="middle" fill="var(--muted)">measured 0.25 precision</text>
+<text x="883" y="148" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">BROKEN</text>
+<rect x="930" y="136" width="220" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1040" y="160" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Report capsules</text>
+<text x="1040" y="174" font-size="11" text-anchor="middle" fill="var(--muted)">plan · draft · publish</text>
+<text x="1143" y="148" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ACTIVE</text>
+<rect x="8" y="200" width="1174" height="88" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="222" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Governance assets — the parts the target keeps</text>
+<rect x="40" y="232" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="165" y="256" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence ledger</text>
+<text x="165" y="270" font-size="11" text-anchor="middle" fill="var(--muted)">citation spans, runs standalone</text>
+<text x="283" y="244" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ACTIVE</text>
+<rect x="330" y="232" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="455" y="256" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Gate ledger</text>
+<text x="455" y="270" font-size="11" text-anchor="middle" fill="var(--muted)">append-only · writer-attributed</text>
+<text x="573" y="244" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ACTIVE</text>
+<rect x="620" y="232" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="745" y="256" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capsule registry</text>
+<text x="745" y="270" font-size="11" text-anchor="middle" fill="var(--muted)">42 manifests · 35 registered</text>
+<text x="863" y="244" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">ACTIVE / UNWIRED</text>
+<rect x="910" y="232" width="240" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1030" y="256" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">GEPA optimizer</text>
+<text x="1030" y="270" font-size="11" text-anchor="middle" fill="var(--muted)">budgets · frozen policy · promote</text>
+<text x="1143" y="244" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">ACTIVE / UNWIRED</text>
+<rect x="8" y="296" width="1174" height="108" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="318" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Implemented but not connected</text>
+<rect x="40" y="332" width="260" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="170" y="358" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Benchmark suites</text>
+<text x="170" y="372" font-size="11" text-anchor="middle" fill="var(--muted)">no lane invokes them</text>
+<text x="293" y="344" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">UNWIRED</text>
+<rect x="340" y="332" width="280" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="480" y="352" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capsule → runner bindings</text>
+<text x="480" y="365" font-size="11" text-anchor="middle" fill="var(--muted)">operator_compatibility declared,</text>
+<text x="480" y="378" font-size="11" text-anchor="middle" fill="var(--muted)">no binder consumes it</text>
+<text x="613" y="344" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">UNWIRED</text>
+<rect x="660" y="332" width="230" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="775" y="358" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Operator profiles</text>
+<text x="775" y="372" font-size="11" text-anchor="middle" fill="var(--muted)">agent-actors config only</text>
+<text x="883" y="344" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">SPECIFIED</text>
+<rect x="930" y="332" width="220" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1040" y="358" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Intent engine adapter</text>
+<text x="1040" y="372" font-size="11" text-anchor="middle" fill="var(--muted)">routing shell hooks</text>
+<text x="1143" y="344" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">UNWIRED</text>
+<rect x="8" y="412" width="1174" height="116" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="434" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Absent — verified by exhaustive search</text>
+<rect x="40" y="448" width="208" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)" stroke-dasharray="4 3"/>
+<text x="144" y="474" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Idea Card</text>
+<text x="144" y="488" font-size="11" text-anchor="middle" fill="var(--muted)">no schema anywhere</text>
+<text x="241" y="460" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ABSENT</text>
+<rect x="268" y="448" width="208" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)" stroke-dasharray="4 3"/>
+<text x="372" y="474" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Falsifiability stage</text>
+<text x="372" y="488" font-size="11" text-anchor="middle" fill="var(--muted)">2 mentions, no gate</text>
+<text x="469" y="460" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ABSENT</text>
+<rect x="496" y="448" width="208" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)" stroke-dasharray="4 3"/>
+<text x="600" y="474" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Typed knowledge graphs</text>
+<text x="600" y="488" font-size="11" text-anchor="middle" fill="var(--muted)">all seven missing</text>
+<text x="697" y="460" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ABSENT</text>
+<rect x="724" y="448" width="208" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)" stroke-dasharray="4 3"/>
+<text x="828" y="474" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Account subsystem</text>
+<text x="828" y="488" font-size="11" text-anchor="middle" fill="var(--muted)">none</text>
+<text x="925" y="460" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ABSENT</text>
+<rect x="952" y="448" width="208" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)" stroke-dasharray="4 3"/>
+<text x="1056" y="474" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">RSI governance loop</text>
+<text x="1056" y="488" font-size="11" text-anchor="middle" fill="var(--muted)">no proposals · no inbox</text>
+<text x="1153" y="460" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">ABSENT</text>
+</svg></div>
+<p>The reading: AI4RnD's <em>governance assets are real</em> — the evidence ledger, gate ledger, capsule registry and GEPA optimizer all exist and mostly run (<strong>EXEC/SRC</strong>) — while its <em>carrier</em> is a tmux cockpit driven by a polling shell script, its scheduler fuses plan semantics with 4,189 lines of physical scheduling, its central grounding check measured <strong>0.25 precision</strong> on a labelled set (<strong>EXEC</strong>), and the knowledge layer, Idea Card, falsifiability stage, accounts and RSI governance are absent (<strong>EXEC</strong> — exhaustive searches). GEPA deserves emphasis because earlier revisions under-weighted it: it is 3,540 lines with unit tests, a typed candidate envelope covering skills, capsules, routing policies, rewrite rules and cost models, budget stoppers, a frozen-policy checker, and a checksummed, atomic, rollback-capable promoter whose CLI defaults to dry-run (<strong>SRC</strong>).</p>
+<h3 id="2-2-current-jiuwenswarm-and-openjiuwen"><a class="anchor" href="#2-2-current-jiuwenswarm-and-openjiuwen" aria-hidden="true">#</a>2.2 Current JiuwenSwarm and OpenJiuwen</h3>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 520" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="JiuwenSwarm and OpenJiuwen, as verified">
+<defs><marker id="kf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="8" y="8" width="1174" height="88" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="30" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Clients</text>
+<rect x="40" y="40" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="165" y="66" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Web UI · TUI · CLI</text>
+<rect x="330" y="40" width="300" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="480" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">9 messaging channels</text>
+<text x="480" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">incl. WeChat · Discord</text>
+<rect x="670" y="40" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="795" y="66" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Agent-to-agent peers</text>
+<rect x="8" y="104" width="1174" height="96" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="126" font-size="12.5" font-weight="640" fill="var(--primary-ink)">JiuwenSwarm — application layer</text>
+<rect x="40" y="140" width="270" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="175" y="161" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Gateway</text>
+<text x="175" y="175" font-size="11" text-anchor="middle" fill="var(--muted)">channel adapters · routing</text>
+<rect x="350" y="140" width="270" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="485" y="161" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Agent server</text>
+<text x="485" y="175" font-size="11" text-anchor="middle" fill="var(--muted)">sessions · modes · skills</text>
+<rect x="660" y="140" width="230" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="775" y="166" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Skill retrieval</text>
+<text x="775" y="180" font-size="11" text-anchor="middle" fill="var(--muted)">ranks — never refuses</text>
+<text x="883" y="152" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">GAP FOR RESEARCH</text>
+<rect x="930" y="140" width="220" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1040" y="161" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Workspace & config</text>
+<text x="1040" y="175" font-size="11" text-anchor="middle" fill="var(--muted)">templates · settings</text>
+<rect x="8" y="208" width="1174" height="148" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="230" font-size="12.5" font-weight="640" fill="var(--primary-ink)">OpenJiuwen — runtime library</text>
+<rect x="40" y="240" width="210" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="145" y="261" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">DeepAgent</text>
+<text x="145" y="275" font-size="11" text-anchor="middle" fill="var(--muted)">single-agent turns</text>
+<rect x="280" y="240" width="230" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="395" y="254" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Core Workflow</text>
+<text x="395" y="268" font-size="11" text-anchor="middle" fill="var(--muted)">durable staged graphs,</text>
+<text x="395" y="282" font-size="11" text-anchor="middle" fill="var(--muted)">checkpoints · interrupts</text>
+<rect x="540" y="240" width="230" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="655" y="254" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">SwarmFlow</text>
+<text x="655" y="268" font-size="11" text-anchor="middle" fill="var(--muted)">scripted pipelines,</text>
+<text x="655" y="282" font-size="11" text-anchor="middle" fill="var(--muted)">replayable journal</text>
+<rect x="800" y="240" width="170" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="885" y="261" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Dynamic Team</text>
+<text x="885" y="275" font-size="11" text-anchor="middle" fill="var(--muted)">leader + roster</text>
+<rect x="1000" y="240" width="150" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1075" y="261" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Code mode</text>
+<text x="1075" y="275" font-size="11" text-anchor="middle" fill="var(--muted)">worktrees</text>
+<rect x="40" y="300" width="280" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="180" y="314" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Team services</text>
+<text x="180" y="328" font-size="11" text-anchor="middle" fill="var(--muted)">task board with dependencies ·</text>
+<text x="180" y="342" font-size="11" text-anchor="middle" fill="var(--muted)">shared memory · reliability detectors</text>
+<rect x="360" y="300" width="280" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="500" y="320" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">agent_evolving</text>
+<text x="500" y="333" font-size="11" text-anchor="middle" fill="var(--muted)">Trainer · Updater · metrics · RL —</text>
+<text x="500" y="346" font-size="11" text-anchor="middle" fill="var(--muted)">one wired subject today</text>
+<text x="633" y="312" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">NARROWLY WIRED</text>
+<rect x="680" y="300" width="240" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="800" y="326" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Model pool + allocator</text>
+<text x="800" y="340" font-size="11" text-anchor="middle" fill="var(--muted)">silent fallback on unknown name</text>
+<text x="913" y="312" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">DEFECT</text>
+<rect x="950" y="300" width="200" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1050" y="326" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Graph memory</text>
+<text x="1050" y="340" font-size="11" text-anchor="middle" fill="var(--muted)">unreferenced by the app</text>
+<text x="1143" y="312" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">UNWIRED</text>
+<rect x="8" y="364" width="1174" height="92" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="386" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Shared infrastructure</text>
+<rect x="40" y="396" width="260" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="170" y="415" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Checkpointer</text>
+<text x="170" y="429" font-size="11" text-anchor="middle" fill="var(--muted)">sqlite, process default</text>
+<rect x="340" y="396" width="260" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="470" y="415" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">jiuwenbox sandbox</text>
+<text x="470" y="429" font-size="11" text-anchor="middle" fill="var(--muted)">bwrap / cgroups</text>
+<rect x="640" y="396" width="240" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="760" y="415" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Observability</text>
+<text x="760" y="429" font-size="11" text-anchor="middle" fill="var(--muted)">spans · progress events</text>
+<rect x="920" y="396" width="230" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1035" y="420" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Guardrail rules tier</text>
+<text x="1035" y="434" font-size="11" text-anchor="middle" fill="var(--muted)">loads 0 rules — orphaned file</text>
+<text x="1143" y="408" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">DEFECT</text>
+<rect x="8" y="464" width="1174" height="48" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="600" y="492" font-size="11" text-anchor="middle" fill="var(--muted)">Verified defects that shape the integration: silent model substitution · resume advertised but rejected · failed steps return empty and the run reports success · executor typing accepted but unread</text>
+<path d="M165 84 L165 104" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M480 84 L480 104" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M795 84 L795 104" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M175 188 L175 208" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M485 188 L485 208" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M775 188 L775 208" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M1040 188 L1040 208" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M170 356 L170 364" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M470 356 L470 364" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M760 356 L760 364" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+<path d="M1035 356 L1035 364" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kf)"/>
+</svg></div>
+<p>The foundation is substantial and much of it is verified by execution: durable staged graphs with runtime-computed fan-out (<strong>EXEC</strong>), a scripted pipeline engine whose journal replays interrupted runs re-executing only the failed step (<strong>EXEC</strong>), admission control that refuses rather than queues silently (<strong>EXEC</strong>), a persistent sqlite checkpointer in a stock install (<strong>SRC</strong>), a team task board with real dependency edges, reliability anomaly detectors and remediation, shared team memory, sandboxing, nine channels and a web UI (<strong>SRC</strong>).</p>
+<p>Four verified gaps shape the integration, and one pattern explains why reading source is not enough here: <strong>this codebase fails loudly on typos and silently on unimplemented features.</strong></p>
+<div class="tw"><table><thead><tr><th>#</th><th>Verified gap</th><th>Class</th></tr></thead><tbody><tr><td>1</td><td>An unknown model name silently resolves to the default worker model — no error, no warning</td><td><span class="chip neutral">SRC</span></td></tr><tr><td>2</td><td>The agent-facing pipeline tool advertises <code>resume_id</code> and rejects it: "not supported yet"; resume exists only as an internal control-plane call</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>3</td><td>A step that fails all its retries returns an empty result and the run reports success</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>4</td><td>The executor-typing option is validated and forwarded, but no backend reads it</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>5</td><td>The built-in shell-guardrail tier loads zero rules; the rules file the installer writes is read by nothing</td><td><span class="chip ok">EXEC</span></td></tr><tr><td>6</td><td>The evolution trainer accepts exactly one subject class in the entire runtime; the application imports only its archive and tool-description parts</td><td><span class="chip ok">EXEC</span></td></tr></tbody></table></div>
+<hr>
+<h2 id="3-the-recommended-integration-and-why"><a class="anchor" href="#3-the-recommended-integration-and-why" aria-hidden="true">#</a>3. The recommended integration, and why</h2>
+<p>Five coherent complete-product options were evaluated. Execution mechanisms — DeepAgent, SwarmFlow, Core Workflow, Dynamic Team — are not among them: each implements 0 of the 142 outcomes alone and appears <em>inside</em> every option as machinery.</p>
+<div class="tw"><table><thead><tr><th>Option</th><th>In one line</th><th>Verdict</th></tr></thead><tbody><tr><td><strong>A</strong> — AI4RnD-led control plane</td><td>keep AI4RnD's scheduler; Jiuwen replaces only physical executors</td><td>complete, but pays a permanent duplicate-scheduler tax against engines verified to work</td></tr><tr><td><strong>B</strong> — Jiuwen-native lifecycle</td><td>delegate sequencing, checkpoints and human turns to the runtime now</td><td>right destination, wrong commitment schedule — deletes fallbacks on the strength of <em>reading</em></td></tr><tr><td><strong>C</strong> — progressive compilation ★</td><td>B's destination, reached one capability at a time, each retirement gated by a passing test</td><td><strong>recommended</strong></td></tr><tr><td><strong>D</strong> — full delegation now</td><td>remove AI4RnD's execution machinery immediately</td><td><strong>fails the preservation gate today</strong> — silent model substitution would drop Model Routing &amp; Selection with no layer left to catch it</td></tr><tr><td><strong>E</strong> — standalone / defer</td><td>keep the tmux-carried system as is</td><td>preserves the most, gains nothing, leaves ~50 never-built outcomes unbuilt</td></tr></tbody></table></div>
+<p>The preservation gate evaluates all 142 outcomes under every option (<a href="traceability/142-feature-preservation-gate.csv">full row-level CSV</a>):</p>
+<div class="tw"><table><thead><tr><th>Verdict</th><th>A</th><th>B</th><th>C ★</th><th>D</th><th>E</th></tr></thead><tbody><tr><td><span class="chip ok">PRESERVED</span></td><td>71</td><td>78</td><td>78</td><td>59</td><td>84</td></tr><tr><td><span class="chip warn">PRESERVED WITH ADAPTATION</span></td><td>13</td><td>6</td><td>6</td><td>24</td><td>0</td></tr><tr><td><span class="chip bad">NEW BUILD REQUIRED</span></td><td>56</td><td>56</td><td>56</td><td>55</td><td>56</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>2</td><td>2</td><td>2</td><td>3</td><td>2</td></tr><tr><td><span class="chip bad">DROPPED</span></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>1</strong></td><td><strong>0</strong></td></tr></tbody></table></div>
+<p>Two facts decide it. First, the big number barely moves: ~56 outcomes need new construction under <em>every</em> option, because they exist in neither system — no architecture choice avoids them. Second, only D drops an outcome today. <strong>That failure is evidence against immediate full delegation, not proof that full delegation can never become safe</strong>: every blocking gap in §2.2 is small and fixable, and when they close upstream, C's mature form <em>is</em> D. C differs from B only in <em>when</em> each fallback dies — after a named, falsifiable test rather than on a schedule. Given that this analysis's execution probes repeatedly caught source-reading overstating what is reachable, that difference is worth having.</p>
+<p><strong>Progressive compilation remains the recommendation.</strong></p>
+<h3 id="3-1-the-target-architecture"><a class="anchor" href="#3-1-the-target-architecture" aria-hidden="true">#</a>3.1 The target architecture</h3>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 600" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="Target integrated architecture with sourcing decisions">
+<defs><marker id="kt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="8" y="8" width="1174" height="96" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="30" font-size="12.5" font-weight="640" fill="var(--primary-ink)">JiuwenSwarm — application foundation</text>
+<rect x="40" y="42" width="240" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="160" y="73" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Channels · Gateway</text>
+<text x="273" y="54" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE</text>
+<rect x="320" y="42" width="240" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="440" y="73" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Sessions · workspace</text>
+<text x="553" y="54" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE</text>
+<rect x="600" y="42" width="250" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="725" y="73" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">UI shell · config · packaging</text>
+<text x="843" y="54" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE + EXTEND</text>
+<rect x="890" y="42" width="260" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1020" y="66" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project & registry views</text>
+<text x="1020" y="80" font-size="11" text-anchor="middle" fill="var(--muted)">approvals · improvements inbox</text>
+<text x="1143" y="54" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">BUILD</text>
+<rect x="8" y="112" width="1174" height="116" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="134" font-size="12.5" font-weight="640" fill="var(--primary-ink)">AI4RnD — product core (permanent)</text>
+<rect x="40" y="146" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="165" y="176" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project subsystem</text>
+<text x="165" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">Contract & TaskGraph versions</text>
+<text x="283" y="158" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">BUILD</text>
+<rect x="330" y="146" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="455" y="176" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Intention Compiler · Planner</text>
+<text x="455" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">ported research semantics</text>
+<text x="573" y="158" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">PORT + ADAPT</text>
+<rect x="620" y="146" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="745" y="176" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capsules · Logical Operators</text>
+<text x="745" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">registry · certification · effects</text>
+<text x="863" y="158" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">PORT + EXTEND</text>
+<rect x="910" y="146" width="240" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1030" y="176" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence · gates · evaluators</text>
+<text x="1030" y="190" font-size="11" text-anchor="middle" fill="var(--muted)">entailment rebuilt & measured</text>
+<text x="1143" y="158" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">PORT + BUILD</text>
+<rect x="8" y="236" width="1174" height="116" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="258" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Integration bridge — the only bilingual component</text>
+<rect x="40" y="270" width="260" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="170" y="294" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Binding</text>
+<text x="170" y="307" font-size="11" text-anchor="middle" fill="var(--muted)">capsule + executor + model,</text>
+<text x="170" y="320" font-size="11" text-anchor="middle" fill="var(--muted)">honest stall — never substitutes</text>
+<text x="293" y="282" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">BUILD</text>
+<rect x="340" y="270" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="465" y="294" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Compiler & dispatch</text>
+<text x="465" y="307" font-size="11" text-anchor="middle" fill="var(--muted)">ready sub-plan → engine spec,</text>
+<text x="465" y="320" font-size="11" text-anchor="middle" fill="var(--muted)">resume · cancel</text>
+<text x="583" y="282" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">BUILD</text>
+<rect x="630" y="270" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="755" y="294" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Receipt builder</text>
+<text x="755" y="307" font-size="11" text-anchor="middle" fill="var(--muted)">typed receipts + provenance,</text>
+<text x="755" y="320" font-size="11" text-anchor="middle" fill="var(--muted)">empty result ⇒ failed attempt</text>
+<text x="873" y="282" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">BUILD</text>
+<rect x="920" y="270" width="230" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1035" y="294" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Engine adapters</text>
+<text x="1035" y="307" font-size="11" text-anchor="middle" fill="var(--muted)">SwarmFlow backend seam ·</text>
+<text x="1035" y="320" font-size="11" text-anchor="middle" fill="var(--muted)">workflow components</text>
+<text x="1143" y="282" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">COMPOSE</text>
+<rect x="8" y="360" width="1174" height="108" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="382" font-size="12.5" font-weight="640" fill="var(--primary-ink)">OpenJiuwen — execution engines</text>
+<rect x="40" y="392" width="250" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="165" y="427" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Core Workflow / Pregel</text>
+<text x="283" y="404" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE</text>
+<rect x="320" y="392" width="220" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="430" y="420" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">SwarmFlow engine</text>
+<text x="430" y="434" font-size="11" text-anchor="middle" fill="var(--muted)">via its backend seam</text>
+<text x="533" y="404" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE</text>
+<rect x="570" y="392" width="250" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="695" y="420" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">DeepAgent · Team · worktrees</text>
+<text x="695" y="434" font-size="11" text-anchor="middle" fill="var(--muted)">task board · reliability · memory</text>
+<text x="813" y="404" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE</text>
+<rect x="850" y="392" width="150" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="925" y="427" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Model routing</text>
+<text x="993" y="404" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">ADAPTER</text>
+<rect x="1030" y="392" width="120" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1090" y="427" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Sandbox</text>
+<text x="1143" y="404" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">REUSE</text>
+<rect x="8" y="476" width="1174" height="112" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<text x="24" y="498" font-size="12.5" font-weight="640" fill="var(--primary-ink)">Durable product state — AI4RnD-owned, project-scoped</text>
+<path d="M40 516 a 120.0 8 0 0 1 240 0 v 36 a 120.0 8 0 0 1 -240 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M40 516 a 120.0 8 0 0 0 240 0" fill="none" stroke="var(--line-strong)"/>
+<text x="160" y="538" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Project store</text>
+<text x="160" y="550" font-size="11" text-anchor="middle" fill="var(--muted)">Contracts · plans · budgets</text>
+<path d="M320 516 a 125.0 8 0 0 1 250 0 v 36 a 125.0 8 0 0 1 -250 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M320 516 a 125.0 8 0 0 0 250 0" fill="none" stroke="var(--line-strong)"/>
+<text x="445" y="538" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Attempt lineage</text>
+<text x="445" y="550" font-size="11" text-anchor="middle" fill="var(--muted)">receipts · cancels · provenance</text>
+<path d="M610 516 a 120.0 8 0 0 1 240 0 v 36 a 120.0 8 0 0 1 -240 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M610 516 a 120.0 8 0 0 0 240 0" fill="none" stroke="var(--line-strong)"/>
+<text x="730" y="538" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence & verdicts</text>
+<text x="730" y="550" font-size="11" text-anchor="middle" fill="var(--muted)">append-only</text>
+<path d="M890 516 a 130.0 8 0 0 1 260 0 v 36 a 130.0 8 0 0 1 -260 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M890 516 a 130.0 8 0 0 0 260 0" fill="none" stroke="var(--line-strong)"/>
+<text x="1020" y="538" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Knowledge & improvements</text>
+<text x="1020" y="550" font-size="11" text-anchor="middle" fill="var(--muted)">projections · versions</text>
+<path d="M165 86 L165 112" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M445 86 L445 112" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M745 86 L745 112" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M1020 86 L1020 112" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M170 202 L170 236" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M455 202 L455 236" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M745 202 L745 236" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M1030 202 L1030 236" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M170 326 L170 360" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M465 326 L465 360" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M755 326 L755 360" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M1035 326 L1035 360" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/>
+<path d="M160 444 L160 476" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kt)"/>
+<path d="M430 444 L430 476" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kt)"/>
+<path d="M700 444 L700 476" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kt)"/>
+<path d="M1020 444 L1020 476" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kt)"/>
+<g font-size="11" fill="var(--muted)"><line x1="24" y1="586" x2="62" y2="586" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kt)"/><text x="70" y="590">control</text><line x1="146" y1="586" x2="184" y2="586" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kt)"/><text x="192" y="590">state & evidence</text><text x="322" y="590">tags: REUSE · COMPOSE (adapter) · EXTEND · PORT · ADAPT · BUILD</text></g>
+</svg></div>
+<p>The bridge is the only bilingual component: plan nodes, capability requirements and gate policy on one side; engine specifications, agent calls and worktrees on the other. It is forbidden to make semantic decisions — it translates them. Each box carries its sourcing decision from the component audit (§7).</p>
+<hr>
+<h2 id="4-how-the-complete-product-works-end-to-end"><a class="anchor" href="#4-how-the-complete-product-works-end-to-end" aria-hidden="true">#</a>4. How the complete product works, end to end</h2>
+<p>The one picture to hold. Solid arrows are control and execution; dashed arrows are state, evidence and improvement. The semantic TaskGraph defines <em>what must happen</em>; engine specifications define <em>how ready work runs</em>.</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 768" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="End-to-end functional architecture">
+<defs><marker id="km" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="126" y="8" width="1056" height="70" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="8" width="112" height="70" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="30" font-size="10.5" fill="var(--subtle)">People &</text>
+<text x="20" y="44" font-size="10.5" fill="var(--subtle)">channels</text>
+<rect x="126" y="86" width="1056" height="186" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="86" width="112" height="186" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="108" font-size="10.5" fill="var(--subtle)">Project control</text>
+<text x="20" y="122" font-size="10.5" fill="var(--subtle)">— AI4RnD</text>
+<rect x="126" y="280" width="1056" height="80" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="280" width="112" height="80" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="302" font-size="10.5" fill="var(--subtle)">Capability</text>
+<text x="20" y="316" font-size="10.5" fill="var(--subtle)">governance</text>
+<text x="20" y="330" font-size="10.5" fill="var(--subtle)">— AI4RnD</text>
+<rect x="126" y="368" width="1056" height="96" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="368" width="112" height="96" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="390" font-size="10.5" fill="var(--subtle)">Integration</text>
+<text x="20" y="404" font-size="10.5" fill="var(--subtle)">bridge</text>
+<rect x="126" y="472" width="1056" height="84" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="472" width="112" height="84" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="494" font-size="10.5" fill="var(--subtle)">Execution</text>
+<text x="20" y="508" font-size="10.5" fill="var(--subtle)">— OpenJiuwen</text>
+<rect x="126" y="564" width="1056" height="168" rx="8" fill="var(--canvas)" stroke="var(--line)"/>
+<rect x="8" y="564" width="112" height="168" rx="8" fill="var(--surface-quiet)" stroke="var(--line)"/>
+<text x="20" y="586" font-size="10.5" fill="var(--subtle)">Durable product</text>
+<text x="20" y="600" font-size="10.5" fill="var(--subtle)">state — AI4RnD</text>
+<rect x="226" y="24" width="220" height="40" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="336" y="48" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Researcher · teams</text>
+<rect x="486" y="24" width="230" height="40" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="601" y="48" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Channels · Web UI · CLI</text>
+<rect x="900" y="24" width="250" height="40" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1025" y="48" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Approvals & stall resolution</text>
+<rect x="146" y="104" width="200" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="246" y="127" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Project</text>
+<text x="246" y="141" font-size="11" text-anchor="middle" fill="var(--muted)">create — or retrieve & resume</text>
+<rect x="386" y="104" width="220" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="496" y="127" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Intention → Contract v1</text>
+<text x="496" y="141" font-size="11" text-anchor="middle" fill="var(--muted)">ambiguity resolved · confirmed</text>
+<rect x="646" y="104" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="761" y="127" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Planner → TaskGraph vN</text>
+<text x="761" y="141" font-size="11" text-anchor="middle" fill="var(--muted)">claims · deps · acceptance</text>
+<rect x="886" y="104" width="200" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="986" y="127" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Semantic readiness</text>
+<text x="986" y="141" font-size="11" text-anchor="middle" fill="var(--muted)">deps · budget · scope</text>
+<rect x="146" y="200" width="220" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="256" y="223" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Close & deliver</text>
+<text x="256" y="237" font-size="11" text-anchor="middle" fill="var(--muted)">freeze · authorize</text>
+<rect x="646" y="200" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="761" y="223" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Repair · replan → vN+1</text>
+<text x="761" y="237" font-size="11" text-anchor="middle" fill="var(--muted)">artifact fix, or plan revision</text>
+<rect x="906" y="200" width="200" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1006" y="223" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Gates</text>
+<text x="1006" y="237" font-size="11" text-anchor="middle" fill="var(--muted)">verdict per claim</text>
+<rect x="146" y="300" width="340" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="316" y="323" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Capability Capsules · Logical Operators</text>
+<text x="316" y="337" font-size="11" text-anchor="middle" fill="var(--muted)">registry · versions · effects · compatibility</text>
+<rect x="546" y="300" width="300" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="696" y="323" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Evaluator families & gate policy</text>
+<text x="696" y="337" font-size="11" text-anchor="middle" fill="var(--muted)">writer ≠ verifier</text>
+<rect x="146" y="392" width="250" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="271" y="410" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Binding</text>
+<text x="271" y="424" font-size="11" text-anchor="middle" fill="var(--muted)">capsule + executor + model —</text>
+<text x="271" y="438" font-size="11" text-anchor="middle" fill="var(--muted)">stall if nothing qualifies</text>
+<rect x="446" y="392" width="220" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="556" y="417" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Compile & dispatch</text>
+<text x="556" y="431" font-size="11" text-anchor="middle" fill="var(--muted)">ready sub-plan → engine spec</text>
+<rect x="716" y="392" width="300" height="56" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="866" y="410" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Receipt builder</text>
+<text x="866" y="424" font-size="11" text-anchor="middle" fill="var(--muted)">typed receipt + provenance —</text>
+<text x="866" y="438" font-size="11" text-anchor="middle" fill="var(--muted)">an empty result is a failed attempt</text>
+<rect x="146" y="492" width="600" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="446" y="518" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Core Workflow · SwarmFlow · DeepAgent · Team · worktrees</text>
+<rect x="796" y="492" width="280" height="44" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="936" y="518" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">External models · tools · sources</text>
+<path d="M146 604 a 105.0 8 0 0 1 210 0 v 36 a 105.0 8 0 0 1 -210 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M146 604 a 105.0 8 0 0 0 210 0" fill="none" stroke="var(--line-strong)"/>
+<text x="251" y="626" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Project store</text>
+<text x="251" y="638" font-size="11" text-anchor="middle" fill="var(--muted)">Contract vN · TaskGraph vN</text>
+<path d="M396 604 a 105.0 8 0 0 1 210 0 v 36 a 105.0 8 0 0 1 -210 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M396 604 a 105.0 8 0 0 0 210 0" fill="none" stroke="var(--line-strong)"/>
+<text x="501" y="626" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Attempt lineage</text>
+<text x="501" y="638" font-size="11" text-anchor="middle" fill="var(--muted)">receipts · cancels</text>
+<path d="M666 604 a 105.0 8 0 0 1 210 0 v 36 a 105.0 8 0 0 1 -210 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M666 604 a 105.0 8 0 0 0 210 0" fill="none" stroke="var(--line-strong)"/>
+<text x="771" y="626" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Evidence · verdicts</text>
+<text x="771" y="638" font-size="11" text-anchor="middle" fill="var(--muted)">append-only</text>
+<path d="M916 604 a 115.0 8 0 0 1 230 0 v 36 a 115.0 8 0 0 1 -230 0 z" fill="var(--surface)" stroke="var(--line-strong)"/>
+<path d="M916 604 a 115.0 8 0 0 0 230 0" fill="none" stroke="var(--line-strong)"/>
+<text x="1031" y="626" font-size="11" text-anchor="middle" font-weight="640" fill="var(--ink)">Knowledge graphs</text>
+<text x="1031" y="638" font-size="11" text-anchor="middle" fill="var(--muted)">typed projections</text>
+<rect x="446" y="672" width="320" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="606" y="693" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">GEPA + governed RSI</text>
+<text x="606" y="707" font-size="11" text-anchor="middle" fill="var(--muted)">candidates · budgets · frozen policy · approval</text>
+<path d="M446 44 L486 44" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<path d="M560 64 L560 82 L246 82 L246 104" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="410" y="96" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">a need — request · clue · material</text>
+<path d="M496 104 L496 64" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)" marker-start="url(#km)"/>
+<text x="504" y="88" font-size="11" text-anchor="start" fill="var(--muted)">confirm Contract</text>
+<path d="M346 130 L386 130" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<path d="M606 130 L646 130" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="626" y="122" font-size="11" text-anchor="middle" fill="var(--muted)"></text>
+<path d="M876 130 L886 130" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<path d="M966 156 L966 200" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="974" y="182" font-size="11" text-anchor="start" fill="var(--muted)">claim decided?</text>
+<path d="M906 226 L876 226" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="891" y="218" font-size="11" text-anchor="middle" fill="var(--muted)">fail</text>
+<path d="M761 200 L761 156" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="769" y="182" font-size="11" text-anchor="start" fill="var(--muted)">vN+1</text>
+<path d="M930 252 L930 264 L256 264 L256 252" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="590" y="260" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">all claims decided — Contract satisfied</text>
+<path d="M146 220 L138 220 L138 44 L226 44" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="146" y="90" font-size="11" text-anchor="start" font-weight="640" fill="var(--muted)" transform="rotate(90 146 90)">Deliverable</text>
+<path d="M1106 214 L1120 214 L1120 64" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="1128" y="150" font-size="11" text-anchor="middle" fill="var(--muted)" transform="rotate(90 1128 150)">human approval</text>
+<path d="M960 156 L960 168 L516 168 L516 380 L320 380 L320 392" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="700" y="162" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">ready step — Logical Operator request + capability requirement</text>
+<path d="M280 352 L280 392" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="288" y="376" font-size="11" text-anchor="start" fill="var(--muted)">qualified capsule + executor</text>
+<path d="M700 300 L700 276 L1006 276 L1006 252" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="850" y="270" font-size="11" text-anchor="middle" fill="var(--muted)">evaluation policy</text>
+<path d="M396 420 L446 420" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="421" y="412" font-size="11" text-anchor="middle" fill="var(--muted)">spec</text>
+<path d="M556 448 L556 492" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="564" y="474" font-size="11" text-anchor="start" fill="var(--muted)">run · resume · cancel</text>
+<path d="M746 514 L796 514" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<path d="M770 492 L770 470 L820 470 L820 448" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="830" y="474" font-size="11" text-anchor="start" fill="var(--muted)">receipts + artifacts</text>
+<path d="M1016 420 L1148 420 L1148 172 L1040 172 L1040 156" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/>
+<text x="1162" y="296" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)" transform="rotate(90 1162 296)">verified step state — empty ⇒ failed</text>
+<path d="M146 130 L128 130 L128 586 L210 586 L210 596" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="120" y="360" font-size="11" text-anchor="middle" fill="var(--muted)" transform="rotate(-90 120 360)">Contract · plan versions · budgets</text>
+<path d="M866 448 L866 584 L501 584 L501 596" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<path d="M866 584 L770 584 L770 596" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="690" y="578" font-size="11" text-anchor="middle" fill="var(--muted)">typed receipts · evidence records</text>
+<path d="M1090 252 L1090 560 L830 560 L830 596" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="1098" y="400" font-size="11" text-anchor="middle" fill="var(--muted)" transform="rotate(90 1098 400)">Gate Verdicts</text>
+<path d="M876 622 L916 622" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="896" y="648" font-size="10" text-anchor="middle" fill="var(--muted)">projections</text>
+<path d="M501 648 L501 672" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<path d="M740 648 L740 672" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<path d="M766 696 L1176 696 L1176 364 L346 364 L346 352" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/>
+<text x="960" y="688" font-size="11" text-anchor="middle" font-weight="640" fill="var(--muted)">governed promotion — approved versions govern future runs</text>
+<g font-size="11" fill="var(--muted)"><line x1="24" y1="748" x2="62" y2="748" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#km)"/><text x="70" y="752">control / execution</text><line x1="218" y1="748" x2="256" y2="748" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#km)"/><text x="264" y="752">state · evidence · improvement</text><text x="478" y="752">bold = hand-off objects</text></g>
+</svg></div>
+<p>Walking it once: a need arrives on any channel and <strong>creates or retrieves a project</strong>. The Intention Compiler resolves ambiguity with the requester and mints <strong>Contract v1</strong>, confirmed by a human before any work starts. The Planner derives <strong>TaskGraph vN</strong> — claims, dependencies, acceptance. As steps become <em>semantically</em> ready (dependencies, inputs, budget, scope), the bridge <strong>binds</strong> each to a qualified Capsule, permitted executor and available model — or stalls with the missing capability named; it never substitutes. The compiler emits an engine specification and dispatch runs it on whichever OpenJiuwen mechanism fits the sub-plan's shape — a choice users never see. Engines return receipts and artifacts; the <strong>receipt builder</strong> turns them into typed receipts with provenance, recording every attempt — and treating an empty result as a failed attempt. Evaluators (never the writer) turn artifacts into <strong>evidence</strong>; gates issue <strong>verdicts</strong> per claim; failures route to repair or to a <strong>plan revision vN+1</strong>; policy-flagged decisions go to a human. When every claim is decided and the Contract is satisfied, the project <strong>closes</strong>: evidence freezes, distribution is authorized, the deliverable returns through the originating channel, and knowledge persists as typed projections. Performance history feeds <strong>GEPA</strong>, whose approved candidates become new capsule, prompt, routing and evaluator versions — governing <em>future</em> bindings only, because in-flight projects pin their versions.</p>
+<h3 id="4-1-state-precise-invariants-not-slogans"><a class="anchor" href="#4-1-state-precise-invariants-not-slogans" aria-hidden="true">#</a>4.1 State: precise invariants, not slogans</h3>
+<p>An earlier revision asserted "the TaskGraph is the only mutable object" and "runtime state is never product state." Both were too absolute, and this report replaces them with the actual invariant classes:</p>
+<div class="tw"><table><thead><tr><th>Class</th><th>Members</th><th>Rule</th></tr></thead><tbody><tr><td><strong>Immutable once written</strong></td><td>a confirmed Contract <em>version</em>; each evidence record; each verdict; each typed receipt; each promotion record</td><td>never edited — superseded by a new record</td></tr><tr><td><strong>Versioned</strong></td><td>Contract (scope change ⇒ new version + re-confirmation), TaskGraph (every replan ⇒ vN+1), Capsules, Operator profiles, evaluator policies, benchmark protocols, datasets</td><td>full history retained; heads move only forward</td></tr><tr><td><strong>Append-only streams</strong></td><td>evidence ledger, gate ledger, <strong>execution-attempt lineage</strong> (dispatches, receipts, cancellations, reconciliations), improvement history</td><td>ordered, attributed, replayable</td></tr><tr><td><strong>Mutable operational state</strong></td><td>per-step run status, consumed budget, stall queue, approval queue</td><td>reconstructible from the streams after any crash</td></tr><tr><td><strong>Reproducible projections</strong></td><td>the seven knowledge graphs, project status, the deliverable itself</td><td>derived from ledgers; rebuildable at any time; never hand-edited</td></tr></tbody></table></div>
+<p>And the runtime-state correction: <strong>engine journals and checkpoints are the runtime's property</strong> — reconstruction aids, session-scoped, free to be garbage-collected (<strong>SRC</strong>: the pipeline journal is keyed by session and a new session replays nothing). But <strong>the facts of execution are project history</strong>: every attempt, receipt, cancellation and reconciliation is captured into the attempt lineage <em>by the bridge</em> at the moment it happens. On restart or resume, the bridge re-derives a specification from the plan, lets the engine replay what its journal still holds (<strong>EXEC</strong> — verified to re-execute only unfinished work), and reconciles the attempt lineage against what actually ran. Project truth never depends on a journal surviving.</p>
+<h3 id="4-2-execution-success-versus-semantic-acceptance"><a class="anchor" href="#4-2-execution-success-versus-semantic-acceptance" aria-hidden="true">#</a>4.2 Execution success versus semantic acceptance</h3>
+<p>Seven distinct questions, each with one owner. Today's fail-closed posture exists because of verified defects; the target does not enshrine those defects as permanent principles:</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Question</th><th>Target owner</th><th>Today (fail-closed)</th></tr></thead><tbody><tr><td>1</td><td>did execution complete?</td><td>OpenJiuwen runtime</td><td>runtime — reliable (EXEC)</td></tr><tr><td>2</td><td>did execution technically succeed?</td><td>OpenJiuwen runtime, propagating failure</td><td><strong>bridge compensates</strong>: empty result ⇒ failed attempt, because the engine reports success around failed steps (EXEC)</td></tr><tr><td>3</td><td>is there a valid typed receipt?</td><td>integration bridge</td><td>bridge (build)</td></tr><tr><td>4</td><td>does the artifact satisfy the node contract?</td><td>AI4RnD evaluators (conformance family)</td><td>same</td></tr><tr><td>5</td><td>does the evidence support the claim?</td><td>AI4RnD evidence authority + entailment</td><td>same — after the 0.25-precision check is replaced and re-measured</td></tr><tr><td>6</td><td>may work proceed?</td><td>AI4RnD gates (+ human where policy says)</td><td>same</td></tr><tr><td>7</td><td>is the project Contract satisfied?</td><td>AI4RnD project control</td><td>same</td></tr><tr><td>—</td><td>runtime supervision: retries, hangs, anomaly detection, remediation</td><td><strong>OpenJiuwen</strong> — its reliability subsystem (detectors + remediation) is real (SRC) and AI4RnD must <strong>not</strong> rebuild it</td><td>reused as-is</td></tr></tbody></table></div>
+<p>When gaps 1–2 close upstream (loud failure propagation, honest model binding, reachable resume), rungs 1–3 belong wholly to the runtime and bridge verification thins to schema-checking receipts. That is the mature form of Option C — and the compatibility tests in §8 are exactly the conditions for it.</p>
+<hr>
+<h2 id="5-gepa-and-governed-self-improvement"><a class="anchor" href="#5-gepa-and-governed-self-improvement" aria-hidden="true">#</a>5. GEPA and governed self-improvement</h2>
+<p>The improvement <strong>engine</strong> is GEPA — AI4RnD's own, existing, tested machinery. The <strong>substrate that tests its candidates</strong> is the same execution machinery that runs real work, reached through the same bridge. OpenJiuwen's evolution framework contributes evaluation-and-training plumbing through its Operator protocol; nothing in OpenJiuwen replaces GEPA's candidate generation or governance. (One narrow overlap exists: the runtime's tool-description optimizer covers a slice of GEPA's text-artifact surface; it is a binding-level alternative, not a replacement — <strong>SRC</strong>.)</p>
+<div class="fig fig-svg"><svg viewBox="0 0 1190 466" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="GEPA and the governed improvement loop">
+<defs><marker id="kg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
+<rect x="40" y="36" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="155" y="59" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Performance history</text>
+<text x="155" y="73" font-size="11" text-anchor="middle" fill="var(--muted)">attempts · evidence · verdicts</text>
+<rect x="310" y="36" width="300" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="460" y="58" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">GEPA candidate engine</text>
+<text x="460" y="71" font-size="11" text-anchor="middle" fill="var(--muted)">typed candidates: skill · capsule ·</text>
+<text x="460" y="84" font-size="11" text-anchor="middle" fill="var(--muted)">routing policy · rewrite rules · cost model</text>
+<text x="603" y="48" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--blocked)">EXISTS · UNWIRED</text>
+<rect x="650" y="36" width="250" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="775" y="58" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Budgets & stoppers</text>
+<text x="775" y="71" font-size="11" text-anchor="middle" fill="var(--muted)">spend · evals · walltime ·</text>
+<text x="775" y="84" font-size="11" text-anchor="middle" fill="var(--muted)">plateau · stop-file — dry-run default</text>
+<text x="893" y="48" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">EXISTS</text>
+<rect x="940" y="36" width="210" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1045" y="64" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Frozen-policy check</text>
+<text x="1045" y="78" font-size="11" text-anchor="middle" fill="var(--muted)">rejects any relaxation</text>
+<text x="1143" y="48" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">EXISTS</text>
+<path d="M270 62 L310 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kg)"/>
+<path d="M610 62 L650 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<path d="M900 62 L940 62" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<rect x="940" y="186" width="210" height="48" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1045" y="207" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Rejected</text>
+<text x="1045" y="221" font-size="11" text-anchor="middle" fill="var(--muted)">before evaluation</text>
+<rect x="600" y="186" width="300" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="750" y="202" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Isolated evaluation</text>
+<text x="750" y="216" font-size="11" text-anchor="middle" fill="var(--muted)">candidates run through the same bridge</text>
+<text x="750" y="230" font-size="11" text-anchor="middle" fill="var(--muted)">and engines as real work — never in place</text>
+<rect x="310" y="186" width="250" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="435" y="209" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Human approval</text>
+<text x="435" y="223" font-size="11" text-anchor="middle" fill="var(--muted)">Improvements inbox</text>
+<path d="M1045 88 L1045 186" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<text x="1053" y="142" font-size="10.5" text-anchor="start" fill="var(--muted)">relaxes a frozen rule</text>
+<path d="M870 88 L790 186" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<text x="806" y="142" font-size="11" text-anchor="middle" fill="var(--muted)">clean</text>
+<path d="M600 212 L560 212" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<path d="M400 238 L400 286 L1010 286 L1010 234" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<text x="700" y="280" font-size="11" text-anchor="middle" fill="var(--muted)">declined</text>
+<rect x="40" y="336" width="260" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="170" y="358" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Promoter</text>
+<text x="170" y="371" font-size="11" text-anchor="middle" fill="var(--muted)">sha256-checksummed · atomic ·</text>
+<text x="170" y="384" font-size="11" text-anchor="middle" fill="var(--muted)">tmp/production path guards</text>
+<text x="293" y="348" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">EXISTS</text>
+<rect x="340" y="336" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="455" y="352" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Registry & config</text>
+<text x="455" y="366" font-size="11" text-anchor="middle" fill="var(--muted)">new capsule / prompt /</text>
+<text x="455" y="380" font-size="11" text-anchor="middle" fill="var(--muted)">routing / evaluator versions</text>
+<rect x="610" y="336" width="230" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="725" y="359" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Monitoring</text>
+<text x="725" y="373" font-size="11" text-anchor="middle" fill="var(--muted)">regression watch</text>
+<rect x="880" y="336" width="270" height="52" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="1015" y="364" font-size="12.5" text-anchor="middle" font-weight="640" fill="var(--ink)">Rollback</text>
+<text x="1015" y="378" font-size="11" text-anchor="middle" fill="var(--muted)">restores the prior version, checksummed</text>
+<text x="1143" y="348" font-size="9" font-weight="700" text-anchor="end" letter-spacing=".05em" fill="var(--primary-ink)">EXISTS</text>
+<path d="M370 238 L370 310 L170 310 L170 336" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<text x="272" y="304" font-size="11" text-anchor="middle" fill="var(--muted)">approved</text>
+<path d="M300 362 L340 362" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<path d="M570 362 L610 362" fill="none" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kg)"/>
+<path d="M840 362 L880 362" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<text x="860" y="354" font-size="10.5" text-anchor="middle" fill="var(--muted)">regression</text>
+<path d="M1015 388 L1015 414 L455 414 L455 388" fill="none" stroke="var(--subtle)" stroke-width="1.5" marker-end="url(#kg)"/>
+<text x="735" y="408" font-size="11" text-anchor="middle" fill="var(--muted)">restored version re-registers</text>
+<text x="595" y="436" font-size="11" text-anchor="middle" fill="var(--muted)">Evaluation/training substrate reused from OpenJiuwen (Trainer · Updater · judge metrics · RL) via Operator-protocol adapters.</text>
+<text x="595" y="452" font-size="11" text-anchor="middle" fill="var(--muted)">The improvement engine is GEPA; the machinery that tests its candidates is the machinery that runs real work. In-flight projects pin versions.</text>
+</svg></div>
+<p>What already exists in GEPA (<strong>SRC</strong>, unit-tested): the typed candidate envelope — skill, capsule, routing policy, rewrite rules, cost model — which <em>is</em> the candidate-scope definition; budget stoppers (spend, evaluations, wall-time, plateau, stop-file) with dry-run as the CLI default; the frozen-policy checker that reports exact violating paths; the artifact store of runs and candidates; and the promoter with sha256 sidecars, tmp-versus-production path guards, atomic writes and rollback. What is missing is not machinery but <strong>wiring and product surface</strong>: connection to real run history, the Improvements inbox for human approval, capsule-registry integration, monitoring, and version pinning for in-flight projects. All eight workbook RSI surfaces route through this one loop; model-weight evolution (surface 7) is deferred on cost — the RL substrate exists but is unreachable from the application today (<strong>SRC</strong>).</p>
+<p>Evaluation-data selection and isolated replay reuse OpenJiuwen: candidates are evaluated on held-out case sets via the Trainer's validation-selection loop, executed through the bridge in isolated worktrees/sandboxes — never in place.</p>
+<hr>
+<h2 id="6-ownership-at-a-glance"><a class="anchor" href="#6-ownership-at-a-glance" aria-hidden="true">#</a>6. Ownership at a glance</h2>
+<div class="tw"><table><thead><tr><th>Concern</th><th>Owner</th></tr></thead><tbody><tr><td>Meaning: Contract, claims, plan, completion</td><td><strong>AI4RnD</strong></td></tr><tr><td>Capability governance: Capsules, Logical Operators, effects, certification</td><td><strong>AI4RnD</strong></td></tr><tr><td>Verification: evidence, evaluators, gates; writer ≠ verifier</td><td><strong>AI4RnD</strong></td></tr><tr><td>Improvement: GEPA candidates, budgets, frozen policy, approval, promotion</td><td><strong>AI4RnD</strong></td></tr><tr><td>Durable product state: projects, ledgers, attempt lineage, knowledge, versions</td><td><strong>AI4RnD</strong></td></tr><tr><td>Binding, compilation, dispatch/resume/cancel, typed receipts</td><td><strong>integration bridge</strong> (semantic decisions forbidden)</td></tr><tr><td>Physical execution, scheduling within a spec, runtime supervision, sandbox</td><td><strong>OpenJiuwen</strong></td></tr><tr><td>Identity, sessions, channels, UI shell, configuration, packaging</td><td><strong>JiuwenSwarm</strong></td></tr><tr><td>Contract confirmation, gated approvals, improvement approvals, stall resolution</td><td><strong>humans</strong> — the three-plus-one deliberate touchpoints</td></tr></tbody></table></div>
+<p>Across the 142 outcomes: AI4RnD semantically owns 118; runtime implementation splits 53 AI4RnD / 32 bridge / 27 JiuwenSwarm / 25 OpenJiuwen / 4 new / 1 unresolved. That divergence — own the meaning of far more than you run — is the architecture.</p>
+<hr>
+<h2 id="7-component-sourcing-reuse-adapt-derive-or-build"><a class="anchor" href="#7-component-sourcing-reuse-adapt-derive-or-build" aria-hidden="true">#</a>7. Component sourcing: reuse, adapt, derive or build</h2>
+<p>A systematic harvest of the foundation, with one of six verdicts per component: <strong>REUSE</strong> unchanged · <strong>COMPOSE</strong> through an adapter · <strong>EXTEND</strong> via a supported interface · <strong>DERIVE</strong> a bounded fork · <strong>BUILD</strong> in AI4RnD · <strong>REJECT</strong>. Bounded derivation was neither assumed nor excluded; it won exactly one candidate.</p>
+<div class="tw"><table><thead><tr><th>Component</th><th>Verdict</th><th>Basis (evidence)</th><th>Condition / spike</th></tr></thead><tbody><tr><td>Channels, Gateway, AgentServer, sessions, workspace</td><td><span class="chip ok">REUSE</span></td><td>the application shell the verticals require (SRC)</td><td>—</td></tr><tr><td>UI shell, configuration, model management, packaging</td><td>REUSE + EXTEND</td><td>research views and settings added on top</td><td>—</td></tr><tr><td>Core Workflow / Pregel</td><td><span class="chip ok">REUSE</span></td><td>runtime-computed fan-out executed (EXEC); durable supersteps</td><td>F4 covers lifecycle fit</td></tr><tr><td>SwarmFlow <strong>engine</strong></td><td>REUSE via its backend seam</td><td>this analysis ran it end-to-end against a custom backend — the seam is the product's entry point (EXEC)</td><td>F4: three real plans compile &amp; run</td></tr><tr><td>SwarmFlow <strong>leader tool</strong></td><td>REJECT</td><td>advertises resume and rejects it; leader-chat coupling (EXEC)</td><td>replaced by bridge dispatch</td></tr><tr><td>DeepAgent, sub-agents, code mode/worktrees</td><td><span class="chip ok">REUSE</span></td><td>bounded agent work and POC construction (SRC)</td><td>—</td></tr><tr><td>Dynamic Team</td><td><span class="chip ok">REUSE</span></td><td>open-ended excursions</td><td>roles/permissions unverified live — U3</td></tr><tr><td>Team task board (dependency edges)</td><td>COMPOSE</td><td>real add-dependencies/blocked-by manager (SRC)</td><td>projection of the TaskGraph for visibility, never the plan authority</td></tr><tr><td>Reliability detectors + remediation</td><td><span class="chip ok">REUSE</span></td><td>model/tool-error, loop, repeat detectors with remediation policy (SRC)</td><td>signals feed receipts; AI4RnD must not rebuild supervision</td></tr><tr><td>Team/shared memory, retrieval</td><td><span class="chip accent">EXTEND</span></td><td>substrate exists (SRC)</td><td>research-grade retrieval measured in P5</td></tr><tr><td>Graph memory module</td><td>EXTEND (conditional)</td><td>exists, referenced nowhere by the app (EXEC)</td><td>spike: fit for typed projections, else BUILD</td></tr><tr><td>Model pool + allocator</td><td>COMPOSE (loud-failure adapter)</td><td>silent fallback by documented design (SRC)</td><td>retire adapter if upstream fails loudly</td></tr><tr><td>Guardrail rules tier</td><td>DERIVE (bounded) or upstream EXTEND</td><td>loader ignores the installed file (EXEC); single-file boundary, upstream tests retained, delta = search path + non-empty assertion</td><td>reconcile on upstream fix</td></tr><tr><td>Permissions engine + jiuwenbox sandbox</td><td><span class="chip ok">REUSE</span></td><td>tiered policy executed in analysis (EXEC); enforcement itself untested here (U2)</td><td>adversarial test before trust</td></tr><tr><td>Observability, progress events, background tasks</td><td><span class="chip ok">REUSE</span></td><td>spans and async controller (SRC)</td><td>—</td></tr><tr><td>agent_evolving: Trainer, Updater, Operator protocol, metrics, EvolutionStore</td><td><span class="chip accent">EXTEND</span></td><td>real loop; one wired subject today (EXEC)</td><td>Q27-class spike: register a capsule as a subject</td></tr><tr><td>agent_rl (PPO/verl)</td><td><span class="chip neutral">DEFER</span></td><td>unreachable from the app (SRC); cost</td><td>with RSI surface 7</td></tr><tr><td>Tool-description optimizer</td><td>COMPOSE (narrow)</td><td>overlaps one GEPA text slice (SRC)</td><td>binding-level only</td></tr><tr><td>Symphony skill retrieval</td><td>COMPOSE</td><td>ranks but never refuses (SRC)</td><td>candidate <em>suggestion</em> under the capsule gate — never the gate</td></tr><tr><td>AI4RnD evidence + gate ledgers</td><td><span class="chip accent">PORT</span></td><td>run standalone (EXEC)</td><td>project-scoped storage</td></tr><tr><td>AI4RnD capsule registry + manifests</td><td>PORT + EXTEND</td><td>42 complete manifests (EXEC)</td><td>schema gains versions/history/RSI targets</td></tr><tr><td>AI4RnD GEPA</td><td>PORT (survives whole)</td><td>§5 (SRC, tested)</td><td>wire to inbox + registry</td></tr><tr><td>AI4RnD graph_scheduler + actor family</td><td>REJECT</td><td>duplicates verified engines; semantic readiness/binding logic relocates to project control and bridge</td><td>—</td></tr><tr><td>tmux cockpit + polling coordinator</td><td>REJECT</td><td>cannot meet multi-user/channel verticals</td><td>retained in history as rejected design</td></tr><tr><td>Grounding check</td><td>REJECT &amp; REBUILD</td><td>0.25 precision (EXEC)</td><td>bar published before build, measured after</td></tr></tbody></table></div>
+<p>Matrix impact: this audit changed three rows of the 142-row ownership matrix (capsule version-promotion, evaluator-driven operator evolution, capsules-as-evolution-subjects) from BUILD to ADAPT, because GEPA's promoter, budget/frozen-policy machinery and typed capsule candidates already exist. New decision totals: <strong>BUILD 50 · ADAPT 35 · REUSE 23 · PORT 20 · EXTEND 11 · DEFER 2 · UNRESOLVED 1</strong> (<a href="traceability/142-feature-implementation-ownership.csv">full matrix</a>).</p>
+<hr>
+<h2 id="8-implementation-direction"><a class="anchor" href="#8-implementation-direction" aria-hidden="true">#</a>8. Implementation direction</h2>
+<p>Dependency-driven, no calendar estimates — earlier LOC/month figures were withdrawn when execution probes showed what reading had missed. Sequence is knowable; duration is staffing.</p>
+<div class="tw"><table><thead><tr><th>Phase</th><th>Objective</th><th>Exit evidence</th></tr></thead><tbody><tr><td><strong>P1 — project &amp; Contract foundation</strong></td><td>durable projects behind the existing channels/UI; Intention Compiler; users choose objective and depth only</td><td>a project survives restart; an unconfirmed Contract blocks work</td></tr><tr><td><strong>P2 — spikes, then the bridge</strong></td><td>prove compilation; build binding, dispatch/resume/cancel, receipt builder; fix the guardrail file</td><td>interrupted run resumes re-executing only unfinished work; empty result blocks its gate; guardrails load non-empty</td></tr><tr><td><strong>P3 — trustworthy evidence &amp; capability registry</strong></td><td>ledgers project-scoped; <strong>entailment rebuilt with the bar published first</strong>; honest binding with effects enforcement and writer≠verifier</td><td>claims resolve to spans; measured precision materially above 0.25; unsatisfiable requirements stall</td></tr><tr><td><strong>P4 — the R&amp;D lanes &amp; Builder</strong></td><td>Idea Card, falsifiability gate, POC on worktrees, benchmarking, the 14 Builder outcomes</td><td>a run reaches a decision with card, falsifiability verdict, baseline benchmark, dossier</td></tr><tr><td><strong>P5 — data foundations &amp; delivery</strong></td><td>one authoritative store, seven typed projections, TaskGraph lifecycle, closure</td><td>any claim resolves to its concepts/datasets/code/runs in one query</td></tr><tr><td><strong>P6 — GEPA wiring, RSI governance, accounts, hardening</strong></td><td>inbox, pinning, monitoring/rollback drills; the account subsystem; platform packaging</td><td>frozen-policy candidate rejected pre-evaluation; rollback drill leaves in-flight runs untouched</td></tr></tbody></table></div>
+<p><strong>Spikes that gate the plan</strong> (choices conditional on them):</p>
+<ul><li><strong>F4 — compile three representative plans</strong> — (1) source-heavy research, (2) POC construction</li></ul>
+<p>plus benchmarking, (3) failed verification followed by repair and replanning — to the pipeline engine and/or staged workflows, and run the deterministic parts. <em>Both targets failing reverts the architecture to Option A.</em> Two related spikes already passed during analysis: runtime- computed fan-out (EXEC) and stock-install persistence (SRC).</p>
+<ul><li><strong>Capsule-as-subject</strong> — register one capsule as an evolution-framework subject through the</li></ul>
+<p>Operator protocol. Failure grows P6 and keeps the affected RSI surfaces manual longer.</p>
+<ul><li><strong>Graph-memory fit</strong> — decides EXTEND versus BUILD for the typed-projection layer.</li><li><strong>Sandbox adversarial test</strong> — before any security reliance on jiuwenbox.</li><li><strong>Team roles/permissions live probe</strong> — before routing open-ended excursions to Dynamic Team.</li></ul>
+<hr>
+<h2 id="9-verified-limitations-risks-and-open-decisions"><a class="anchor" href="#9-verified-limitations-risks-and-open-decisions" aria-hidden="true">#</a>9. Verified limitations, risks and open decisions</h2>
+<p><strong>Execution-verified limitations</strong> (each shaped the design; none was silently accepted): silent model substitution; unreachable resume; false-success on failed steps; unread executor typing; zero-rule guardrail tier; one-subject evolution wiring; 0.25 grounding precision.</p>
+<p><strong>Not verifiable here</strong> (recorded, not assumed): platform installers (6 matrix rows carry UNVERIFIED); sandbox enforcement under attack; live Team role limits; end-to-end model-fallback behaviour with real credentials; achievable entailment ceiling.</p>
+<p><strong>Principal risks.</strong></p>
+<ol><li><em>Entailment quality</em> — if a rebuilt check cannot materially beat 0.25 on research citations, the product's central promise fails regardless of architecture. Mitigation: P3 publishes the bar before building; stop-widening decision point if unmet.</li><li><em>Compilation coverage</em> — the mechanism mix is design intent until F4 runs.</li><li><em>Upstream drift</em> — adapters and the one bounded derivative must be reconciled against pinned dependency updates; each carries retained upstream tests as its tripwire.</li><li><em>Approval throughput</em> — three-plus-one human touchpoints could bottleneck at volume; P1 exit review watches it.</li></ol>
+<p><strong>Open product decisions</strong> (need an owner, not more analysis): what "Cluster setting" owns (the one UNRESOLVED row); whether tmux is a supported <em>channel</em> of the product or retired tooling; the definition of the externally-referenced "V-05" intake qualification tier; who owns strategic screening criteria; whether one-shot runs without a durable project are a product mode.</p>
+<hr>
+<h2 id="10-conclusion"><a class="anchor" href="#10-conclusion" aria-hidden="true">#</a>10. Conclusion</h2>
+<p>The complete intended AI4RnD product — all 142 outcomes, with Capsules, Contracts, Operators, semantic TaskGraphs, evaluators, evidence, knowledge, GEPA and governed RSI first-class — can be built on JiuwenSwarm and OpenJiuwen. The foundation contributes exactly what the product should not build: channels, sessions, UI, sandboxing, durable graph execution, replayable pipelines, teams, supervision and training plumbing. AI4RnD contributes exactly what no runtime can: meaning, capability governance, verification and governed self-improvement. The bridge between them stays thin, honest and fail-closed until each compatibility test proves the runtime can be trusted with more — and the target explicitly hands runtime supervision back to the runtime as those tests pass.</p>
+<p>~56 of the 142 outcomes require new construction under every option; the architecture decision was never about avoiding that work, only about never doing it twice and never dropping an outcome to make a diagram simpler.</p>
+<h3 id="what-changed-from-commit-69ebc372-and-what-held"><a class="anchor" href="#what-changed-from-commit-69ebc372-and-what-held" aria-hidden="true">#</a>What changed from commit <code>69ebc372</code>, and what held</h3>
+<p><strong>Held:</strong> the recommendation (progressive compilation, Option C); zero dropped outcomes; all seven negative findings; the decision-ownership principle; the journey's shape; the preservation gate's logic; every executed probe result.</p>
+<p><strong>Changed, with reasons:</strong></p>
+<ol><li><em>Framing</em> — "claims refinery" narrowed the product; now the identity is an evidence-governed R&amp;D system with claims refinement as its verification spine (§1).</li><li><em>State model</em> — two absolutes replaced by invariant classes plus execution-attempt lineage as first-class project history (§4.1).</li><li><em>Execution ownership</em> — the fail-closed bridge posture is dated to today's defects, with an explicit target that returns rungs 1–3 and supervision to the runtime (§4.2).</li><li><em>GEPA</em> — surfaced from an unexplained "governed RSI" box into the named improvement engine, with its existing budgets, frozen-policy and promote/rollback machinery credited (§5); three matrix rows corrected BUILD → ADAPT accordingly (§7).</li><li><em>Component audit</em> — extended beyond engines to the task board, reliability, memory, Symphony-as-suggester and a single bounded derivative (§7).</li><li><em>Document set</em> — this report replaces the multi-document presentation as the primary deliverable; the eight analyses and the full history are supporting material; the stale "seven documents" language is corrected.</li><li><em>Diagrams</em> — one authoritative end-to-end functional architecture restored at full product scope (§4); current-state and intended-state views separated and status-labelled (§1–2); the hard-to-read five-actor sequence demoted to the supporting engineering appendix.</li></ol>
+<h3 id="assumptions-this-report-rests-on"><a class="anchor" href="#assumptions-this-report-rests-on" aria-hidden="true">#</a>Assumptions this report rests on</h3>
+<ol><li>The 142-feature workbook is the complete product definition.</li><li>Phases group by the durable object each mints; the workbook names no macro-phases.</li><li>A confirmed Contract is immutable per version; the workbook requires confirmation but not mutability rules — chosen for auditability.</li><li>Seven knowledge graphs are typed projections over one authoritative store; physical storage is unprescribed.</li><li>Human touchpoints are the four named; the workbook implies review without enumerating.</li><li>The pinned OpenJiuwen (<code>0.1.15.post3</code>) is representative of the integration target; upstream fixes shift adapter work but not ownership.</li></ol>
+<p><em>Supporting material: the <a href="html/index.html">eight detailed analyses</a>, the <a href="traceability/142-feature-implementation-ownership.csv">142-row ownership matrix</a>, the <a href="traceability/142-feature-preservation-gate.csv">preservation gate</a>, and the <a href="source-material/README.md">full four-revision history with probe transcripts</a>.</em></p></section><section id="d-00-executive-summary"><div class="crumb">Supporting analyses — Overview / 00-executive-summary.md</div><h1 id="executive-summary"><a class="anchor" href="#executive-summary" aria-hidden="true">#</a>Executive Summary</h1>
 <p><strong>Recommendation: build AI4RnD as a first-class, persistent research product on top of JiuwenSwarm, keep all product semantics inside AI4RnD, and hand execution to OpenJiuwen progressively — one capability at a time, each migration gated by a passing compatibility test.</strong></p>
-<p>This package consolidates four revisions of analysis into seven documents. Everything here is backed by direct source reading of all three codebases and 29 executed experiments; the evidence for every claim is catalogued in <a href="#d-06-evidence-assumptions-open-questions">06-evidence-assumptions-open-questions.md</a>.</p>
+<p>This summary condenses the canonical <a href="#d-report">Architecture Report</a> — the one self-contained stakeholder deliverable; the numbered analyses, including this one, are supporting material. It is backed by direct source reading of all three codebases and 29 executed experiments; the evidence for every claim is catalogued in <a href="#d-06-evidence-assumptions-open-questions">06-evidence-assumptions-open-questions.md</a>.</p>
 <hr>
 <h2 id="1-the-question"><a class="anchor" href="#1-the-question" aria-hidden="true">#</a>1. The question</h2>
 <p>AI4RnD (repository: <code>Stellven/AI4Research</code>) is an autonomous R&amp;D product defined by a 142-feature workbook: it takes a research request, compiles it into a contract, plans the work, searches literature, forms claims and hypotheses, builds proof-of-concepts, benchmarks them, evaluates the evidence, and delivers results — improving its own capabilities under governance as it goes.</p>
@@ -258,7 +1045,7 @@ AI4Research @ d35c511</div></aside>
 <p>The runtime was not just read; it was run. Most of it works as documented — durable graph execution, journal-based replay of interrupted workflows, admission control, and a persistent checkpointer in a stock install were all confirmed. Seven negative findings shape the recommendation:</p>
 <div class="tw"><table><thead><tr><th>#</th><th>Finding</th><th>Consequence</th></tr></thead><tbody><tr><td>1</td><td>A requested-but-missing model is <strong>silently replaced</strong> by the default</td><td>AI4RnD must own model routing until fixed</td></tr><tr><td>2</td><td>Workflow resume works internally but is <strong>not reachable</strong> by any agent</td><td>the bridge must expose resume</td></tr><tr><td>3</td><td>A failed workflow step returns <strong><code>None</code> and the run reports success</strong></td><td>AI4RnD must verify completion itself</td></tr><tr><td>4</td><td>The <code>agent_type</code> execution knob is accepted but <strong>read by nothing</strong></td><td>typed operator binding must be built</td></tr><tr><td>5</td><td>The built-in shell guardrail tier <strong>loads zero rules</strong> in a stock install</td><td>fix before relying on it</td></tr><tr><td>6</td><td>Of 8 self-improvement surfaces, <strong>only 1 is wired end to end</strong></td><td>governed RSI is mostly new work</td></tr><tr><td>7</td><td>AI4RnD's own citation grounding check measured <strong>0.25 precision</strong></td><td>the evidence core must be rebuilt and re-measured</td></tr></tbody></table></div>
 <h2 id="5-what-it-takes-to-build"><a class="anchor" href="#5-what-it-takes-to-build" aria-hidden="true">#</a>5. What it takes to build</h2>
-<p>Of the 142 outcomes: <strong>53 must be built new</strong> (they exist in neither system — true under <em>every</em> architecture option), 32 adapted, 23 reused, 20 ported from AI4RnD, 11 extensions of JiuwenSwarm, 2 deferred, 1 unresolved. The plan in <a href="#d-05-feature-ownership-implementation-plan">05-feature-ownership-implementation-plan.md</a> is dependency-driven — six phases, each with acceptance evidence and exit criteria, no invented calendar estimates. The critical path runs: project/Contract foundation → compilation spikes → trustworthy evidence and capability binding → workflow lanes → data foundations → governed RSI.</p>
+<p>Of the 142 outcomes: <strong>50 must be built new</strong> (they exist in neither system — true under <em>every</em> architecture option), 35 adapted, 23 reused, 20 ported from AI4RnD, 11 extensions of JiuwenSwarm, 2 deferred, 1 unresolved. The plan in <a href="#d-05-feature-ownership-implementation-plan">05-feature-ownership-implementation-plan.md</a> is dependency-driven — six phases, each with acceptance evidence and exit criteria, no invented calendar estimates. The critical path runs: project/Contract foundation → compilation spikes → trustworthy evidence and capability binding → workflow lanes → data foundations → governed RSI.</p>
 <h2 id="6-what-could-change-this-recommendation"><a class="anchor" href="#6-what-could-change-this-recommendation" aria-hidden="true">#</a>6. What could change this recommendation</h2>
 <ul><li>If the F4 spike fails (real AI4RnD plans cannot compile to either execution engine), the</li></ul>
 <p>architecture reverts toward Option A.</p>
@@ -267,7 +1054,7 @@ AI4Research @ d35c511</div></aside>
 <ul><li>If a replacement grounding check cannot materially beat 0.25 precision, the product's central</li></ul>
 <p>claim — verifiable research — is unmet regardless of architecture.</p>
 <hr>
-<p><em>Reading order: this summary → <a href="#d-04-recommended-target-architecture">04-recommended-target-architecture.md</a> for the design → <a href="#d-05-feature-ownership-implementation-plan">05-feature-ownership-implementation-plan.md</a> for the work. Documents 01–03 give the background; 06 carries the evidence.</em></p></section><section id="d-01-intended-ai4rnd-product"><div class="crumb">Background / 01-intended-ai4rnd-product.md</div><h1 id="the-intended-ai4rnd-product"><a class="anchor" href="#the-intended-ai4rnd-product" aria-hidden="true">#</a>The Intended AI4RnD Product</h1>
+<p><em>Reading order: the <a href="#d-report">Architecture Report</a> is the canonical, self-contained deliverable. For deeper cuts: 04/07 for design, 05 for the work, 01–03 for background, 06 for evidence.</em></p></section><section id="d-01-intended-ai4rnd-product"><div class="crumb">Background / 01-intended-ai4rnd-product.md</div><h1 id="the-intended-ai4rnd-product"><a class="anchor" href="#the-intended-ai4rnd-product" aria-hidden="true">#</a>The Intended AI4RnD Product</h1>
 <p><strong>Purpose of this document: define what is being built, independent of how it is built.</strong> The product is defined by <code>AI4RnD Feature List.xlsx</code> — 25 feature groups, 142 features — and this definition is held constant across every architecture discussion in this package.</p>
 <p>The workbook was read directly (not from summaries) and reconciles exactly:</p>
 <div class="tw"><table><thead><tr><th>Sheet</th><th>Plane</th><th>Groups</th><th>Features</th></tr></thead><tbody><tr><td>Workflow Features</td><td>Workflow — what a research run does</td><td>9</td><td>54</td></tr><tr><td>Foundation Features</td><td>Foundation — the machinery underneath</td><td>10</td><td>65</td></tr><tr><td>Vertical Features</td><td>Vertical — the product around both</td><td>6</td><td>23</td></tr><tr><td><strong>Total</strong></td><td></td><td><strong>25</strong></td><td><strong>142</strong></td></tr></tbody></table></div>
@@ -439,11 +1226,11 @@ AI4Research @ d35c511</div></aside>
 <p><strong>B — Jiuwen-native lifecycle with AI4RnD semantic control.</strong> Core Workflow runs the outer research lifecycle as durable stages with checkpoints and human turns. AI4RnD keeps the project TaskGraph, capsules, contracts, evidence and RSI, and Jiuwen mechanisms execute the stages. Commits to the delegation immediately.</p>
 <p><strong>C — Progressive compilation (recommended).</strong> Same target picture as B, plus a migration discipline: AI4RnD-side scheduling and safety logic is retired <strong>per capability, only after a compatibility test passes</strong> — never on a schedule. Starts with the outer lifecycle on Core Workflow, deterministic sub-plans on SwarmFlow, and AI4RnD retaining capability binding, model routing, failure detection, gate evaluation and run-state authority. Each verified gap that closes upstream retires the corresponding AI4RnD fallback.</p>
 <p><strong>D — Full delegation now.</strong> AI4RnD keeps semantics but removes its execution-side machinery immediately, trusting Jiuwen for persistence, gates-relevant completion signals, cancellation, recovery and routing.</p>
-<p><strong>E — Standalone baseline / defer.</strong> Keep AI4RnD as it is (tmux carrier, own scheduler) and postpone integration. Changes nothing, gains nothing: no channels, no sandbox, no UI, no packaging — and the 53 never-built outcomes stay unbuilt.</p>
+<p><strong>E — Standalone baseline / defer.</strong> Keep AI4RnD as it is (tmux carrier, own scheduler) and postpone integration. Changes nothing, gains nothing: no channels, no sandbox, no UI, no packaging — and the ~50 never-built outcomes stay unbuilt.</p>
 <h2 id="2-preservation-gate-results"><a class="anchor" href="#2-preservation-gate-results" aria-hidden="true">#</a>2. Preservation-gate results</h2>
-<div class="tw"><table><thead><tr><th>Verdict</th><th>A</th><th>B</th><th>C ★</th><th>D</th><th>E</th></tr></thead><tbody><tr><td><span class="chip ok">PRESERVED</span></td><td>70</td><td>76</td><td>76</td><td>58</td><td>82</td></tr><tr><td><span class="chip warn">PRESERVED WITH ADAPTATION</span></td><td>12</td><td>6</td><td>6</td><td>23</td><td>0</td></tr><tr><td><span class="chip bad">NEW BUILD REQUIRED</span></td><td>58</td><td>58</td><td>58</td><td>57</td><td>58</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>2</td><td>2</td><td>2</td><td>3</td><td>2</td></tr><tr><td><span class="chip bad">DROPPED</span></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>1</strong></td><td><strong>0</strong></td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Verdict</th><th>A</th><th>B</th><th>C ★</th><th>D</th><th>E</th></tr></thead><tbody><tr><td><span class="chip ok">PRESERVED</span></td><td>71</td><td>78</td><td>78</td><td>59</td><td>84</td></tr><tr><td><span class="chip warn">PRESERVED WITH ADAPTATION</span></td><td>13</td><td>6</td><td>6</td><td>24</td><td>0</td></tr><tr><td><span class="chip bad">NEW BUILD REQUIRED</span></td><td>56</td><td>56</td><td>56</td><td>55</td><td>56</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>2</td><td>2</td><td>2</td><td>3</td><td>2</td></tr><tr><td><span class="chip bad">DROPPED</span></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>1</strong></td><td><strong>0</strong></td></tr></tbody></table></div>
 <p>Two facts stand out.</p>
-<p><strong>First: the big number never moves.</strong> 57–58 outcomes require new construction under <em>every</em> option, because they exist in neither system (all seven typed graphs, the Idea Card, account management, most evaluators, most RSI surfaces…). Any comparison that makes one option look dramatically cheaper is comparing execution plumbing, not the product.</p>
+<p><strong>First: the big number never moves.</strong> 55–56 outcomes require new construction under <em>every</em> option, because they exist in neither system (all seven typed graphs, the Idea Card, account management, most evaluators, most RSI surfaces…). Any comparison that makes one option look dramatically cheaper is comparing execution plumbing, not the product.</p>
 <p><strong>Second: only D drops an outcome.</strong> Model Routing &amp; Selection is lost under D because OpenJiuwen silently substitutes the default model when a requested one is missing, and under D no AI4RnD layer remains to catch it. D also leaves failure recovery unresolved: resume is not reachable from the agent surface, and a failed step returns <code>None</code> while the run reports success.</p>
 <p>**This is evidence against <em>immediate</em> full delegation — not proof that full delegation can never be safe.** All three blocking gaps are small and fixable. If they close upstream, D stops dropping outcomes, and C's mature form <em>is</em> D. The gate measures the systems as they are today.</p>
 <h2 id="3-why-c-over-a-and-b"><a class="anchor" href="#3-why-c-over-a-and-b" aria-hidden="true">#</a>3. Why C over A and B</h2>
@@ -737,10 +1524,10 @@ AI4Research @ d35c511</div></aside>
 <p>Option C's end state approaches full delegation. Each fallback below dies only when its named test passes — never on a date:</p>
 <div class="tw"><table><thead><tr><th>AI4RnD-side fallback</th><th>Retires when</th></tr></thead><tbody><tr><td>Model routing</td><td>the runtime fails loudly on an unknown model instead of substituting</td></tr><tr><td>Resume re-drive logic</td><td>resume is reachable through a supported runtime surface</td></tr><tr><td>Failure detection in the fact converter</td><td>failed steps propagate as failures, not <code>None</code></td></tr><tr><td>Typed-executor enforcement in the bridge</td><td>the runtime honors executor typing end to end</td></tr><tr><td>Compile-time write-scope exclusion</td><td>only if the runtime ever offers equivalent isolation guarantees</td></tr></tbody></table></div>
 <p>What never retires: semantic readiness, evidence sufficiency, gate decisions, repair/replanning, and project-completion authority. Those are the product.</p></section><section id="d-07-functional-architecture"><div class="crumb">Decision / 07-functional-architecture.md</div><h1 id="the-functional-architecture-end-to-end"><a class="anchor" href="#the-functional-architecture-end-to-end" aria-hidden="true">#</a>The Functional Architecture, End to End</h1>
-<p><strong>This document is the authoritative functional view of the proposed product.</strong> It was derived independently from the 142-feature workbook, the verified state of the three repositories, and the reuse audit — not from the earlier diagrams. Where it disagrees with them, this document wins; §8 says exactly where and why.</p>
-<p>The one-sentence version first:</p>
-<blockquote><p><strong>AI4RnD is a claims refinery.</strong> A user brings a need; the product converts it into explicit, falsifiable claims; everything in the middle exists to turn those claims into verdicts backed by evidence; and every run leaves the refinery itself measurably better, under governance.</p></blockquote>
-<p>That sentence is the organizing principle. The stages (§2), the state model (§3), the execution round trip (§4) and the loops (§5) all follow from it.</p>
+<p><strong>Supporting engineering narrative.</strong> The canonical stakeholder deliverable is the <a href="#d-report">Architecture Report</a>; this document carries the deeper functional walk-through, including the one-step execution sequence that the report deliberately leaves to an appendix.</p>
+<p>The organizing idea:</p>
+<blockquote><p><strong>AI4RnD is an evidence-governed autonomous R&amp;D system</strong>, and <strong>claims refinement is its verification spine</strong>: nothing it asserts reaches a user without resolving to evidence, and nothing is built before its hypothesis can state what would refute it. (An earlier revision used the spine — "a claims refinery" — as the whole identity; that was too narrow, and the correction is recorded in the report's change log.)</p></blockquote>
+<p>The stages (§2), the state model (§3), the execution round trip (§4) and the loops (§5) all follow from that spine.</p>
 <p>Labels used throughout: <strong>[today]</strong> — verified current behaviour; <strong>[target]</strong> — the proposed architecture; <strong>[evidence]</strong> — the observation that justifies a choice, with its verification class. Dense probe detail stays in <a href="#d-06-evidence-assumptions-open-questions">06-evidence-assumptions-open-questions.md</a>.</p>
 <hr>
 <h2 id="1-the-user-journey-where-it-really-begins-and-ends"><a class="anchor" href="#1-the-user-journey-where-it-really-begins-and-ends" aria-hidden="true">#</a>1. The user journey — where it really begins and ends</h2>
@@ -797,7 +1584,7 @@ AI4Research @ d35c511</div></aside>
 <p>Three human touchpoints are load-bearing and deliberate: Contract confirmation, gated approvals, and improvement approvals. Everything else is designed to run unattended.</p>
 <p><strong>[evidence]</strong> Step success stays with AI4RnD because of an executed finding: a SwarmFlow step that fails all its retries returns an empty result and the run reports success (EXEC, probe V-22). Binding stalls rather than substitutes because the runtime silently falls back to the default model when a requested one is missing (SRC, V-24). Mechanism choice is hidden from users because exposing it would couple the product's semantics to a guess about internals — a judgment, recorded as such.</p>
 <h2 id="3-the-state-spine-how-persistent-product-state-changes"><a class="anchor" href="#3-the-state-spine-how-persistent-product-state-changes" aria-hidden="true">#</a>3. The state spine — how persistent product state changes</h2>
-<p>The functional heart of the product is not a pipeline of services. It is a short chain of <strong>durable objects</strong>, each minted by one phase, owned by one authority, and never silently mutated. Execution, by contrast, is stateless from the product's point of view: runtime state (journals, checkpoints) is scoped to sessions and runs, and nothing the product asserts may depend on it.</p>
+<p>The functional heart of the product is not a pipeline of services. It is a short chain of <strong>durable objects</strong>, each minted by one phase, owned by one authority, and never silently mutated. (Two earlier absolutes — "the TaskGraph is the only mutable object" and "runtime state is never product state" — were over-statements; the report's §4.1 carries the precise invariant classes: immutable records, versioned records, append-only streams <em>including execution-attempt lineage as first-class project history</em>, mutable-but-reconstructible operational state, and reproducible projections. Engine journals and checkpoints remain the runtime's reconstruction aids; the <em>facts</em> of execution are captured into project history by the bridge.)</p>
 <div class="fig fig-svg"><svg viewBox="0 0 1190 300" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="The state spine">
 <defs><marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--subtle)"/></marker></defs>
 <rect x="40" y="36" width="230" height="66" rx="7" fill="var(--surface)" stroke="var(--line-strong)"/>
@@ -918,11 +1705,11 @@ AI4Research @ d35c511</div></aside>
 <p>This document summarizes them and adds the dependency structure the CSVs cannot express.</p>
 <hr>
 <h2 id="1-the-totals"><a class="anchor" href="#1-the-totals" aria-hidden="true">#</a>1. The totals</h2>
-<div class="tw"><table><thead><tr><th>Implementation decision</th><th>Rows</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip bad">BUILD</span></td><td>53</td><td>exists in neither system — required under <strong>every</strong> architecture option</td></tr><tr><td><span class="chip warn">ADAPT</span></td><td>32</td><td>exists on one side but must change shape</td></tr><tr><td><span class="chip ok">REUSE</span></td><td>23</td><td>use as-is (6 of these are packaging rows, unverifiable here, labelled so)</td></tr><tr><td><span class="chip accent">PORT</span></td><td>20</td><td>move working AI4RnD code onto the new foundation</td></tr><tr><td><span class="chip accent">EXTEND</span></td><td>11</td><td>JiuwenSwarm feature plus a research-specific layer</td></tr><tr><td><span class="chip neutral">DEFER</span></td><td>2</td><td>model-weight RSI and model construction — cost, not capability</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>1</td><td>"Cluster setting": one workbook line, no definition to build from</td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Implementation decision</th><th>Rows</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip bad">BUILD</span></td><td>50</td><td>exists in neither system — required under <strong>every</strong> architecture option</td></tr><tr><td><span class="chip warn">ADAPT</span></td><td>35</td><td>exists on one side but must change shape</td></tr><tr><td><span class="chip ok">REUSE</span></td><td>23</td><td>use as-is (6 of these are packaging rows, unverifiable here, labelled so)</td></tr><tr><td><span class="chip accent">PORT</span></td><td>20</td><td>move working AI4RnD code onto the new foundation</td></tr><tr><td><span class="chip accent">EXTEND</span></td><td>11</td><td>JiuwenSwarm feature plus a research-specific layer</td></tr><tr><td><span class="chip neutral">DEFER</span></td><td>2</td><td>model-weight RSI and model construction — cost, not capability</td></tr><tr><td><span class="chip warn">UNRESOLVED</span></td><td>1</td><td>"Cluster setting": one workbook line, no definition to build from</td></tr></tbody></table></div>
 <div class="tw"><table><thead><tr><th>Ownership</th><th>Semantic</th><th>Runtime</th></tr></thead><tbody><tr><td>AI4RnD Core</td><td>118</td><td>53</td></tr><tr><td>AI4RnD–Jiuwen Integration</td><td>—</td><td>32</td></tr><tr><td>JiuwenSwarm Application</td><td>19</td><td>27</td></tr><tr><td>OpenJiuwen Runtime</td><td>—</td><td>25</td></tr><tr><td>External / new product work</td><td>4</td><td>4</td></tr><tr><td>Unresolved</td><td>1</td><td>1</td></tr></tbody></table></div>
 <p>The 118-versus-53 gap between what AI4RnD <em>defines</em> and what it <em>runs</em> is the integration surface, and is why the bridge exists.</p>
 <h2 id="2-ownership-by-feature-group"><a class="anchor" href="#2-ownership-by-feature-group" aria-hidden="true">#</a>2. Ownership by feature group</h2>
-<div class="tw"><table><thead><tr><th>Plane · group</th><th>Rows</th><th>Semantic owner</th><th>Dominant runtime</th><th>Decisions</th><th>Phase</th></tr></thead><tbody><tr><td>W · Ingestion</td><td>7</td><td>AI4RnD</td><td>JiuwenSwarm App</td><td>adapt 2 · port 2 · reuse/extend/build</td><td>P1</td></tr><tr><td>W · Requirement compilation</td><td>7</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 5 · build 2</td><td>P1</td></tr><tr><td>W · Search &amp; ideation</td><td>8</td><td>AI4RnD</td><td>Bridge</td><td>port 7 · build 1</td><td>P2</td></tr><tr><td>W · Opportunity selection</td><td>7</td><td>AI4RnD</td><td>AI4RnD</td><td>build 5 · adapt 2</td><td>P4</td></tr><tr><td>W · Claims &amp; hypotheses</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>port 2 · build 2 · adapt 1</td><td>P4</td></tr><tr><td>W · POC implementation</td><td>5</td><td>AI4RnD</td><td>OpenJiuwen</td><td>reuse 2 · build 2 · adapt 1</td><td>P4</td></tr><tr><td>W · Benchmarking</td><td>5</td><td>AI4RnD</td><td>Bridge</td><td>port 2 · mixed</td><td>P4</td></tr><tr><td>W · Evaluation</td><td>6</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 3 · build 2 · port 1</td><td>P3</td></tr><tr><td>W · Delivery</td><td>4</td><td>AI4RnD</td><td>Bridge</td><td>build 2 · port 1 · adapt 1</td><td>P5</td></tr><tr><td>F · Capability capsule</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>extend 2 · mixed</td><td>P3/P6</td></tr><tr><td>F · Operators</td><td>6</td><td>AI4RnD</td><td>Bridge</td><td>build 4 · port 1 · adapt 1</td><td>P3/P6</td></tr><tr><td>F · Evaluator</td><td>6</td><td>AI4RnD</td><td>AI4RnD</td><td>build 4 · adapt 2</td><td>P3</td></tr><tr><td>F · Foundational models</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>extend 2 · build 1</td><td>P1</td></tr><tr><td>F · RSI</td><td>8</td><td>AI4RnD</td><td>Bridge</td><td>build 5 · adapt 2 · defer 1</td><td>P6</td></tr><tr><td>F · Data foundations</td><td>9</td><td>AI4RnD</td><td>AI4RnD</td><td>build 7 · extend/adapt</td><td>P5</td></tr><tr><td>F · Harness Core</td><td>6</td><td>AI4RnD</td><td>OpenJiuwen</td><td>reuse 4 · adapt 2</td><td>P2</td></tr><tr><td>F · Intention compilers</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 4 · build 1</td><td>P1</td></tr><tr><td>F · Planner</td><td>3</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 3</td><td>P2</td></tr><tr><td>F · Builder</td><td>14</td><td>AI4RnD</td><td>OpenJiuwen</td><td>build 7 · reuse 3 · port 3 · defer 1</td><td>P4/P6</td></tr><tr><td>V · Visibility / statistics</td><td>4</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>extend 3 · build 1</td><td>P2</td></tr><tr><td>V · Installer / CLI / webapp</td><td>5</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 5 (unverified here)</td><td>P1</td></tr><tr><td>V · UI</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 2 · extend 1</td><td>P1</td></tr><tr><td>V · Account management</td><td>4</td><td>External / new</td><td>External / new</td><td>build 4</td><td>P6</td></tr><tr><td>V · Message channels</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 2 · port 1 (tmux — open question)</td><td>P1</td></tr><tr><td>V · System configurations</td><td>4</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse/extend · 1 unresolved</td><td>P1</td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Plane · group</th><th>Rows</th><th>Semantic owner</th><th>Dominant runtime</th><th>Decisions</th><th>Phase</th></tr></thead><tbody><tr><td>W · Ingestion</td><td>7</td><td>AI4RnD</td><td>JiuwenSwarm App</td><td>adapt 2 · port 2 · reuse/extend/build</td><td>P1</td></tr><tr><td>W · Requirement compilation</td><td>7</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 5 · build 2</td><td>P1</td></tr><tr><td>W · Search &amp; ideation</td><td>8</td><td>AI4RnD</td><td>Bridge</td><td>port 7 · build 1</td><td>P2</td></tr><tr><td>W · Opportunity selection</td><td>7</td><td>AI4RnD</td><td>AI4RnD</td><td>build 5 · adapt 2</td><td>P4</td></tr><tr><td>W · Claims &amp; hypotheses</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>port 2 · build 2 · adapt 1</td><td>P4</td></tr><tr><td>W · POC implementation</td><td>5</td><td>AI4RnD</td><td>OpenJiuwen</td><td>reuse 2 · build 2 · adapt 1</td><td>P4</td></tr><tr><td>W · Benchmarking</td><td>5</td><td>AI4RnD</td><td>Bridge</td><td>port 2 · mixed</td><td>P4</td></tr><tr><td>W · Evaluation</td><td>6</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 3 · build 2 · port 1</td><td>P3</td></tr><tr><td>W · Delivery</td><td>4</td><td>AI4RnD</td><td>Bridge</td><td>build 2 · port 1 · adapt 1</td><td>P5</td></tr><tr><td>F · Capability capsule</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>extend 2 · adapt 2 · reuse 1</td><td>P3/P6</td></tr><tr><td>F · Operators</td><td>6</td><td>AI4RnD</td><td>Bridge</td><td>build 3 · adapt 2 · port 1</td><td>P3/P6</td></tr><tr><td>F · Evaluator</td><td>6</td><td>AI4RnD</td><td>AI4RnD</td><td>build 4 · adapt 2</td><td>P3</td></tr><tr><td>F · Foundational models</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>extend 2 · build 1</td><td>P1</td></tr><tr><td>F · RSI</td><td>8</td><td>AI4RnD</td><td>Bridge</td><td>build 4 · adapt 3 · defer 1</td><td>P6</td></tr><tr><td>F · Data foundations</td><td>9</td><td>AI4RnD</td><td>AI4RnD</td><td>build 7 · extend/adapt</td><td>P5</td></tr><tr><td>F · Harness Core</td><td>6</td><td>AI4RnD</td><td>OpenJiuwen</td><td>reuse 4 · adapt 2</td><td>P2</td></tr><tr><td>F · Intention compilers</td><td>5</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 4 · build 1</td><td>P1</td></tr><tr><td>F · Planner</td><td>3</td><td>AI4RnD</td><td>AI4RnD</td><td>adapt 3</td><td>P2</td></tr><tr><td>F · Builder</td><td>14</td><td>AI4RnD</td><td>OpenJiuwen</td><td>build 7 · reuse 3 · port 3 · defer 1</td><td>P4/P6</td></tr><tr><td>V · Visibility / statistics</td><td>4</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>extend 3 · build 1</td><td>P2</td></tr><tr><td>V · Installer / CLI / webapp</td><td>5</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 5 (unverified here)</td><td>P1</td></tr><tr><td>V · UI</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 2 · extend 1</td><td>P1</td></tr><tr><td>V · Account management</td><td>4</td><td>External / new</td><td>External / new</td><td>build 4</td><td>P6</td></tr><tr><td>V · Message channels</td><td>3</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse 2 · port 1 (tmux — open question)</td><td>P1</td></tr><tr><td>V · System configurations</td><td>4</td><td>JiuwenSwarm App</td><td>JiuwenSwarm App</td><td>reuse/extend · 1 unresolved</td><td>P1</td></tr></tbody></table></div>
 <p>Verification authority follows semantic ownership throughout: AI4RnD's evaluators and gates verify research outcomes; platform tests verify application rows; the writer of an artifact never verifies it.</p>
 <h2 id="3-not-all-rows-are-equal-the-dependency-critical-ten"><a class="anchor" href="#3-not-all-rows-are-equal-the-dependency-critical-ten" aria-hidden="true">#</a>3. Not all rows are equal — the dependency-critical ten</h2>
 <p>These capabilities gate everything else. Slippage here blocks the plan; slippage elsewhere narrows it.</p>
@@ -980,7 +1767,11 @@ AI4Research @ d35c511</div></aside>
 <h2 id="7-what-verified-does-not-mean-here"><a class="anchor" href="#7-what-verified-does-not-mean-here" aria-hidden="true">#</a>7. What "verified" does not mean here</h2>
 <p>HTML, link and diagram checks in this package validate the <em>documents</em>, not the product. No claim of product-runtime correctness is based on them. Product-runtime claims come only from the experiments in §1, and their limits are stated in §2 and §4.</p>
 <hr>
-<p><em>Provenance: the full analysis history — 21 working documents across four revisions, including the correction log of what each revision got wrong and why — is preserved under <a href="source-material/README.md">source-material/</a>. The primary documents supersede it.</em></p></section></main></div>
+<p><em>Provenance: the full analysis history — 21 working documents across four revisions, including the correction log of what each revision got wrong and why — is preserved under <a href="source-material/README.md">source-material/</a>. The primary documents supersede it.</em></p>
+<hr>
+<h2 id="addendum-revision-5-corrections-the-canonical-report-pass"><a class="anchor" href="#addendum-revision-5-corrections-the-canonical-report-pass" aria-hidden="true">#</a>Addendum — Revision 5 corrections (the canonical-report pass)</h2>
+<p>Recorded here so the correction trail stays complete; full statements in the <a href="#d-report">Architecture Report</a> change log.</p>
+<ol><li><strong>Framing</strong> — "claims refinery" was too narrow as a product identity; corrected to <em>evidence-governed autonomous R&amp;D system</em> with claims refinement as the verification spine.</li><li><strong>State model</strong> — two absolutes replaced by invariant classes; execution-attempt lineage (dispatches, receipts, cancellations, reconciliations) is first-class project history.</li><li><strong>Execution ownership</strong> — the fail-closed bridge posture is explicitly dated to today's verified defects; the target returns technical-success detection and supervision to the runtime as compatibility tests pass. Runtime supervision (reliability detectors + remediation, SRC) is reused, never rebuilt.</li><li><strong>GEPA under-credit</strong> — GEPA's budgets/stoppers, frozen-policy checker, typed candidate envelope (skill · capsule · routing policy · rewrite rules · cost model) and checksummed promote/rollback were previously overlooked (SRC, unit-tested). Three matrix rows corrected BUILD → ADAPT: capsule version-promotion, evaluator-driven operator evolution, capsules-as-evolution-subjects. New totals: BUILD 50 · ADAPT 35.</li><li><strong>Component audit widened</strong> — team task board (real dependency edges), reliability subsystem, team/shared memory, graph-memory module and the tool-description optimizer assessed; one bounded derivative admitted (the guardrail rules tier).</li><li><strong>Document coherence</strong> — the "seven documents" language was stale after doc 07 was added; the canonical report now replaces the multi-document presentation as the primary deliverable.</li></ol></section></main></div>
 <button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
 <script src="html/vendor/mermaid.min.js"></script>
 <script>

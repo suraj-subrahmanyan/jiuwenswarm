@@ -6,7 +6,9 @@
 <div class="layout">
 <aside><div class="brand"><svg class="mark" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.6c2.4 2.1 3.6 4.7 3.6 7.4 0 2.9-1.3 5.5-3.6 7.4-2.3-1.9-3.6-4.5-3.6-7.4 0-2.7 1.2-5.3 3.6-7.4z" fill="#cf0a2c"/><path d="M10 16.4c-2.6 1.4-5 1.7-7.2 1-.5-2.2 0-4.4 1.6-6.4 2.2.3 4.1 1.5 5.6 3.5z" fill="#a60822"/><path d="M10 16.4c2.6 1.4 5 1.7 7.2 1 .5-2.2 0-4.4-1.6-6.4-2.2.3-4.1 1.5-5.6 3.5z" fill="#7a0a1d"/></svg><h1>AI4RnD &times; JiuwenSwarm</h1></div>
 <p class="rev">Architecture review &middot; Rev 4</p>
-<div class="navsec">Overview</div>
+<div class="navsec">Report</div>
+<a class="doc" href="report.html">The Architecture Report</a>
+<div class="navsec">Supporting analyses — Overview</div>
 <a class="doc" href="00-executive-summary.html">Executive summary</a>
 <div class="navsec">Background</div>
 <a class="doc" href="01-intended-ai4rnd-product.html">The intended AI4RnD product</a>
@@ -22,34 +24,36 @@
 <div class="side-foot">jiuwenswarm @ a98d7ad<br>openjiuwen 0.1.15.post3<br>AI4Research @ d35c511<br>142 outcomes &middot; 29 experiments</div></aside>
 <main><div class="hero">
 <h1>AI4RnD on JiuwenSwarm</h1>
-<p class="lede">Build AI4RnD as a <strong>first-class, persistent research product</strong> on
-JiuwenSwarm. AI4RnD keeps all product semantics &mdash; contracts, plans, capsules, evidence,
-gates, governed self-improvement. OpenJiuwen executes. Migration of low-level scheduling is
-<strong>progressive, gated by compatibility tests</strong>. All 142 workbook outcomes preserved.</p>
+<p class="lede">Build the complete intended AI4RnD product — an <strong>evidence-governed
+autonomous R&amp;D system</strong> — as a first-class, persistent subsystem on JiuwenSwarm.
+AI4RnD keeps product semantics; OpenJiuwen executes; delegation is <strong>progressive, gated
+by compatibility tests</strong>. All 142 workbook outcomes preserved.</p>
 <div class="stats">
+  <div class="stat"><div class="n">1</div>
+    <div class="k">canonical report — self-contained; nothing else is required reading</div></div>
   <div class="stat"><div class="n">142<span style="font-size:15px;color:var(--subtle)">/142</span></div>
-    <div class="k">product outcomes preserved under the recommended architecture</div></div>
-  <div class="stat"><div class="n">53</div>
-    <div class="k">outcomes needing new construction &mdash; under every option</div></div>
+    <div class="k">outcomes preserved under the recommended architecture</div></div>
+  <div class="stat"><div class="n">50</div>
+    <div class="k">outcomes needing new construction — under every option</div></div>
   <div class="stat"><div class="n">29</div>
     <div class="k">executed experiments behind the evidence labels</div></div>
-  <div class="stat"><div class="n">7</div>
-    <div class="k">verified negative findings shaping the design</div></div>
 </div>
-<p style="font-size:13px;color:var(--subtle);margin-top:10px">Seven documents. The
-<a href="00-executive-summary.html">executive summary</a> is the five-minute version; dense
-evidence lives in <a href="06-evidence-assumptions-open-questions.html">document 06</a> and the
-CSVs below.</p>
-</div><div class="sech">Overview</div><div class="cards"><a class="card" href="00-executive-summary.html"><div class="cn">00</div><div class="ct">Executive summary</div><div class="cd">The recommendation and why, in five minutes. Start here.</div></a></div><div class="sech">Background</div><div class="cards"><a class="card" href="01-intended-ai4rnd-product.html"><div class="cn">01</div><div class="ct">The intended AI4RnD product</div><div class="cd">What is being built: the 142-outcome definition, the capsule model, current state.</div></a><a class="card" href="02-jiuwenswarm-openjiuwen-architecture.html"><div class="cn">02</div><div class="ct">JiuwenSwarm &amp; OpenJiuwen</div><div class="cd">What the foundation reliably provides, what exists but is unreachable, what is missing.</div></a></div><div class="sech">Decision</div><div class="cards"><a class="card" href="03-integration-options.html"><div class="cn">03</div><div class="ct">Integration options</div><div class="cd">Five coherent architectures, the preservation gate, and why progressive compilation wins.</div></a><a class="card" href="04-recommended-target-architecture.html"><div class="cn">04</div><div class="ct">Recommended architecture</div><div class="cd">The design: layers, structural workflow, twelve boundary rules, the governed RSI loop.</div></a><a class="card" href="07-functional-architecture.html"><div class="cn">07</div><div class="ct">Functional architecture</div><div class="cd">The authoritative end-to-end functional view: journey, decision ownership, state spine, execution round trip, loops.</div></a></div><div class="sech">Delivery</div><div class="cards"><a class="card" href="05-feature-ownership-implementation-plan.html"><div class="cn">05</div><div class="ct">Ownership &amp; implementation plan</div><div class="cd">Who owns each feature group, the ten dependency-critical capabilities, six phases.</div></a></div><div class="sech">Evidence</div><div class="cards"><a class="card" href="06-evidence-assumptions-open-questions.html"><div class="cn">06</div><div class="ct">Evidence &amp; open questions</div><div class="cd">Verified vs architectural judgment vs unverified assumption, plus open product questions.</div></a></div><div class="sech">Machine-readable & provenance</div><div class="cards">
+<p style="font-size:13px;color:var(--subtle);margin-top:10px">Start with
+<a href="report.html">the Architecture Report</a>. The eight analyses below are supporting
+material — deeper cuts of the same recommendation, never required.</p>
+</div><div class="sech">Report</div><div class="cards"><a class="card" href="report.html"><div class="cn">&mdash;</div><div class="ct">The Architecture Report</div><div class="cd">The canonical, self-contained stakeholder report. Everything needed to decide is on this one page.</div></a></div><div class="sech">Supporting analyses — Overview</div><div class="cards"><a class="card" href="00-executive-summary.html"><div class="cn">00</div><div class="ct">Executive summary</div><div class="cd">The recommendation and why, in five minutes. Start here.</div></a></div><div class="sech">Background</div><div class="cards"><a class="card" href="01-intended-ai4rnd-product.html"><div class="cn">01</div><div class="ct">The intended AI4RnD product</div><div class="cd">What is being built: the 142-outcome definition, the capsule model, current state.</div></a><a class="card" href="02-jiuwenswarm-openjiuwen-architecture.html"><div class="cn">02</div><div class="ct">JiuwenSwarm &amp; OpenJiuwen</div><div class="cd">What the foundation reliably provides, what exists but is unreachable, what is missing.</div></a></div><div class="sech">Decision</div><div class="cards"><a class="card" href="03-integration-options.html"><div class="cn">03</div><div class="ct">Integration options</div><div class="cd">Five coherent architectures, the preservation gate, and why progressive compilation wins.</div></a><a class="card" href="04-recommended-target-architecture.html"><div class="cn">04</div><div class="ct">Recommended architecture</div><div class="cd">The design: layers, structural workflow, twelve boundary rules, the governed RSI loop.</div></a><a class="card" href="07-functional-architecture.html"><div class="cn">07</div><div class="ct">Functional architecture</div><div class="cd">The authoritative end-to-end functional view: journey, decision ownership, state spine, execution round trip, loops.</div></a></div><div class="sech">Delivery</div><div class="cards"><a class="card" href="05-feature-ownership-implementation-plan.html"><div class="cn">05</div><div class="ct">Ownership &amp; implementation plan</div><div class="cd">Who owns each feature group, the ten dependency-critical capabilities, six phases.</div></a></div><div class="sech">Evidence</div><div class="cards"><a class="card" href="06-evidence-assumptions-open-questions.html"><div class="cn">06</div><div class="ct">Evidence &amp; open questions</div><div class="cd">Verified vs architectural judgment vs unverified assumption, plus open product questions.</div></a></div><div class="sech">Machine-readable & provenance</div><div class="cards">
 <a class="card" href="../traceability/142-feature-implementation-ownership.csv"><div class="cn">CSV</div>
 <div class="ct">Implementation ownership</div>
 <div class="cd">All 142 rows: owners, decisions, evidence, open questions.</div></a>
 <a class="card" href="../traceability/142-feature-preservation-gate.csv"><div class="cn">CSV</div>
 <div class="ct">Preservation gate</div>
 <div class="cd">Every outcome evaluated under every architecture option.</div></a>
+<a class="card" href="../ai4rnd-architecture-report.html"><div class="cn">RPT</div>
+<div class="ct">The report, standalone</div>
+<div class="cd">Self-contained offline HTML of the canonical report.</div></a>
 <a class="card" href="../ai4rnd-architecture-review.html"><div class="cn">1PG</div>
-<div class="ct">Single-file edition</div>
-<div class="cd">All seven documents on one page, for offline review or printing.</div></a>
+<div class="ct">Supporting analyses, one page</div>
+<div class="cd">All nine supporting documents concatenated — superseded by the report above for decision-making.</div></a>
 <a class="card" href="../source-material/README.md"><div class="cn">ARC</div>
 <div class="ct">Superseded source material</div>
 <div class="cd">The full four-revision analysis history. Not required reading.</div></a>

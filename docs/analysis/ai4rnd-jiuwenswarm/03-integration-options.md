@@ -37,22 +37,22 @@ persistence, gates-relevant completion signals, cancellation, recovery and routi
 
 **E — Standalone baseline / defer.**
 Keep AI4RnD as it is (tmux carrier, own scheduler) and postpone integration. Changes nothing,
-gains nothing: no channels, no sandbox, no UI, no packaging — and the 53 never-built outcomes
+gains nothing: no channels, no sandbox, no UI, no packaging — and the ~50 never-built outcomes
 stay unbuilt.
 
 ## 2. Preservation-gate results
 
 | Verdict | A | B | C ★ | D | E |
 |---|---:|---:|---:|---:|---:|
-| PRESERVED | 70 | 76 | 76 | 58 | 82 |
-| PRESERVED WITH ADAPTATION | 12 | 6 | 6 | 23 | 0 |
-| NEW BUILD REQUIRED | 58 | 58 | 58 | 57 | 58 |
+| PRESERVED | 71 | 78 | 78 | 59 | 84 |
+| PRESERVED WITH ADAPTATION | 13 | 6 | 6 | 24 | 0 |
+| NEW BUILD REQUIRED | 56 | 56 | 56 | 55 | 56 |
 | UNRESOLVED | 2 | 2 | 2 | 3 | 2 |
 | **DROPPED** | **0** | **0** | **0** | **1** | **0** |
 
 Two facts stand out.
 
-**First: the big number never moves.** 57–58 outcomes require new construction under *every*
+**First: the big number never moves.** 55–56 outcomes require new construction under *every*
 option, because they exist in neither system (all seven typed graphs, the Idea Card, account
 management, most evaluators, most RSI surfaces…). Any comparison that makes one option look
 dramatically cheaper is comparing execution plumbing, not the product.

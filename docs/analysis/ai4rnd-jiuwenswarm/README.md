@@ -4,9 +4,11 @@
 AI4RnD keeps all product semantics; OpenJiuwen executes; migration of low-level scheduling is
 progressive, gated by compatibility tests. All 142 workbook outcomes are preserved.**
 
-Start with the [Executive Summary](00-executive-summary.md).
+**Start — and, for most readers, finish — with the canonical
+[Architecture Report](REPORT.md)** ([standalone offline HTML](ai4rnd-architecture-report.html)).
+It is self-contained; everything below it is supporting material.
 
-## The primary documents
+## Supporting analyses (not required reading)
 
 | # | Document | Answers |
 |---|---|---|

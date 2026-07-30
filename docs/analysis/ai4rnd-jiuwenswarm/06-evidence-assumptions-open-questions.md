@@ -113,3 +113,29 @@ experiments in §1, and their limits are stated in §2 and §4.
 *Provenance: the full analysis history — 21 working documents across four revisions, including
 the correction log of what each revision got wrong and why — is preserved under
 [source-material/](source-material/README.md). The primary documents supersede it.*
+
+---
+
+## Addendum — Revision 5 corrections (the canonical-report pass)
+
+Recorded here so the correction trail stays complete; full statements in the
+[Architecture Report](REPORT.md) change log.
+
+1. **Framing** — "claims refinery" was too narrow as a product identity; corrected to
+   *evidence-governed autonomous R&D system* with claims refinement as the verification spine.
+2. **State model** — two absolutes replaced by invariant classes; execution-attempt lineage
+   (dispatches, receipts, cancellations, reconciliations) is first-class project history.
+3. **Execution ownership** — the fail-closed bridge posture is explicitly dated to today's
+   verified defects; the target returns technical-success detection and supervision to the
+   runtime as compatibility tests pass. Runtime supervision (reliability detectors +
+   remediation, SRC) is reused, never rebuilt.
+4. **GEPA under-credit** — GEPA's budgets/stoppers, frozen-policy checker, typed candidate
+   envelope (skill · capsule · routing policy · rewrite rules · cost model) and checksummed
+   promote/rollback were previously overlooked (SRC, unit-tested). Three matrix rows corrected
+   BUILD → ADAPT: capsule version-promotion, evaluator-driven operator evolution,
+   capsules-as-evolution-subjects. New totals: BUILD 50 · ADAPT 35.
+5. **Component audit widened** — team task board (real dependency edges), reliability
+   subsystem, team/shared memory, graph-memory module and the tool-description optimizer
+   assessed; one bounded derivative admitted (the guardrail rules tier).
+6. **Document coherence** — the "seven documents" language was stale after doc 07 was added;
+   the canonical report now replaces the multi-document presentation as the primary deliverable.

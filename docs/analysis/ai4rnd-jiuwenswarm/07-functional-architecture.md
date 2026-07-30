@@ -1,18 +1,19 @@
 # The Functional Architecture, End to End
 
-**This document is the authoritative functional view of the proposed product.** It was derived
-independently from the 142-feature workbook, the verified state of the three repositories, and
-the reuse audit — not from the earlier diagrams. Where it disagrees with them, this document
-wins; §8 says exactly where and why.
+**Supporting engineering narrative.** The canonical stakeholder deliverable is the
+[Architecture Report](REPORT.md); this document carries the deeper functional walk-through,
+including the one-step execution sequence that the report deliberately leaves to an appendix.
 
-The one-sentence version first:
+The organizing idea:
 
-> **AI4RnD is a claims refinery.** A user brings a need; the product converts it into explicit,
-> falsifiable claims; everything in the middle exists to turn those claims into verdicts backed
-> by evidence; and every run leaves the refinery itself measurably better, under governance.
+> **AI4RnD is an evidence-governed autonomous R&D system**, and **claims refinement is its
+> verification spine**: nothing it asserts reaches a user without resolving to evidence, and
+> nothing is built before its hypothesis can state what would refute it. (An earlier revision
+> used the spine — "a claims refinery" — as the whole identity; that was too narrow, and the
+> correction is recorded in the report's change log.)
 
-That sentence is the organizing principle. The stages (§2), the state model (§3), the execution
-round trip (§4) and the loops (§5) all follow from it.
+The stages (§2), the state model (§3), the execution round trip (§4) and the loops (§5) all
+follow from that spine.
 
 Labels used throughout: **[today]** — verified current behaviour; **[target]** — the proposed
 architecture; **[evidence]** — the observation that justifies a choice, with its verification
@@ -130,9 +131,12 @@ recorded as such.
 
 The functional heart of the product is not a pipeline of services. It is a short chain of
 **durable objects**, each minted by one phase, owned by one authority, and never silently
-mutated. Execution, by contrast, is stateless from the product's point of view: runtime state
-(journals, checkpoints) is scoped to sessions and runs, and nothing the product asserts may
-depend on it.
+mutated. (Two earlier absolutes — "the TaskGraph is the only mutable object" and "runtime state
+is never product state" — were over-statements; the report's §4.1 carries the precise invariant
+classes: immutable records, versioned records, append-only streams *including execution-attempt
+lineage as first-class project history*, mutable-but-reconstructible operational state, and
+reproducible projections. Engine journals and checkpoints remain the runtime's reconstruction
+aids; the *facts* of execution are captured into project history by the bridge.)
 
 ```svg
 <svg viewBox="0 0 1190 300" width="1190" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="The state spine">

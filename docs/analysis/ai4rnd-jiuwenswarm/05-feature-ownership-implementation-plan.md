@@ -16,8 +16,8 @@ This document summarizes them and adds the dependency structure the CSVs cannot 
 
 | Implementation decision | Rows | Meaning |
 |---|---:|---|
-| BUILD | 53 | exists in neither system — required under **every** architecture option |
-| ADAPT | 32 | exists on one side but must change shape |
+| BUILD | 50 | exists in neither system — required under **every** architecture option |
+| ADAPT | 35 | exists on one side but must change shape |
 | REUSE | 23 | use as-is (6 of these are packaging rows, unverifiable here, labelled so) |
 | PORT | 20 | move working AI4RnD code onto the new foundation |
 | EXTEND | 11 | JiuwenSwarm feature plus a research-specific layer |
@@ -49,11 +49,11 @@ and is why the bridge exists.
 | W · Benchmarking | 5 | AI4RnD | Bridge | port 2 · mixed | P4 |
 | W · Evaluation | 6 | AI4RnD | AI4RnD | adapt 3 · build 2 · port 1 | P3 |
 | W · Delivery | 4 | AI4RnD | Bridge | build 2 · port 1 · adapt 1 | P5 |
-| F · Capability capsule | 5 | AI4RnD | AI4RnD | extend 2 · mixed | P3/P6 |
-| F · Operators | 6 | AI4RnD | Bridge | build 4 · port 1 · adapt 1 | P3/P6 |
+| F · Capability capsule | 5 | AI4RnD | AI4RnD | extend 2 · adapt 2 · reuse 1 | P3/P6 |
+| F · Operators | 6 | AI4RnD | Bridge | build 3 · adapt 2 · port 1 | P3/P6 |
 | F · Evaluator | 6 | AI4RnD | AI4RnD | build 4 · adapt 2 | P3 |
 | F · Foundational models | 3 | JiuwenSwarm App | JiuwenSwarm App | extend 2 · build 1 | P1 |
-| F · RSI | 8 | AI4RnD | Bridge | build 5 · adapt 2 · defer 1 | P6 |
+| F · RSI | 8 | AI4RnD | Bridge | build 4 · adapt 3 · defer 1 | P6 |
 | F · Data foundations | 9 | AI4RnD | AI4RnD | build 7 · extend/adapt | P5 |
 | F · Harness Core | 6 | AI4RnD | OpenJiuwen | reuse 4 · adapt 2 | P2 |
 | F · Intention compilers | 5 | AI4RnD | AI4RnD | adapt 4 · build 1 | P1 |
