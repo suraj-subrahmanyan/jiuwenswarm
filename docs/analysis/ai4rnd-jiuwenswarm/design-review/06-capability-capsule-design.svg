@@ -24,13 +24,13 @@
 <text x="811" y="190" class="s">consumes · produces · ordering</text>
 <text x="811" y="206" class="s">compatible · incompatible Capsules</text>
 <rect x="50" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
-<text x="61" y="307" class="n">Planner blueprint</text>
-<text x="61" y="325" class="s">required and optional Logical Operators</text>
-<text x="61" y="341" class="s">dependencies · skills · evidence owed</text>
+<text x="61" y="307" class="n">Planner blueprint [TARGET]</text>
+<text x="61" y="325" class="s">each step names one Logical Operator</text>
+<text x="61" y="341" class="s">dependencies · binding needs · evidence owed</text>
 <rect x="300" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="311" y="307" class="n">Executor compatibility</text>
 <text x="311" y="325" class="s">required capabilities</text>
-<text x="311" y="341" class="s">permitted/forbidden operator classes</text>
+<text x="311" y="341" class="s">kind allow/deny + operator deny-list</text>
 <rect x="550" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="561" y="307" class="n">Verification</text>
 <text x="561" y="325" class="s">self-check · independent verifier</text>
@@ -95,9 +95,9 @@
 <text x="881" y="905" class="s">Core Workflow</text>
 <text x="881" y="921" class="s">SwarmFlow / code</text>
 <rect x="407" y="985" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
-<text x="418" y="1007" class="n">Model</text>
-<text x="418" y="1025" class="s">exact pool entry</text>
-<text x="418" y="1041" class="s">no silent fallback</text>
+<text x="418" y="1007" class="n">Model [TARGET]</text>
+<text x="418" y="1025" class="s">exact qualified binding</text>
+<text x="418" y="1041" class="s">fix/fence silent fallback</text>
 <rect x="592" y="985" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="603" y="1007" class="n">Data / secret</text>
 <text x="603" y="1025" class="s">versioned references</text>
@@ -107,7 +107,7 @@
 <text x="788" y="1025" class="s">browser · API · host</text>
 <text x="788" y="1041" class="s">health/quota/cost</text>
 <path d="M280 950 H305" class="flow"/>
-<text x="50" y="1084" class="tiny">A Jiuwen skill, agent, model, tool or workflow can implement part of a Capsule. None of them is the Capsule itself; replacing one binding does not change capability identity.</text>
+<text x="50" y="1084" class="tiny">A skill, agent, model, tool or workflow can implement part of a Capsule. None is its identity. Secret refs require a guard Capsule.</text>
 <rect x="30" y="1150" width="1040" height="260" rx="10" fill="#eef6f8" stroke="#73a0aa" stroke-width="1.2"/>
 <text x="44" y="1174" class="h">4. Assurance, operation and evolution — three status axes</text>
 <text x="44" y="1193" class="m">Do not compress definition maturity, runtime health and certification into one &#x27;stable&#x27; flag</text>

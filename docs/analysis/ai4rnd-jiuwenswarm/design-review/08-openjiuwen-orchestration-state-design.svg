@@ -55,11 +55,12 @@
 <rect x="800" y="630" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="811" y="652" class="n">Returns</text>
 <text x="811" y="670" class="s">graph outputs · interrupt state</text>
+<text x="811" y="686" class="s">router receives no state argument</text>
 <path d="M280 680 H295" class="flow"/>
 <path d="M530 680 H545" class="flow"/>
 <path d="M780 680 H795" class="flow"/>
 <rect x="30" y="825" width="1040" height="225" rx="10" fill="#e8eef7" stroke="#7d97b8" stroke-width="1.2"/>
-<text x="44" y="849" class="h">3. SwarmFlow</text>
+<text x="44" y="849" class="h">3. SwarmFlow [FENCE]</text>
 <text x="44" y="868" class="m">Script-defined parallel, pipeline, map and nested phases</text>
 <rect x="50" y="900" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="61" y="922" class="n">Control</text>
@@ -70,9 +71,11 @@
 <rect x="550" y="900" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="561" y="922" class="n">Durability</text>
 <text x="561" y="940" class="s">journal/WAL + progress events</text>
+<text x="561" y="956" class="s">resume is engine-API-only</text>
 <rect x="800" y="900" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="811" y="922" class="n">Returns</text>
 <text x="811" y="940" class="s">script return · phase/run events</text>
+<text x="811" y="956" class="s">failed step may yield empty success</text>
 <path d="M280 950 H295" class="flow"/>
 <path d="M530 950 H545" class="flow"/>
 <path d="M780 950 H795" class="flow"/>
@@ -84,7 +87,8 @@
 <text x="61" y="1210" class="s">Leader + persistent task scheduler</text>
 <rect x="300" y="1170" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="311" y="1192" class="n">Work unit</text>
-<text x="311" y="1210" class="s">members · task assignees · reviewers</text>
+<text x="311" y="1210" class="s">members · assignees · reviewers</text>
+<text x="311" y="1226" class="s">human/bridge roles available</text>
 <rect x="550" y="1170" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
 <text x="561" y="1192" class="n">Durability</text>
 <text x="561" y="1210" class="s">team task DB + member/worktree state</text>

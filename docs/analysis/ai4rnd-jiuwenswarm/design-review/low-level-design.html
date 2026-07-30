@@ -879,52 +879,32 @@ A dashboard may summarise the three axes into one badge; the stored model never 
 <h2 id="s5">5 · Capability Capsule to-be template — draft 2</h2>
 <p>The full revised template (<code>capability-capsule.to-be.template.yaml</code> in this
 directory). Draft 2 keeps draft 1's structure — universal capsule, planner blueprint,
-replaceable bindings, three status axes — and repairs the five migration defects the
+replaceable bindings, three status axes — and repairs the migration defects the
 adversarial review filed against draft 1:</p>
 <table>
 <tr><th>Review finding</th><th>Draft-2 change</th></tr>
-<tr><td><strong>M-2</strong> — plate and template disagreed on the blueprint step unit</td><td>each step now carries <code>logical_operator_ref</code> as its typed action identity; skills remain the ingredients under it</td></tr>
-<tr><td><strong>M-3</strong> — id-level operator deny-list dropped</td><td><code>executor_policy.forbidden_operators</code> restored (deny-by-id is a safety control, distinct from pinning; allow-lists stay kind/capability-based)</td></tr>
-<tr><td><strong>M-4</strong> — registry <code>default_operator_profile</code> conflicts with <code>forbid_identity_pinning</code></td><td>explicit migration rule in the header: defaults move to the Physical Operator registry keyed by capability; the field is deleted from registry entries at migration</td></tr>
-<tr><td><strong>M-5</strong> — secrets-require-guard invariant lost</td><td>schema invariants block restored in the header; <code>resources.secret_refs</code> annotated with the rule; validator + JSON schema listed as migration artifacts</td></tr>
-<tr><td>Kind/prefix and corpus gaps</td><td><code>adapter</code> added to <code>capsule_kind</code>; per-kind ID prefixes stated; <code>portability.scope</code> gains <code>project</code>; <code>runtime_preferences</code> mapping and <code>version</code> backfill rules stated; kind-conditional sections marked</td></tr>
+<tr><td><strong>M-2</strong> — plate and template disagreed on the blueprint step unit</td><td>each step now carries <code>logical_operator_ref</code> as its typed action identity; skills sit under it as <code>skill_requirements.required/optional</code>, tools/MCP as capability requirements</td></tr>
+<tr><td><strong>M-3</strong> — id-level operator deny-list dropped</td><td><code>executor_policy.forbidden_physical_operator_ids</code> restored (deny-by-id is a safety control, distinct from pinning; allow-lists stay kind/capability-based), plus the <code>policy_invariants</code> rule <code>operator_deny_list_precedes_scoring</code></td></tr>
+<tr><td><strong>M-4</strong> — registry <code>default_operator_profile</code> conflicts with <code>forbid_identity_pinning</code></td><td>explicit <code>migration_from_v1</code> block: the profile becomes a capability-scoped <em>preference</em> in the Physical Operator registry, requalified and pinned per attempt, and is removed from registry entries after migration</td></tr>
+<tr><td><strong>M-5</strong> — secrets-require-guard invariant lost</td><td>new <code>policy_invariants</code> block: <code>secret_refs_require_guard_capsule</code> enforced at schema semantics and runtime admission; <code>no_silent_executor_or_model_fallback</code> added alongside it</td></tr>
+<tr><td>Kind/prefix and corpus gaps</td><td>prefix-to-kind rule stated (<code>cap.* / guard.* / resource.*</code>; legacy <code>adapter.*</code> IDs stay capability-kind until migrated — no fourth kind); <code>planning_blueprint</code> marked TARGET-ONLY; <code>runtime_status</code> externalised to <code>runtime_status_ref</code> keyed by capsule version; <code>version</code> backfill and <code>runtime_preferences</code> translation live in <code>migration_from_v1</code></td></tr>
 </table>
-<pre><code># Proposal — Capability Capsule v2, DRAFT 2
-# (draft 1 revised per design-review/adversarial-review.md findings M-2..M-5)
+<pre><code># Initial proposal — Capability Capsule v2
 #
 # Design rule:
 #   A Capsule is a governed, reusable capability blueprint created before a
 #   project is planned. The Planner selects it and expands its ordered steps
-#   into the project TaskGraph. Each step&#x27;s typed action identity is a Logical
-#   Operator; Skills are the primary reusable ingredients under it. MCP/tool
-#   requirements are typed resources. Runtime executor selection is a later
-#   concern and remains in the Physical Operator registry.
-#
-# Schema invariants (enforced by the JSON schema + semantic validator; these
-# migrate from v1 — see capability_capsules.py validate_capability_capsule_semantics):
-#   I1. resources.secret_refs non-empty  =&gt;  composition.required_guard_capsules
-#       non-empty (v1 rule retained across the bindings-&gt;resources relocation).
-#   I2. capsule_kind == resource  =&gt;  effects.execute empty.
-#   I3. capsule_kind == guard     =&gt;  verification declares pass conditions.
-#   I4. No field anywhere may name a permanent agent/team/model instance;
-#       pin_binding_for_attempt is the only sanctioned pinning.
-#
-# Migration rules (v1 corpus -&gt; v2):
-#   MG1. Registry default_operator_profile is DELETED from registry entries;
-#        defaults move to the Physical Operator registry keyed by capability
-#        (resolves the forbid_identity_pinning conflict, review M-4).
-#   MG2. v1 runtime_preferences (6 manifests) maps into
-#        executor_policy.model_requirements / permitted_operator_kinds.
-#   MG3. Manifests without version (19 of 42) are backfilled 0.1.0 from the
-#        registry entry&#x27;s version at migration.
-#   MG4. Kind-conditional sections: planning_blueprint is required for
-#        capability/adapter, forbidden for resource, optional for guard.
-#
-# ID prefixes by kind: cap. | guard. | resource. | adapter.
+#   into the project TaskGraph. Every step names one Logical Operator; skills,
+#   MCP and tool capabilities are replaceable requirements or bindings beneath
+#   that action. Runtime executor selection is a later, fail-closed decision in
+#   the Physical Operator registry.
 
 schema_version: ai4rnd.capability-capsule.v2
+# Prefix-to-kind rule: cap.* = capability, guard.* = guard, resource.* = resource.
+# Legacy adapter.* IDs remain capability-kind until explicitly migrated below;
+# &quot;adapter&quot; is not a fourth capsule_kind.
 capability_capsule_id: cap.&lt;domain&gt;-&lt;capability&gt;
-capsule_kind: capability            # capability | guard | resource | adapter
+capsule_kind: capability            # capability | guard | resource
 version: 0.1.0
 
 metadata:
@@ -934,8 +914,7 @@ metadata:
   tags: []
 
 portability:
-  scope: universal                 # universal | project (project requires owning_project)
-  owning_project: null             # required when scope == project
+  scope: universal                 # reusable across projects, agents and teams
   executor_agnostic: true
   requires_specific_agent_id: false
   environment_requirements: []
@@ -979,36 +958,41 @@ composition:
   required_resource_capsules: []     # resource.* Capsule IDs
 
 planning_blueprint:
-  # The Planner instantiates this reusable partial graph inside the project plan.
+  # TARGET-ONLY: v1 Capsules contain no plan structure. The Planner instantiates
+  # this reusable partial graph inside the project plan.
   expansion: planner_expands_into_taskgraph
   steps:
     - step_id: &lt;stable-local-step-id&gt;
       purpose: &lt;what this step establishes&gt;
-      logical_operator_ref: lop://&lt;action-name&gt;@&lt;version&gt;   # typed action identity (review M-2)
-      skill_refs:
-        - skill://&lt;skill-name&gt;@&lt;version&gt;
+      logical_operator_ref: logical-operator://&lt;operator-type&gt;@&lt;version&gt;
+      skill_requirements:
+        required:
+          - skill://&lt;skill-name&gt;@&lt;version&gt;
+        optional: []
       consumes:
         - schema://&lt;input-artifact&gt;@&lt;version&gt;
       produces:
         - schema://&lt;output-artifact&gt;@&lt;version&gt;
       depends_on: []
-      tool_requirements: []           # capabilities, not concrete tool instances
-      mcp_requirements: []            # capabilities, not server credentials
+      tool_capability_requirements: []  # capabilities, not concrete tool instances
+      mcp_capability_requirements: []   # capabilities, not server credentials
       completion_checks:
         - &lt;observable pass condition&gt;
     - step_id: &lt;dependent-step-id&gt;
       purpose: &lt;what becomes possible after the prior step&gt;
-      logical_operator_ref: lop://&lt;action-name&gt;@&lt;version&gt;
-      skill_refs:
-        - skill://&lt;skill-name&gt;@&lt;version&gt;
+      logical_operator_ref: logical-operator://&lt;operator-type&gt;@&lt;version&gt;
+      skill_requirements:
+        required:
+          - skill://&lt;skill-name&gt;@&lt;version&gt;
+        optional: []
       consumes:
         - schema://&lt;output-artifact&gt;@&lt;version&gt;
       produces:
         - schema://&lt;next-artifact&gt;@&lt;version&gt;
       depends_on:
         - &lt;stable-local-step-id&gt;
-      tool_requirements: []
-      mcp_requirements: []
+      tool_capability_requirements: []
+      mcp_capability_requirements: []
       completion_checks:
         - &lt;observable pass condition&gt;
   ordering_constraints:
@@ -1043,17 +1027,15 @@ executor_policy:
   physical_operator_registry_ref: registry://physical-operators/current
   permitted_operator_kinds: []       # e.g. deep_agent, team, tool, workflow
   forbidden_operator_kinds: []
-  forbidden_operators: []            # id-level DENY-list (safety control, not pinning;
-                                     # restores v1 operator_compatibility.forbidden — review M-3)
+  forbidden_physical_operator_ids: [] # explicit safety deny-list; not identity pinning
   required_capabilities: []
-  model_requirements: []              # capabilities/constraints, not model IDs (absorbs
-                                      # v1 runtime_preferences at migration — MG2)
+  model_requirements: []              # target: capabilities/constraints, not model IDs
   separation_of_duties:
     writer_may_verify: false
     verifier_must_be_independent: true
   bind_at: runtime
   pin_binding_for_attempt: true
-  forbid_identity_pinning: true      # no permanent agent/team/model instance ID
+  forbid_identity_pinning: true      # no permanent preferred agent/team/model instance ID
 
 resources:
   # Skills are the main Capsule ingredients. Tools/MCP are typed dependencies.
@@ -1062,9 +1044,21 @@ resources:
     optional: []
   mcp_capabilities: []
   data_refs: []
-  secret_refs: []                    # secret:// references only; never values.
-                                     # Invariant I1: non-empty secret_refs REQUIRE at least
-                                     # one guard.* in composition.required_guard_capsules
+  secret_refs: []                    # secret:// references only; never values
+
+policy_invariants:
+  - id: secret_refs_require_guard_capsule
+    assertion: resources.secret_refs is empty or composition.required_guard_capsules contains a guard.* Capsule
+    enforcement: schema_semantics_and_runtime_admission
+    failure: reject_capsule_or_binding
+  - id: no_silent_executor_or_model_fallback
+    assertion: selected executor and model satisfy the recorded BindingDecision exactly
+    enforcement: binding_and_receipt_validation
+    failure: stall_or_reject_attempt
+  - id: operator_deny_list_precedes_scoring
+    assertion: forbidden operator kinds and ids are removed before candidate ranking
+    enforcement: binding_admission
+    failure: reject_candidate
 
 verification:
   self_checks:
@@ -1094,13 +1088,13 @@ registry_status:
   value: draft                      # draft | candidate | stable | deprecated | retired
   reason: &lt;why this state is justified&gt;
 
-runtime_status:
-  # OWNED BY THE CONTROL PLANE, keyed by (capsule id, version); shown here only as
-  # the field contract. Values in a manifest file are ignored at load time —
-  # mutable operational state never lives in a versioned definition artifact.
-  binding: unbound                  # unbound | bound | unavailable
-  readiness: not_proven             # not_proven | runnable | integrated | degraded
-  last_probe_ref: null
+runtime_status_ref:
+  # Mutable status is external to this versioned manifest and keyed by Capsule version.
+  uri: status://capsules/&lt;capsule-id&gt;@&lt;version&gt;
+  required_fields:
+    - binding                         # unbound | bound | unavailable
+    - readiness                       # not_proven | runnable | integrated | degraded
+    - last_probe_ref
 
 assurance_status:
   # Certification is evidence-backed and independent from registry_status.
@@ -1130,6 +1124,32 @@ evolution:
   evaluation_suite_refs: []
   promotion_requires_human: true
   rollback_on_regression: true
+
+migration_from_v1:
+  # Current registry.default_operator_profile is a preference, not Capsule identity.
+  # Migrate it into the Physical Operator registry as a capability-scoped preference;
+  # never copy it into the Capsule as a permanent executor or model binding.
+  default_operator_profile:
+    treatment: preference_only
+    target: registry://physical-operators/capability-preferences
+    binding_rule: requalify_and_pin_each_attempt
+    remove_after_migration: true
+  manifests_without_version:
+    treatment: backfill_from_registry_or_reject
+  runtime_preferences:
+    treatment: translate_to_executor_and_model_requirements_or_reject
+  legacy_adapter_manifests:
+    observed_unregistered_count: 3
+    current_kind: capability
+    adapter_is_a_capsule_kind: false
+    decision_required: true
+    allowed_dispositions:
+      - register_as_capability
+      - reclassify_as_guard_or_resource
+      - retire
+    rule: preserve no adapter.* manifest without one recorded disposition
+  non_universal_capsules:
+    treatment: reclassify_or_retire_explicitly
 </code></pre>
 
 <h2 id="s6">6 · Changes applied in this revision</h2>

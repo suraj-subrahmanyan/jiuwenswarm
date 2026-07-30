@@ -54,6 +54,11 @@ class SVG:
 
     def label(self, x, y, value): self.text(x, y, value, "tag")
 
+    def badge(self, x, y, value, fill="gray", width=None):
+        width = width or max(72, 16 + len(value) * 6)
+        self.rect(x, y, width, 24, fill, radius=12, sw=1)
+        self.text(x + width / 2, y + 16, value, "tag", anchor="middle")
+
     def finish(self, name):
         (ROOT / name).write_text("\n".join(self.parts) + "\n</svg>\n", encoding="utf-8")
 
@@ -254,8 +259,8 @@ def capsule_design():
         (300, 150, "Typed contract", ("inputs · outputs · pre/postconditions", "invariants · acceptance evidence")),
         (550, 150, "Declared effects", ("read · write · execute · network", "cost · risk · approval class")),
         (800, 150, "Composition", ("consumes · produces · ordering", "compatible · incompatible Capsules")),
-        (50, 285, "Planner blueprint", ("required and optional Logical Operators", "dependencies · skills · evidence owed")),
-        (300, 285, "Executor compatibility", ("required capabilities", "permitted/forbidden operator classes")),
+        (50, 285, "Planner blueprint [TARGET]", ("each step names one Logical Operator", "dependencies · binding needs · evidence owed")),
+        (300, 285, "Executor compatibility", ("required capabilities", "kind allow/deny + operator deny-list")),
         (550, 285, "Verification", ("self-check · independent verifier", "pass conditions · separation of duties")),
         (800, 285, "Provenance & lifecycle", ("owner · origin · certification", "version · history · rollback")),
     ]
@@ -281,14 +286,14 @@ def capsule_design():
         (500, 865, "Tool / MCP", ("typed callable", "resource capability")),
         (685, 865, "Agent / Team", ("adaptive executor", "DeepAgent / Dynamic Team")),
         (870, 865, "Workflow", ("Core Workflow", "SwarmFlow / code")),
-        (407, 985, "Model", ("exact pool entry", "no silent fallback")),
+        (407, 985, "Model [TARGET]", ("exact qualified binding", "fix/fence silent fallback")),
         (592, 985, "Data / secret", ("versioned references", "never inline")),
         (777, 985, "External operator", ("browser · API · host", "health/quota/cost")),
     ]
     for x, y, title, body in binding_nodes:
         s.node(x, y, 165, 88, title, body)
     s.arrow("M280 950 H305");
-    s.text(50, 1084, "A Jiuwen skill, agent, model, tool or workflow can implement part of a Capsule. None of them is the Capsule itself; replacing one binding does not change capability identity.", "tiny")
+    s.text(50, 1084, "A skill, agent, model, tool or workflow can implement part of a Capsule. None is its identity. Secret refs require a guard Capsule.", "tiny")
 
     s.panel(30, 1150, 1040, 260, "4. Assurance, operation and evolution — three status axes", "Do not compress definition maturity, runtime health and certification into one 'stable' flag", "cyan")
     s.node(50, 1210, 285, 130, "Definition lifecycle", ("manifest-present → registered", "draft → stable → deprecated", "schema and composition validation"))
@@ -318,7 +323,7 @@ def openjiuwen_turn_design():
     construction = [
         (50, 365, "DeepAgentSpec", ("model · prompt · tools · MCP", "Rails · skills · sub-agents", "task loop · workspace · policy")),
         (270, 365, "BuildContext", ("provider registries", "parameter/context resolution", "cross-process rebuild seed")),
-        (490, 350, "Resolved components", ("model pool + allocator", "Ability cards + resources", "Rail instances + callbacks", "Skill/workspace managers")),
+        (490, 350, "Resolved components", ("model pool + allocator [GAP]", "Ability cards + resources", "Rail instances + callbacks", "Skill/workspace managers")),
         (730, 365, "DeepAgentConfig", ("live model/runner references", "loop and context policies", "session-capable config")),
         (930, 365, "DeepAgent", ("outer task coordinator", "inner ReAct agent", "interrupt/cancel surface")),
     ]
@@ -331,9 +336,9 @@ def openjiuwen_turn_design():
         (70, 640, 680, 72, "1 · Invoke", ("InvocationContext enters DeepAgent; before-invoke Rails may add context or reject",)),
         (70, 742, 680, 72, "2 · Start task iteration", ("Task-loop budget, cancellation, follow-up and prior session state are checked",)),
         (70, 844, 680, 72, "3 · Assemble model context", ("system prompt + history + skill guidance + memory + available ability cards",)),
-        (70, 946, 680, 72, "4 · Allocate and call model", ("before-model Rails → exact pool allocation → provider client → response/exception Rails",)),
+        (70, 946, 680, 72, "4 · Allocate and call model", ("before-model Rails → allocator [GAP: missing request may silently fall back] → provider client → response/exception Rails",)),
         (70, 1048, 680, 72, "5 · Parse response", ("text may finish the ReAct turn; tool requests enter the ability path",)),
-        (70, 1150, 680, 96, "6 · Authorize and execute each ability", ("before-tool Rails → argument validation → permission ALLOW/ASK/DENY → resource runner", "Tool/MCP/sub-agent/workflow/SysOperation returns ToolMessage or typed exception")),
+        (70, 1150, 680, 96, "6 · Authorize and execute each ability", ("before-tool Rail enforces permission → validate arguments → ALLOW/ASK/DENY → runner", "Tool/MCP/sub-agent/workflow/SysOperation returns ToolMessage or typed exception")),
         (70, 1276, 680, 72, "7 · Consume observation", ("after-tool Rails → model observation → after-ReAct-iteration Rails",)),
         (70, 1378, 680, 42, "8 · Decide", ("continue ReAct · finish task iteration · interrupt · fail",)),
     ]
@@ -344,13 +349,13 @@ def openjiuwen_turn_design():
 
     s.panel(820, 575, 250, 430, "D. Rail callback envelope", "Hooks surrounding both loops", "purple")
     s.lines(840, 640, ["Invocation", "before · after", "", "Task iteration", "before · after", "", "ReAct iteration", "after", "", "Model call", "before · after · exception", "", "Tool call", "before · after · exception"], "n", 22)
-    s.lines(840, 944, ["Possible actions:", "context/ability injection", "approval · interrupt · retry", "force-complete · telemetry"], "tiny", 14)
+    s.lines(840, 930, ["Possible actions:", "context/ability injection", "approval · interrupt · retry", "force-complete · telemetry", "ReAct after-hook: success-only"], "tiny", 14)
 
     s.panel(820, 1045, 250, 400, "E. Services used by a turn", "Shared contracts used by the loop", "yellow")
     services = [
-        (840, 1100, "Model pool + allocator", ("entry · capability · client config",)),
+        (840, 1100, "Model allocator [GAP]", ("missing requested model may use default",)),
         (840, 1170, "AbilityManager + runner", ("metadata cards · executable resources",)),
-        (840, 1240, "Permission engine", ("allow · ask · deny",)),
+        (840, 1240, "Permission engine [GAP]", ("ALLOW/ASK/DENY · 0 builtin rules load",)),
         (840, 1310, "Workspace / SysOperation", ("private · team · worktree · sandbox",)),
         (840, 1380, "Skill + memory managers", ("prompt guidance · retrieved context",)),
     ]
@@ -382,19 +387,19 @@ def openjiuwen_orchestration_design():
     s.arrow("M280 180 H295"); s.arrow("M530 180 H545"); s.arrow("M780 180 H795")
 
     mechanisms = [
-        (30, 285, "1. Direct DeepAgent", "Adaptive task when topology is unknown locally", "Task-loop coordinator", "model ↔ ability ReAct iterations", "session history + interrupts", "final message · tool artifacts"),
-        (30, 555, "2. Core Workflow / Pregel", "Known component topology and deterministic/conditional routing", "Pregel superstep scheduler", "components read/write typed channels", "checkpointer snapshots", "graph outputs · interrupt state"),
-        (30, 825, "3. SwarmFlow", "Script-defined parallel, pipeline, map and nested phases", "Python flow interpreter + admission", "agent sessions / backend calls", "journal/WAL + progress events", "script return · phase/run events"),
-        (30, 1095, "4. Dynamic Team / NativeHarness", "Open-ended coordination with delegation and independent review", "Leader + persistent task scheduler", "members · task assignees · reviewers", "team task DB + member/worktree state", "task results · review · team stream"),
+        (30, 285, "1. Direct DeepAgent", "Adaptive task when topology is unknown locally", ("Task-loop coordinator",), ("model ↔ ability ReAct iterations",), ("session history + interrupts",), ("final message · tool artifacts",)),
+        (30, 555, "2. Core Workflow / Pregel", "Known component topology and deterministic/conditional routing", ("Pregel superstep scheduler",), ("components read/write typed channels",), ("checkpointer snapshots",), ("graph outputs · interrupt state", "router receives no state argument")),
+        (30, 825, "3. SwarmFlow [FENCE]", "Script-defined parallel, pipeline, map and nested phases", ("Python flow interpreter + admission",), ("agent sessions / backend calls",), ("journal/WAL + progress events", "resume is engine-API-only"), ("script return · phase/run events", "failed step may yield empty success")),
+        (30, 1095, "4. Dynamic Team / NativeHarness", "Open-ended coordination with delegation and independent review", ("Leader + persistent task scheduler",), ("members · assignees · reviewers", "human/bridge roles available"), ("team task DB + member/worktree state",), ("task results · review · team stream",)),
     ]
     colors = ["sand", "green", "blue", "purple"]
     for i, (x, y, title, purpose, scheduler, workers, state, output) in enumerate(mechanisms):
         s.panel(x, y, 1040, 225, title, purpose, colors[i])
         cells = [
-            (50, "Control", (scheduler,)),
-            (300, "Work unit", (workers,)),
-            (550, "Durability", (state,)),
-            (800, "Returns", (output,)),
+            (50, "Control", scheduler),
+            (300, "Work unit", workers),
+            (550, "Durability", state),
+            (800, "Returns", output),
         ]
         for cx, ct, cb in cells: s.node(cx, y + 75, 230, 100, ct, cb)
         for cx in (280, 530, 780): s.arrow(f"M{cx} {y+125} H{cx+15}")
@@ -433,8 +438,8 @@ def ai4rnd_control_design():
 
     s.panel(30, 640, 1040, 315, "C. Capsule, Operator and worker binding", "Capability admission is a hard gate; scoring happens only after qualification", "purple")
     binding = [
-        (50, 705, "Capsule loader", ("applicability · contract", "effects · composition", "verification · compatibility")),
-        (260, 705, "Stage expansion", ("guard → resource", "capability → verifier", "skill/MCP plan")),
+        (50, 705, "Capsule loader [PARTIAL]", ("applicability · contract", "effects · composition", "verification · compatibility")),
+        (260, 705, "Stage expansion [PARTIAL]", ("guard → resource", "capability → verifier", "skill/MCP plan")),
         (470, 705, "Logical Operator", ("typed action identity", "inputs/outputs", "completion + evidence")),
         (680, 705, "Candidate enumeration", ("Physical Operator registry", "role/model/runtime profiles")),
         (890, 705, "Hard admission", ("capabilities · quota", "health · capacity", "security + resources")),
@@ -473,13 +478,13 @@ def ai4rnd_control_design():
 def ai4rnd_evidence_rsi_design():
     s = SVG(1640, "AI4RnD — Evidence, Data and Governed RSI Design", "How execution facts become claims and verdicts, then controlled improvement candidates")
 
-    s.panel(30, 90, 1040, 220, "A. Evidence ingestion and immutable lineage", "Evidence records preserve original content identity and exact support spans", "green")
+    s.panel(30, 90, 1040, 220, "A. Evidence lineage [CURRENT RESEARCH STORE → TARGET INTEGRATION]", "The research SQLite schema supplies hashes, spans and claim links; harness-wide integration is not current", "green")
     evidence = [
         (50, "Source", ("URI/repository/dataset/run", "authority + retrieval facts")),
         (260, "Document/artifact", ("content hash", "version + parser facts")),
-        (470, "Span / measurement", ("char+byte offsets", "metric protocol + raw result")),
+        (470, "Span / measurement", ("span_start · span_end", "content + content hash")),
         (680, "Evidence item", ("typed payload", "provenance + confidence")),
-        (890, "Claim link", ("supports · refutes · contextual", "link confidence")),
+        (890, "Claim link", ("supports · refutes · qualifies", "link strength")),
     ]
     for x, title, body in evidence: s.node(x, 155, 180, 110, title, body)
     for x in (230, 440, 650, 860): s.arrow(f"M{x} 210 H{x+25}")
@@ -496,7 +501,7 @@ def ai4rnd_evidence_rsi_design():
     s.node(260, 560, 600, 58, "Gate ledger", ("append-only, writer-attributed verdicts; node status is a projection; corrections supersede rather than edit history",), fill=COLORS["purple"])
     for x in (140, 350, 560, 770, 980): s.arrow(f"M{x} 533 V555")
 
-    s.panel(30, 690, 1040, 300, "C. Authoritative data foundation and typed projections", "One event/artifact truth can serve several graph schemas; the graphs are views with distinct lifecycle rules", "cyan")
+    s.panel(30, 690, 1040, 300, "C. Data foundation [TARGET]", "Today four stores are separate; target records support typed projections with distinct lifecycle rules", "cyan")
     s.node(50, 755, 250, 145, "Authoritative records", ("Contracts · TaskGraph versions", "attempts · receipts · artifacts", "claims · evidence · verdicts", "Capsule/operator versions"))
     graph_nodes = [
         (335, 745, "Concept graph", ("ideas · claims · relations",)),
@@ -530,11 +535,128 @@ def ai4rnd_evidence_rsi_design():
     for i, subject in enumerate(subjects):
         x = 50 + (i % 4) * 250; y = 1460 + (i // 4) * 48
         s.rect(x, y, 230, 34, "gray", radius=6); s.text(x + 12, y + 22, subject, "s")
-    s.text(50, 1554, "Current maturity: GEPA text-artifact path is implemented/tested but isolated; Capsule/operator and data/benchmark on-ramps are partial; the full eight-surface loop is not wired.", "tiny")
+    s.text(50, 1554, "Current maturity: GEPA text-artifact path is isolated; Capsule on-ramp is partial; no data/benchmark candidate type; the eight-surface loop is not wired.", "tiny")
     s.finish("10-ai4rnd-evidence-data-rsi-design.svg")
 
 
+def integration_contract_design():
+    s = SVG(
+        1900,
+        "AI4RnD × OpenJiuwen — Integration Contract Design",
+        "Five normative boundary objects preserve AI4RnD meaning while OpenJiuwen executes bounded attempts",
+    )
+    s.badge(30, 78, "TARGET CONTRACT", "purple", 130)
+    s.badge(175, 78, "REUSE WITH FENCE", "sand", 145)
+    s.badge(335, 78, "CURRENT GAP", "red", 112)
+    s.text(470, 94, "Solid arrows: control and execution · dashed arrows: facts, evidence and reconciliation", "tiny")
+
+    s.panel(
+        30, 120, 1040, 245,
+        "1. AI4RnD semantic authority",
+        "Only verified semantic readiness can mint a PlanSlice; runtime availability never defines product meaning",
+        "purple",
+    )
+    semantic = [
+        (50, "Contract version", ("objective · scope · budget", "acceptance · evidence owed")),
+        (255, "TaskGraph version", ("ready nodes · dependencies", "write scope · repair lineage")),
+        (460, "Capsule + action", ("Capsule version · effects", "Logical Operator identity")),
+        (665, "Readiness validator", ("inputs · gates · budget", "schema · capability feasibility")),
+        (870, "PlanSlice", ("slice_id · plan_version · digest", "operator nodes · dep/order edges")),
+    ]
+    for x, title, body in semantic: s.node(x, 190, 180, 110, title, body)
+    for x in (230, 435, 640, 845): s.arrow(f"M{x} 245 H{x+20}")
+    s.text(50, 335, "Invariant: the same idempotency key with a different content digest is a hard conflict; a replan creates a new plan/slice version.", "s")
+
+    s.panel(
+        30, 405, 1040, 335,
+        "2. Integration bridge — admission, binding and compilation",
+        "The bridge translates and validates; it may not invent meaning, relax policy, or substitute an unqualified executor",
+        "yellow",
+    )
+    bridge = [
+        (50, "Resolve Capsule", ("pin version + guards", "enforce effects + secrets rule")),
+        (255, "Enumerate candidates", ("operators · models · tools", "resources · skills · health")),
+        (460, "BindingDecision", ("qualified resource selection", "exact bindings or STALL · no mechanism")),
+        (665, "Compile mechanism", ("agent · graph · flow · team", "emit normalized common spec")),
+        (870, "ExecutionSpec", ("attempt · epoch · mechanism", "policy/guard digest · typed I/O")),
+    ]
+    for x, title, body in bridge: s.node(x, 480, 180, 118, title, body)
+    for x in (230, 435, 640, 845): s.arrow(f"M{x} 539 H{x+20}")
+    s.rect(50, 630, 980, 76, "cyan", radius=8)
+    s.text(64, 653, "Bridge mapping — authoritative cross-system lineage", "n")
+    s.text(64, 673, "project · slice · binding · execution · attempt ↔ native run/checkpoint · idempotency key · attempt lease epoch", "s")
+    s.text(64, 691, "Every contract: same explicit key + digest deduplicates; same key + different digest hard-conflicts.", "tiny")
+    s.arrow("M960 300 V400", "dash")
+
+    s.panel(
+        30, 780, 1040, 305,
+        "3. OpenJiuwen native attempt",
+        "OpenJiuwen owns bounded physical execution and operational recovery—not Contract satisfaction, evidence truth or gate permission",
+        "sand",
+    )
+    s.node(50, 850, 150, 105, "Attempt admission", ("idempotency · lease epoch", "budget · timeout · cancel"))
+    s.node(230, 850, 150, 105, "Mechanism dispatch", ("read spec discriminator", "invoke exactly one option"))
+    alternatives = [
+        (410, "DeepAgent", ("adaptive bounded turn", "ReAct + task loop")),
+        (565, "Workflow / Pregel", ("known topology", "checkpoint + interrupt")),
+        (720, "SwarmFlow [FENCE]", ("parallel / pipeline / map", "empty-success gap")),
+        (875, "Dynamic Team", ("delegation · tasks", "review + remediation")),
+    ]
+    for x, title, body in alternatives: s.node(x, 850, 140, 105, title, body)
+    s.arrow("M200 902 H225")
+    s.parts.append('<path d="M380 902 H395 V830 H945" stroke="#475569" stroke-width="1.7" fill="none"/>')
+    for x in (480, 635, 790, 945): s.arrow(f"M{x} 830 V845")
+    s.text(712, 817, "SELECT EXACTLY ONE MECHANISM", "tag", anchor="middle")
+    s.rect(50, 985, 980, 70, "blue", radius=8)
+    s.text(64, 1004, "Shared resources and derived attempt state", "n")
+    s.text(64, 1026, "code/tools · worktree · MCP · sandbox · native run/checkpoint · progress · cancel acknowledgement · retry counter", "s")
+    s.text(64, 1044, "Resume keeps the attempt only with checkpoint continuity; otherwise mint a new attempt. Runtime completion cannot release dependencies.", "tiny")
+    s.arrow("M960 706 V775", "flow")
+
+    s.panel(
+        30, 1125, 1040, 325,
+        "4. Typed return and independent assurance",
+        "Execution facts become product truth only after receipt validation, independent evaluation and an authoritative gate record",
+        "green",
+    )
+    assurance = [
+        (50, "AttemptReceipt", ("attempt + epoch + native run", "runtime_outcome enum or absent", "receipt_disposition separate")),
+        (300, "Receipt validator", ("identity · digest · lineage", "VALID · INVALID · QUARANTINED", "RECONCILING · CONFLICT")),
+        (550, "Independent evaluators", ("Contract · engineering · cost", "evidence/science · security", "writer ≠ verifier")),
+        (800, "EvaluationGateRecord", ("evaluation findings + gate disposition", "one immutable envelope", "duplicate delivery: no transition")),
+    ]
+    for x, title, body in assurance: s.node(x, 1200, 230, 145, title, body)
+    for x in (280, 530, 780): s.arrow(f"M{x} 1272 H{x+15}")
+    s.rect(50, 1375, 980, 42, "red", radius=8)
+    s.text(64, 1401, "One terminal receipt per attempt+epoch; identical redelivery deduplicates; contradiction quarantines/reconciles and never overwrites.", "s")
+    s.arrow("M970 1051 V1120", "dash")
+
+    s.panel(
+        30, 1490, 1040, 340,
+        "5. Product outcomes and recovery",
+        "Only the gate/reconciliation authority selects an outcome; every transition is durable, attributable and versioned",
+        "cyan",
+    )
+    outcomes = [
+        (50, 1555, "Release", ("gate permits progress", "release dependants"), "green"),
+        (250, 1555, "Repair", ("same plan node", "new attempt + lineage"), "yellow"),
+        (450, 1555, "Replan", ("new TaskGraph version", "new PlanSlice digest"), "purple"),
+        (650, 1555, "Stall / stop / quarantine", ("named reason · never progress", "human may resolve or close"), "red"),
+        (850, 1555, "Human gate", ("approval dossier", "record decision"), "blue"),
+    ]
+    for x, y, title, body, fill in outcomes: s.node(x, y, 180, 92, title, body, fill=COLORS[fill])
+    recovery = [
+        (50, "Cancel", ("persist intent → runtime ack", "quarantine late result")),
+        (300, "Resume", ("same attempt only if", "checkpoint continuity holds")),
+        (550, "Restart", ("UNKNOWN → RECONCILING", "until native state matches")),
+        (800, "Fence stale work", ("lease epoch rejects old result", "new attempt supersedes")),
+    ]
+    for x, title, body in recovery: s.node(x, 1690, 230, 92, title, body)
+    s.text(50, 1812, "Five distinct decisions: runtime outcome ≠ receipt disposition ≠ Contract satisfaction ≠ evidence support ≠ gate permission.", "n")
+
+    s.finish("11-integration-contracts-design.svg")
+
+
 if __name__ == "__main__":
-    openjiuwen(); ai4rnd(); compatibility(); target(); lifecycle(); capsule_design()
-    openjiuwen_turn_design(); openjiuwen_orchestration_design()
-    ai4rnd_control_design(); ai4rnd_evidence_rsi_design()
+    capsule_design(); openjiuwen_turn_design(); openjiuwen_orchestration_design()
+    ai4rnd_control_design(); ai4rnd_evidence_rsi_design(); integration_contract_design()

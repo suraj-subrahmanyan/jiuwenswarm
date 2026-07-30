@@ -570,3 +570,51 @@ in this review is refinement: the package's core content — the turn anatomy, t
 four-mechanism decomposition, the carrier-rejection boundary, the five-decision
 evaluation split, and the three-axis capsule status model — is verified sound and is a
 genuine advance over the prior high-level plates.
+
+---
+
+## 17. Design response after the audit
+
+This section records the bounded revision made in response to the review. It does not
+retroactively change the evidence classes above and does not claim that a runtime bridge was
+implemented.
+
+### Applied
+
+- Corrected both generated Capsule census claims to **42 manifests, 35 registered, 30 stable,
+  5 draft and 7 unregistered**.
+- Made exact model/executor binding a visibly **target, fail-closed obligation** and carried the
+  current silent-fallback defect as fix/fence-before-reuse.
+- Reconciled the target blueprint around one `logical_operator_ref` per step; skills, tools and
+  MCP remain replaceable requirements or bindings beneath that logical action.
+- Restored an explicit Physical Operator id deny-list, independently of kind-level deny rules.
+- Defined v1 `default_operator_profile` migration as a capability-scoped preference that is
+  requalified and pinned per attempt, never copied into Capsule identity.
+- Restated the secret-reference-requires-guard invariant and assigned enforcement at semantic
+  validation and runtime admission.
+- Corrected evidence vocabulary and currency: the current hash/span/claim substrate is the
+  research SQLite store; harness-wide integration and typed graph projections remain target.
+- Added the verified SwarmFlow empty-success, engine-only resume, silent model fallback and
+  zero-loaded-rules hazards to the system plates and contract obligations.
+- Added current/target/partial wording where Capsule stage expansion, evidence integration and
+  GEPA/data paths were previously too broad.
+- Added a contract-level plate and normative design document defining `PlanSlice`,
+  `BindingDecision`, `ExecutionSpec`, `AttemptReceipt` and `EvaluationGateRecord`, including
+  idempotency conflicts, attempt fencing, cancellation acknowledgement, stale-result
+  quarantine, restart reconciliation and fail-closed gate persistence.
+
+### Still open by design
+
+- No v2 Capsule has been expanded through a running Planner, binder and OpenJiuwen mechanism.
+- No credentialed live-team probe has demonstrated exact model binding or the current fallback.
+- The guardrail loader is still a product defect; this package specifies the non-empty,
+  digest-pinned target contract but does not modify product code.
+- The five boundary objects are normative proposals, not implemented schemas or services.
+- Evidence-store convergence, authoritative gate persistence and mechanism-specific receipt
+  adapters still require the spikes in §15 and the contract document.
+
+### Readiness after the response
+
+The revised package is suitable for **contract-design stakeholder review** once its generated
+artifacts and browser rendering pass. It remains unfit for implementation sign-off until the
+required execution spikes validate the contract against real OpenJiuwen mechanisms.

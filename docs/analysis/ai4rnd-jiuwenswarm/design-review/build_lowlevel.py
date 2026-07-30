@@ -736,15 +736,15 @@ to-be axes with their transitions.</p>
 <h2 id="s5">5 · Capability Capsule to-be template — draft 2</h2>
 <p>The full revised template (<code>capability-capsule.to-be.template.yaml</code> in this
 directory). Draft 2 keeps draft 1's structure — universal capsule, planner blueprint,
-replaceable bindings, three status axes — and repairs the five migration defects the
+replaceable bindings, three status axes — and repairs the migration defects the
 adversarial review filed against draft 1:</p>
 <table>
 <tr><th>Review finding</th><th>Draft-2 change</th></tr>
-<tr><td><strong>M-2</strong> — plate and template disagreed on the blueprint step unit</td><td>each step now carries <code>logical_operator_ref</code> as its typed action identity; skills remain the ingredients under it</td></tr>
-<tr><td><strong>M-3</strong> — id-level operator deny-list dropped</td><td><code>executor_policy.forbidden_operators</code> restored (deny-by-id is a safety control, distinct from pinning; allow-lists stay kind/capability-based)</td></tr>
-<tr><td><strong>M-4</strong> — registry <code>default_operator_profile</code> conflicts with <code>forbid_identity_pinning</code></td><td>explicit migration rule in the header: defaults move to the Physical Operator registry keyed by capability; the field is deleted from registry entries at migration</td></tr>
-<tr><td><strong>M-5</strong> — secrets-require-guard invariant lost</td><td>schema invariants block restored in the header; <code>resources.secret_refs</code> annotated with the rule; validator + JSON schema listed as migration artifacts</td></tr>
-<tr><td>Kind/prefix and corpus gaps</td><td><code>adapter</code> added to <code>capsule_kind</code>; per-kind ID prefixes stated; <code>portability.scope</code> gains <code>project</code>; <code>runtime_preferences</code> mapping and <code>version</code> backfill rules stated; kind-conditional sections marked</td></tr>
+<tr><td><strong>M-2</strong> — plate and template disagreed on the blueprint step unit</td><td>each step now carries <code>logical_operator_ref</code> as its typed action identity; skills sit under it as <code>skill_requirements.required/optional</code>, tools/MCP as capability requirements</td></tr>
+<tr><td><strong>M-3</strong> — id-level operator deny-list dropped</td><td><code>executor_policy.forbidden_physical_operator_ids</code> restored (deny-by-id is a safety control, distinct from pinning; allow-lists stay kind/capability-based), plus the <code>policy_invariants</code> rule <code>operator_deny_list_precedes_scoring</code></td></tr>
+<tr><td><strong>M-4</strong> — registry <code>default_operator_profile</code> conflicts with <code>forbid_identity_pinning</code></td><td>explicit <code>migration_from_v1</code> block: the profile becomes a capability-scoped <em>preference</em> in the Physical Operator registry, requalified and pinned per attempt, and is removed from registry entries after migration</td></tr>
+<tr><td><strong>M-5</strong> — secrets-require-guard invariant lost</td><td>new <code>policy_invariants</code> block: <code>secret_refs_require_guard_capsule</code> enforced at schema semantics and runtime admission; <code>no_silent_executor_or_model_fallback</code> added alongside it</td></tr>
+<tr><td>Kind/prefix and corpus gaps</td><td>prefix-to-kind rule stated (<code>cap.* / guard.* / resource.*</code>; legacy <code>adapter.*</code> IDs stay capability-kind until migrated — no fourth kind); <code>planning_blueprint</code> marked TARGET-ONLY; <code>runtime_status</code> externalised to <code>runtime_status_ref</code> keyed by capsule version; <code>version</code> backfill and <code>runtime_preferences</code> translation live in <code>migration_from_v1</code></td></tr>
 </table>
 <pre><code>{escape(yaml_text)}</code></pre>
 
