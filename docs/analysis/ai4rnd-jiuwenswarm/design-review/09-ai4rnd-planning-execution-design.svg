@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1750" viewBox="0 0 1100 1750" font-family="Helvetica,Arial,'Segoe UI',sans-serif" role="img" aria-labelledby="title desc">
+<title id="title">AI4RnD — Planning, Binding and Execution Design</title><desc id="desc">White-box current control flow with retained product semantics and the tmux carrier marked for replacement</desc>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+<style>.title{font-size:24px;font-weight:700;fill:#0f172a}.h{font-size:15px;font-weight:700;fill:#1e293b}.n{font-size:12.5px;font-weight:700;fill:#1e293b}.s{font-size:10.5px;fill:#475569}.m{font-size:11px;fill:#64748b}.tiny{font-size:9.5px;fill:#64748b}.tag{font-size:10px;font-weight:700;fill:#475569;letter-spacing:.04em}.flow{stroke:#475569;stroke-width:1.7;fill:none;marker-end:url(#arr)}.flow2{stroke:#475569;stroke-width:1.7;fill:none;marker-start:url(#arr);marker-end:url(#arr)}.dash{stroke:#64748b;stroke-width:1.3;stroke-dasharray:5 4;fill:none;marker-end:url(#arr)}.box{fill:#fff;stroke:#64748b;stroke-width:1;rx:7}</style><rect width="1100" height="1750" fill="#fff"/>
+<text x="24" y="38" class="title">AI4RnD — Planning, Binding and Execution Design</text>
+<text x="24" y="62" class="m">White-box current control flow with retained product semantics and the tmux carrier marked for replacement</text>
+<rect x="30" y="90" width="1040" height="170" rx="10" fill="#e8eef7" stroke="#7d97b8" stroke-width="1.2"/>
+<text x="44" y="114" class="h">A. Intake and run authority</text>
+<text x="44" y="133" class="m">Files currently hold the run contract and lifecycle; product meaning is independent of the worker carrier</text>
+<rect x="50" y="150" width="180" height="86" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="172" class="n">Run intake</text>
+<text x="61" y="190" class="s">objective · repo/workspace</text>
+<text x="61" y="206" class="s">budget · mode hints</text>
+<rect x="250" y="150" width="180" height="86" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="261" y="172" class="n">Run scaffold</text>
+<text x="261" y="190" class="s">sprint status · task graph</text>
+<text x="261" y="206" class="s">artifact directories</text>
+<rect x="450" y="150" width="230" height="86" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="461" y="172" class="n">Coordinator state machine</text>
+<text x="461" y="190" class="s">PM → Planner → Builder → Evaluator</text>
+<text x="461" y="206" class="s">retry · timeout · quarantine</text>
+<rect x="700" y="150" width="170" height="86" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="711" y="172" class="n">Artifact predicates</text>
+<text x="711" y="190" class="s">PRD · design · handoff · eval</text>
+<text x="711" y="206" class="s">mtime + schema checks</text>
+<rect x="890" y="150" width="160" height="86" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="901" y="172" class="n">Run projection</text>
+<text x="901" y="190" class="s">state · owner · blockers</text>
+<text x="901" y="206" class="s">next action</text>
+<path d="M230 193 H245" class="flow"/>
+<path d="M430 193 H445" class="flow"/>
+<path d="M680 193 H695" class="flow"/>
+<path d="M870 193 H885" class="flow"/>
+<rect x="30" y="300" width="1040" height="300" rx="10" fill="#e9f2ec" stroke="#84a98c" stroke-width="1.2"/>
+<text x="44" y="324" class="h">B. Planning and semantic readiness</text>
+<text x="44" y="343" class="m">The plan expresses meaning, dependencies, capabilities, write safety and evidence—not panes</text>
+<rect x="50" y="365" width="180" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="387" class="n">Requirement / intent</text>
+<text x="61" y="405" class="s">normalized objective</text>
+<text x="61" y="421" class="s">constraints + acceptance</text>
+<rect x="260" y="365" width="180" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="271" y="387" class="n">Planner / compiler</text>
+<text x="271" y="405" class="s">decompose logical work</text>
+<text x="271" y="421" class="s">select Capsule patterns</text>
+<rect x="470" y="350" width="200" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="481" y="372" class="n">TaskGraph</text>
+<text x="481" y="390" class="s">nodes + dependencies</text>
+<text x="481" y="406" class="s">Logical Operators</text>
+<text x="481" y="422" class="s">required capabilities</text>
+<text x="481" y="438" class="s">write scope + evidence owed</text>
+<rect x="700" y="365" width="170" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="711" y="387" class="n">Graph validation</text>
+<text x="711" y="405" class="s">schema · cycles · endpoints</text>
+<text x="711" y="421" class="s">topological layers</text>
+<rect x="890" y="365" width="160" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="901" y="387" class="n">Readiness</text>
+<text x="901" y="405" class="s">deps + external waits</text>
+<text x="901" y="421" class="s">gates + retry policy</text>
+<path d="M230 430 H255" class="flow"/>
+<path d="M440 430 H465" class="flow"/>
+<path d="M670 430 H695" class="flow"/>
+<path d="M870 430 H885" class="flow"/>
+<rect x="260" y="515" width="600" height="56" rx="10" fill="#fff8e7" stroke="#475569" stroke-width="1"/>
+<text x="271" y="537" class="n">Batch safety</text>
+<text x="271" y="555" class="s">ready nodes may run together only when dependencies, write scopes, effects and resource constraints are compatible</text>
+<rect x="30" y="640" width="1040" height="315" rx="10" fill="#f3edf8" stroke="#9873bb" stroke-width="1.2"/>
+<text x="44" y="664" class="h">C. Capsule, Operator and worker binding</text>
+<text x="44" y="683" class="m">Capability admission is a hard gate; scoring happens only after qualification</text>
+<rect x="50" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="727" class="n">Capsule loader</text>
+<text x="61" y="745" class="s">applicability · contract</text>
+<text x="61" y="761" class="s">effects · composition</text>
+<text x="61" y="777" class="s">verification · compatibility</text>
+<rect x="260" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="271" y="727" class="n">Stage expansion</text>
+<text x="271" y="745" class="s">guard → resource</text>
+<text x="271" y="761" class="s">capability → verifier</text>
+<text x="271" y="777" class="s">skill/MCP plan</text>
+<rect x="470" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="481" y="727" class="n">Logical Operator</text>
+<text x="481" y="745" class="s">typed action identity</text>
+<text x="481" y="761" class="s">inputs/outputs</text>
+<text x="481" y="777" class="s">completion + evidence</text>
+<rect x="680" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="691" y="727" class="n">Candidate enumeration</text>
+<text x="691" y="745" class="s">Physical Operator registry</text>
+<text x="691" y="761" class="s">role/model/runtime profiles</text>
+<rect x="890" y="705" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="901" y="727" class="n">Hard admission</text>
+<text x="901" y="745" class="s">capabilities · quota</text>
+<text x="901" y="761" class="s">health · capacity</text>
+<text x="901" y="777" class="s">security + resources</text>
+<path d="M230 775 H255" class="flow"/>
+<path d="M440 775 H465" class="flow"/>
+<path d="M650 775 H675" class="flow"/>
+<path d="M860 775 H885" class="flow"/>
+<rect x="260" y="865" width="600" height="58" rx="10" fill="#fff8e7" stroke="#475569" stroke-width="1"/>
+<text x="271" y="887" class="n">Selection after admission</text>
+<text x="271" y="905" class="s">rank qualified candidates by role/model fit, skill overlap, cost/latency and current load; otherwise record no_matching_worker</text>
+<rect x="30" y="995" width="1040" height="260" rx="10" fill="#fff0ee" stroke="#d16d62" stroke-width="1.2"/>
+<text x="44" y="1019" class="h">D. Current physical carrier — rejected for the target</text>
+<text x="44" y="1038" class="m">The worker transport is coupled to terminal UI state and filesystem polling</text>
+<rect x="50" y="1060" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="1082" class="n">Graph-node dispatcher</text>
+<text x="61" y="1100" class="s">node → role/pane command</text>
+<rect x="260" y="1060" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="271" y="1082" class="n">Pane readiness probe</text>
+<text x="271" y="1100" class="s">capture-pane · busy markers</text>
+<rect x="470" y="1060" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="481" y="1082" class="n">tmux send-keys</text>
+<text x="481" y="1100" class="s">command then delayed Enter</text>
+<rect x="680" y="1060" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="691" y="1082" class="n">CLI worker</text>
+<text x="691" y="1100" class="s">Codex/Claude process</text>
+<text x="691" y="1116" class="s">writes artifact handoff</text>
+<rect x="890" y="1060" width="180" height="110" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="901" y="1082" class="n">Polling reconciliation</text>
+<text x="901" y="1100" class="s">max mtime · status file</text>
+<text x="901" y="1116" class="s">infer next transition</text>
+<path d="M230 1115 H255" class="flow"/>
+<path d="M440 1115 H465" class="flow"/>
+<path d="M650 1115 H675" class="flow"/>
+<path d="M860 1115 H885" class="flow"/>
+<text x="50" y="1205" class="s">Retain the typed work packet, capability decision and artifact expectations. Replace pane focus, split send-keys/Enter, busy-marker polling and unsafe permission assumptions.</text>
+<rect x="30" y="1295" width="1040" height="375" rx="10" fill="#fff8e7" stroke="#c3a158" stroke-width="1.2"/>
+<text x="44" y="1319" class="h">E. Return path and semantic state transition</text>
+<text x="44" y="1338" class="m">Artifacts do not advance the run until independent evidence and gates accept them</text>
+<rect x="50" y="1360" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="1382" class="n">Worker handoff</text>
+<text x="61" y="1400" class="s">artifacts · tests · metrics</text>
+<text x="61" y="1416" class="s">claimed completion</text>
+<rect x="260" y="1360" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="271" y="1382" class="n">Receipt / provenance</text>
+<text x="271" y="1400" class="s">writer identity · hashes</text>
+<text x="271" y="1416" class="s">attempt + timestamps</text>
+<rect x="470" y="1360" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="481" y="1382" class="n">Independent evaluator</text>
+<text x="481" y="1400" class="s">contract · engineering</text>
+<text x="481" y="1416" class="s">evidence/science · security</text>
+<text x="481" y="1432" class="s">cost/performance</text>
+<rect x="680" y="1360" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="691" y="1382" class="n">Gate ledger</text>
+<text x="691" y="1400" class="s">append-only verdict</text>
+<text x="691" y="1416" class="s">writer attribution</text>
+<text x="691" y="1432" class="s">approval/repair data</text>
+<rect x="890" y="1360" width="180" height="140" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="901" y="1382" class="n">State transition</text>
+<text x="901" y="1400" class="s">progress · repair</text>
+<text x="901" y="1416" class="s">replan/reframe</text>
+<text x="901" y="1432" class="s">blocked · done</text>
+<path d="M230 1430 H255" class="flow"/>
+<path d="M440 1430 H465" class="flow"/>
+<path d="M650 1430 H675" class="flow"/>
+<path d="M860 1430 H885" class="flow"/>
+<path d="M980 1500 V1605 H20 V505 H545 V480" class="dash"/>
+<text x="350" y="1595" class="tiny">failed verdict produces a new attempt or versioned plan revision</text>
+</svg>

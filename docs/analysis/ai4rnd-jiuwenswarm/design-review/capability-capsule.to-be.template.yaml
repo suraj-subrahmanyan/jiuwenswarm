@@ -1,0 +1,207 @@
+# Initial proposal — Capability Capsule v2
+#
+# Design rule:
+#   A Capsule is a governed, reusable capability blueprint created before a
+#   project is planned. The Planner selects it and expands its ordered steps
+#   into the project TaskGraph. Skills are the primary reusable ingredients;
+#   MCP/tool requirements are typed resources. Runtime executor selection is a
+#   later concern and remains in the Physical Operator registry.
+
+schema_version: ai4rnd.capability-capsule.v2
+capability_capsule_id: cap.<domain>-<capability>
+capsule_kind: capability            # capability | guard | resource
+version: 0.1.0
+
+metadata:
+  name: <human-readable name>
+  description: <one-sentence capability promise>
+  owner: <team-or-person>
+  tags: []
+
+portability:
+  scope: universal                 # reusable across projects, agents and teams
+  executor_agnostic: true
+  requires_specific_agent_id: false
+  environment_requirements: []
+
+applicability:
+  task_types: []
+  positive_signals: []
+  negative_signals: []
+  exclusions: []
+
+contract:
+  inputs:
+    required:
+      - name: <input-name>
+        schema_ref: schema://<input-schema>@<version>
+        description: <meaning>
+    optional: []
+  outputs:
+    required:
+      - name: <output-name>
+        schema_ref: schema://<output-schema>@<version>
+        description: <meaning>
+    optional: []
+  preconditions:
+    - id: <precondition-id>
+      assertion: <machine-checkable or reviewable condition>
+  postconditions:
+    - id: <postcondition-id>
+      assertion: <machine-checkable or reviewable condition>
+  invariants:
+    - <condition that must remain true throughout execution>
+
+composition:
+  consumes: []                      # typed artifact/schema references
+  produces: []                      # typed artifact/schema references
+  compatible_with: []               # Capsule IDs
+  incompatible_with: []             # Capsule IDs
+  requires_before: []                # Capsule IDs
+  requires_after: []                 # Capsule IDs
+  required_guard_capsules: []        # guard.* Capsule IDs
+  required_resource_capsules: []     # resource.* Capsule IDs
+
+planning_blueprint:
+  # The Planner instantiates this reusable partial graph inside the project plan.
+  expansion: planner_expands_into_taskgraph
+  steps:
+    - step_id: <stable-local-step-id>
+      purpose: <what this step establishes>
+      skill_refs:
+        - skill://<skill-name>@<version>
+      consumes:
+        - schema://<input-artifact>@<version>
+      produces:
+        - schema://<output-artifact>@<version>
+      depends_on: []
+      tool_requirements: []           # capabilities, not concrete tool instances
+      mcp_requirements: []            # capabilities, not server credentials
+      completion_checks:
+        - <observable pass condition>
+    - step_id: <dependent-step-id>
+      purpose: <what becomes possible after the prior step>
+      skill_refs:
+        - skill://<skill-name>@<version>
+      consumes:
+        - schema://<output-artifact>@<version>
+      produces:
+        - schema://<next-artifact>@<version>
+      depends_on:
+        - <stable-local-step-id>
+      tool_requirements: []
+      mcp_requirements: []
+      completion_checks:
+        - <observable pass condition>
+  ordering_constraints:
+    - before: <stable-local-step-id>
+      after: <dependent-step-id>
+      reason: <why the dependency is mandatory>
+  planner_policy:
+    may_skip_optional_steps: true
+    may_add_project_specific_steps: true
+    may_remove_required_steps: false
+    may_relax_contract: false
+
+effects:
+  read:
+    scopes: []
+  write:
+    scopes: []
+  execute:
+    classes: []
+  network:
+    destinations: []
+  cost:
+    budget_class: <low|medium|high|custom>
+    hard_limit_ref: policy://<budget-policy>
+  risk:
+    class: <low|medium|high|critical>
+    policy_refs: []
+
+executor_policy:
+  # Applied after planning: the binder resolves a Physical Operator separately.
+  selection: fail_closed             # fail_closed | require_human
+  physical_operator_registry_ref: registry://physical-operators/current
+  permitted_operator_kinds: []       # e.g. deep_agent, team, tool, workflow
+  forbidden_operator_kinds: []
+  required_capabilities: []
+  model_requirements: []              # capabilities/constraints, not model IDs
+  separation_of_duties:
+    writer_may_verify: false
+    verifier_must_be_independent: true
+  bind_at: runtime
+  pin_binding_for_attempt: true
+  forbid_identity_pinning: true      # no permanent agent/team/model instance ID
+
+resources:
+  # Skills are the main Capsule ingredients. Tools/MCP are typed dependencies.
+  skills:
+    required: []
+    optional: []
+  mcp_capabilities: []
+  data_refs: []
+  secret_refs: []                    # secret:// references only; never values
+
+verification:
+  self_checks:
+    - id: <self-check-id>
+      method: <test|schema|rule|metric>
+      pass_condition: <condition>
+  external_verifier:
+    required: true
+    capability_requirements: []
+  acceptance:
+    all_of: []
+    any_of: []
+  evidence_requirements:
+    artifact_receipt: true
+    execution_receipt: true
+    provenance: true
+    evaluation_record: true
+
+provenance:
+  origin: <human|repository|generated|derived>
+  source_refs: []
+  created_by: <actor-id>
+  created_at: <RFC3339 timestamp>
+
+registry_status:
+  # Definition lifecycle only. It does not claim runtime or assurance readiness.
+  value: draft                      # draft | candidate | stable | deprecated | retired
+  reason: <why this state is justified>
+
+runtime_status:
+  # Normally maintained by the registry/control plane, shown here as the contract.
+  binding: unbound                  # unbound | bound | unavailable
+  readiness: not_proven             # not_proven | runnable | integrated | degraded
+  last_probe_ref: null
+
+assurance_status:
+  # Certification is evidence-backed and independent from registry_status.
+  value: unassessed                 # unassessed | tested | verified | certified | revoked
+  policy_ref: policy://capsule-certification/v1
+  evidence_refs: []
+  approved_by: null
+  approved_at: null
+
+lifecycle:
+  in_flight_version_policy: pin
+  supersedes: null
+  replaced_by: null
+  promotion_policy_ref: policy://capsule-promotion/v1
+  rollback_policy_ref: policy://capsule-rollback/v1
+
+history_refs:
+  change_ledger: ledger://capsules/<capsule-id>/changes
+  evaluation_ledger: ledger://capsules/<capsule-id>/evaluations
+  performance_ledger: ledger://capsules/<capsule-id>/performance
+
+evolution:
+  enabled: false
+  allowed_surfaces: []              # prompt, routing, contract, evaluator, etc.
+  candidate_generator: null          # e.g. gepa://text-artifact
+  frozen_policy_refs: []
+  evaluation_suite_refs: []
+  promotion_requires_human: true
+  rollback_on_regression: true

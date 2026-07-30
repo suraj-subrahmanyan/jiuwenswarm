@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1480" viewBox="0 0 1100 1480" font-family="Helvetica,Arial,'Segoe UI',sans-serif" role="img" aria-labelledby="title desc">
+<title id="title">Capability Capsule — Detailed Design</title><desc id="desc">A universal governed capability definition that contributes a partial plan and binds replaceable execution resources</desc>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+<style>.title{font-size:24px;font-weight:700;fill:#0f172a}.h{font-size:15px;font-weight:700;fill:#1e293b}.n{font-size:12.5px;font-weight:700;fill:#1e293b}.s{font-size:10.5px;fill:#475569}.m{font-size:11px;fill:#64748b}.tiny{font-size:9.5px;fill:#64748b}.tag{font-size:10px;font-weight:700;fill:#475569;letter-spacing:.04em}.flow{stroke:#475569;stroke-width:1.7;fill:none;marker-end:url(#arr)}.flow2{stroke:#475569;stroke-width:1.7;fill:none;marker-start:url(#arr);marker-end:url(#arr)}.dash{stroke:#64748b;stroke-width:1.3;stroke-dasharray:5 4;fill:none;marker-end:url(#arr)}.box{fill:#fff;stroke:#64748b;stroke-width:1;rx:7}</style><rect width="1100" height="1480" fill="#fff"/>
+<text x="24" y="38" class="title">Capability Capsule — Detailed Design</text>
+<text x="24" y="62" class="m">A universal governed capability definition that contributes a partial plan and binds replaceable execution resources</text>
+<rect x="30" y="90" width="1040" height="390" rx="10" fill="#f3edf8" stroke="#9873bb" stroke-width="1.2"/>
+<text x="44" y="114" class="h">1. Capsule definition — stable product identity</text>
+<text x="44" y="133" class="m">Created before a project; reusable across agents, teams and execution engines</text>
+<rect x="50" y="150" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="172" class="n">Applicability</text>
+<text x="61" y="190" class="s">task types · positive/negative signals</text>
+<text x="61" y="206" class="s">selection and exclusion rules</text>
+<rect x="300" y="150" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="311" y="172" class="n">Typed contract</text>
+<text x="311" y="190" class="s">inputs · outputs · pre/postconditions</text>
+<text x="311" y="206" class="s">invariants · acceptance evidence</text>
+<rect x="550" y="150" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="561" y="172" class="n">Declared effects</text>
+<text x="561" y="190" class="s">read · write · execute · network</text>
+<text x="561" y="206" class="s">cost · risk · approval class</text>
+<rect x="800" y="150" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="811" y="172" class="n">Composition</text>
+<text x="811" y="190" class="s">consumes · produces · ordering</text>
+<text x="811" y="206" class="s">compatible · incompatible Capsules</text>
+<rect x="50" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="307" class="n">Planner blueprint</text>
+<text x="61" y="325" class="s">required and optional Logical Operators</text>
+<text x="61" y="341" class="s">dependencies · skills · evidence owed</text>
+<rect x="300" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="311" y="307" class="n">Executor compatibility</text>
+<text x="311" y="325" class="s">required capabilities</text>
+<text x="311" y="341" class="s">permitted/forbidden operator classes</text>
+<rect x="550" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="561" y="307" class="n">Verification</text>
+<text x="561" y="325" class="s">self-check · independent verifier</text>
+<text x="561" y="341" class="s">pass conditions · separation of duties</text>
+<rect x="800" y="285" width="230" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="811" y="307" class="n">Provenance &amp; lifecycle</text>
+<text x="811" y="325" class="s">owner · origin · certification</text>
+<text x="811" y="341" class="s">version · history · rollback</text>
+<rect x="50" y="405" width="980" height="48" rx="8" fill="#fff8e7" stroke="#c3a158" stroke-width="1.2"/>
+<text x="64" y="427" class="n">Invariant</text>
+<text x="132" y="427" class="s">A Capsule may constrain or expand the plan; it may not hide Logical Operators, embed credentials, or pin one agent instance.</text>
+<text x="64" y="444" class="tiny">Current source: 41 unique manifests; all carry 11 v1 sections. Registry: 34 entries (30 stable, 4 draft), with 7 manifests unregistered.</text>
+<rect x="30" y="520" width="1040" height="250" rx="10" fill="#e9f2ec" stroke="#84a98c" stroke-width="1.2"/>
+<text x="44" y="544" class="h">2. Planning contribution — the house-plan model</text>
+<text x="44" y="563" class="m">The Planner selects reusable partial plans, then composes them into the project TaskGraph</text>
+<rect x="50" y="585" width="200" height="120" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="607" class="n">Project Contract</text>
+<text x="61" y="625" class="s">goal · constraints · budgets</text>
+<text x="61" y="641" class="s">acceptance · required evidence</text>
+<rect x="285" y="585" width="220" height="120" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="296" y="607" class="n">Capsule selection</text>
+<text x="296" y="625" class="s">match applicability</text>
+<text x="296" y="641" class="s">check composition</text>
+<text x="296" y="657" class="s">pin version</text>
+<rect x="540" y="585" width="230" height="120" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="551" y="607" class="n">Partial plan expansion</text>
+<text x="551" y="625" class="s">wall before window</text>
+<text x="551" y="641" class="s">typed data/evidence edges</text>
+<text x="551" y="657" class="s">required verifier steps</text>
+<rect x="805" y="585" width="225" height="120" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="816" y="607" class="n">Validated TaskGraph</text>
+<text x="816" y="625" class="s">project-specific nodes</text>
+<text x="816" y="641" class="s">dependencies + write scope</text>
+<text x="816" y="657" class="s">Capsule/Operator references</text>
+<path d="M250 645 H280" class="flow"/>
+<path d="M505 645 H535" class="flow"/>
+<path d="M770 645 H800" class="flow"/>
+<text x="50" y="742" class="tiny">The Capsule is analogous to a reusable building-system specification: it contributes mandatory order and checks, while the Planner still owns the complete house plan.</text>
+<rect x="30" y="810" width="1040" height="300" rx="10" fill="#f3eee4" stroke="#b3a689" stroke-width="1.2"/>
+<text x="44" y="834" class="h">3. Replaceable execution bindings — implementation beneath the Capsule</text>
+<text x="44" y="853" class="m">Binding happens after semantic readiness; failure to find an exact qualified executor produces an honest stall</text>
+<rect x="50" y="875" width="230" height="150" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="897" class="n">Logical Operator</text>
+<text x="61" y="915" class="s">stable callable action</text>
+<text x="61" y="931" class="s">typed request/receipt</text>
+<text x="61" y="947" class="s">write scope · evidence owed</text>
+<text x="61" y="963" class="s">referenced by TaskGraph</text>
+<rect x="315" y="865" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="326" y="887" class="n">Skill</text>
+<text x="326" y="905" class="s">prompt package</text>
+<text x="326" y="921" class="s">portable guidance</text>
+<rect x="500" y="865" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="511" y="887" class="n">Tool / MCP</text>
+<text x="511" y="905" class="s">typed callable</text>
+<text x="511" y="921" class="s">resource capability</text>
+<rect x="685" y="865" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="696" y="887" class="n">Agent / Team</text>
+<text x="696" y="905" class="s">adaptive executor</text>
+<text x="696" y="921" class="s">DeepAgent / Dynamic Team</text>
+<rect x="870" y="865" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="881" y="887" class="n">Workflow</text>
+<text x="881" y="905" class="s">Core Workflow</text>
+<text x="881" y="921" class="s">SwarmFlow / code</text>
+<rect x="407" y="985" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="418" y="1007" class="n">Model</text>
+<text x="418" y="1025" class="s">exact pool entry</text>
+<text x="418" y="1041" class="s">no silent fallback</text>
+<rect x="592" y="985" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="603" y="1007" class="n">Data / secret</text>
+<text x="603" y="1025" class="s">versioned references</text>
+<text x="603" y="1041" class="s">never inline</text>
+<rect x="777" y="985" width="165" height="88" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="788" y="1007" class="n">External operator</text>
+<text x="788" y="1025" class="s">browser · API · host</text>
+<text x="788" y="1041" class="s">health/quota/cost</text>
+<path d="M280 950 H305" class="flow"/>
+<text x="50" y="1084" class="tiny">A Jiuwen skill, agent, model, tool or workflow can implement part of a Capsule. None of them is the Capsule itself; replacing one binding does not change capability identity.</text>
+<rect x="30" y="1150" width="1040" height="260" rx="10" fill="#eef6f8" stroke="#73a0aa" stroke-width="1.2"/>
+<text x="44" y="1174" class="h">4. Assurance, operation and evolution — three status axes</text>
+<text x="44" y="1193" class="m">Do not compress definition maturity, runtime health and certification into one &#x27;stable&#x27; flag</text>
+<rect x="50" y="1210" width="285" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="61" y="1232" class="n">Definition lifecycle</text>
+<text x="61" y="1250" class="s">manifest-present → registered</text>
+<text x="61" y="1266" class="s">draft → stable → deprecated</text>
+<text x="61" y="1282" class="s">schema and composition validation</text>
+<rect x="375" y="1210" width="285" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="386" y="1232" class="n">Runtime readiness</text>
+<text x="386" y="1250" class="s">unbound → bound → runnable</text>
+<text x="386" y="1266" class="s">integrated · degraded · unavailable</text>
+<text x="386" y="1282" class="s">exact executor + resource health</text>
+<rect x="700" y="1210" width="330" height="130" rx="10" fill="#fff" stroke="#475569" stroke-width="1"/>
+<text x="711" y="1232" class="n">Assurance lifecycle</text>
+<text x="711" y="1250" class="s">unassessed → tested → verified</text>
+<text x="711" y="1266" class="s">certified → revoked</text>
+<text x="711" y="1282" class="s">independent evidence + approval</text>
+<path d="M335 1275 H370" class="flow"/>
+<path d="M660 1275 H695" class="flow"/>
+<text x="50" y="1372" class="s">GEPA / governed RSI may propose a new version from execution and evaluation history. Promotion requires frozen-policy checks, isolated evaluation, approval, monitoring and rollback.</text>
+<text x="50" y="1392" class="tiny">In-flight projects pin the selected Capsule version; improvement changes future runs only unless an explicit migration is approved.</text>
+</svg>

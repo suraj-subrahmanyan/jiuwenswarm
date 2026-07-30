@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI4RnD × OpenJiuwen — Design diagram review</title>
+  <style>
+    :root { --ink:#162033; --muted:#607086; --line:#d5dde8; --nav:#e9eff6; --paper:#fff; --wash:#f5f7fa; --accent:#315d86; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--wash); font-family:Inter,"Segoe UI",Arial,sans-serif; line-height:1.55; }
+    header, nav, main { width:min(1220px,100%); margin:auto; background:var(--paper); }
+    header { padding:42px 44px 24px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:clamp(30px,4vw,48px); letter-spacing:-.045em; }
+    header p { max-width:82ch; margin:10px 0 0; color:var(--muted); }
+    nav { position:sticky; top:0; z-index:5; padding:12px 44px; background:var(--nav); border-bottom:1px solid var(--line); }
+    nav a { display:inline-block; margin:4px 18px 4px 0; color:var(--accent); text-decoration:none; font-weight:650; }
+    main { padding:16px 44px 70px; box-shadow:0 0 34px rgba(26,43,68,.06); }
+    section { padding-top:36px; margin-top:20px; border-top:3px solid #263c56; }
+    h2 { margin:0 0 6px; font-size:26px; }
+    .question { margin:0 0 16px; color:var(--muted); }
+    .plate { width:100%; overflow-x:auto; padding:12px 0 18px; }
+    .plate img { display:block; width:1100px; max-width:none; height:auto; border:1px solid #e6ebf1; background:#fff; }
+    .note { max-width:86ch; margin:4px 0 0; padding:10px 14px; border-left:4px solid var(--accent); background:#f1f5f9; }
+    @media(max-width:700px) { header,nav,main { padding-left:16px; padding-right:16px; } nav { position:static; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AI4RnD × OpenJiuwen — design review</h1>
+    <p>This review set is intentionally below high-level architecture. Each plate opens a major box and shows internal responsibilities, contracts, control flow, state, and blocking decisions. Review these before the final integration report is assembled.</p>
+  </header>
+  <nav>
+    <a href="#open-turn">OpenJiuwen turn</a>
+    <a href="#open-orchestration">OpenJiuwen orchestration</a>
+    <a href="#ai-control">AI4RnD control</a>
+    <a href="#capsule">Capsule</a>
+    <a href="#ai-truth">Evidence & RSI</a>
+  </nav>
+  <main>
+    <section id="open-turn">
+      <h2>1. OpenJiuwen: one DeepAgent turn</h2>
+      <p class="question">Question answered: how do a JiuwenSwarm request, serializable agent definition, nested agent loops, Rails, models, abilities, permissions, workspaces, and state interact?</p>
+      <div class="plate"><img src="07-openjiuwen-deepagent-turn-design.svg" alt="OpenJiuwen DeepAgent turn detailed design"></div>
+      <p class="note">This replaces the opaque “runtime” box. It separates application request resolution, construction, the outer task loop, inner ReAct loop, middleware, shared services, and five state classes.</p>
+    </section>
+
+    <section id="open-orchestration">
+      <h2>2. OpenJiuwen: orchestration and state</h2>
+      <p class="question">Question answered: what does each execution mechanism actually schedule, persist, and return?</p>
+      <div class="plate"><img src="08-openjiuwen-orchestration-state-design.svg" alt="OpenJiuwen orchestration and state detailed design"></div>
+      <p class="note">Direct DeepAgent, Core Workflow/Pregel, SwarmFlow, and Dynamic Team are not interchangeable names. Each has a different controller, work unit, durability model, and result contract.</p>
+    </section>
+
+    <section id="ai-control">
+      <h2>3. AI4RnD: planning, binding, execution, and return</h2>
+      <p class="question">Question answered: how does the current AI4RnD control plane go from intake to a TaskGraph, Capsule/Operator binding, physical execution, evaluation, and state transition?</p>
+      <div class="plate"><img src="09-ai4rnd-planning-execution-design.svg" alt="AI4RnD planning binding and execution detailed design"></div>
+      <p class="note">The product semantics worth retaining are separated from the tmux/send-keys/polling carrier that should be retired.</p>
+    </section>
+
+    <section id="capsule">
+      <h2>4. Capability Capsule: definition, planning, binding, assurance</h2>
+      <p class="question">Question answered: what is a Capsule, how does it contribute to the Planner, what may execute it, and what does each status mean?</p>
+      <div class="plate"><img src="06-capability-capsule-design.svg" alt="Capability Capsule detailed design"></div>
+      <p class="note">The Capsule remains universal and skill-centered. Skills, tools, MCP, agents, teams, workflows, models, data, and external operators are replaceable bindings—not the capability identity.</p>
+    </section>
+
+    <section id="ai-truth">
+      <h2>5. AI4RnD: evidence, data foundations, and governed RSI</h2>
+      <p class="question">Question answered: how do execution facts become evidence and verdicts, typed knowledge, and controlled improvement proposals?</p>
+      <div class="plate"><img src="10-ai4rnd-evidence-data-rsi-design.svg" alt="AI4RnD evidence data and governed RSI detailed design"></div>
+      <p class="note">GEPA is shown explicitly. It proposes candidates; frozen policy, isolated evaluation, approval, promotion monitoring, and rollback govern whether any version changes.</p>
+    </section>
+  </main>
+</body>
+</html>
