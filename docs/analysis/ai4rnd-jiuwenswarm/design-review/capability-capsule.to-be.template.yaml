@@ -1,15 +1,39 @@
-# Initial proposal — Capability Capsule v2
+# Proposal — Capability Capsule v2, DRAFT 2
+# (draft 1 revised per design-review/adversarial-review.md findings M-2..M-5)
 #
 # Design rule:
 #   A Capsule is a governed, reusable capability blueprint created before a
 #   project is planned. The Planner selects it and expands its ordered steps
-#   into the project TaskGraph. Skills are the primary reusable ingredients;
-#   MCP/tool requirements are typed resources. Runtime executor selection is a
-#   later concern and remains in the Physical Operator registry.
+#   into the project TaskGraph. Each step's typed action identity is a Logical
+#   Operator; Skills are the primary reusable ingredients under it. MCP/tool
+#   requirements are typed resources. Runtime executor selection is a later
+#   concern and remains in the Physical Operator registry.
+#
+# Schema invariants (enforced by the JSON schema + semantic validator; these
+# migrate from v1 — see capability_capsules.py validate_capability_capsule_semantics):
+#   I1. resources.secret_refs non-empty  =>  composition.required_guard_capsules
+#       non-empty (v1 rule retained across the bindings->resources relocation).
+#   I2. capsule_kind == resource  =>  effects.execute empty.
+#   I3. capsule_kind == guard     =>  verification declares pass conditions.
+#   I4. No field anywhere may name a permanent agent/team/model instance;
+#       pin_binding_for_attempt is the only sanctioned pinning.
+#
+# Migration rules (v1 corpus -> v2):
+#   MG1. Registry default_operator_profile is DELETED from registry entries;
+#        defaults move to the Physical Operator registry keyed by capability
+#        (resolves the forbid_identity_pinning conflict, review M-4).
+#   MG2. v1 runtime_preferences (6 manifests) maps into
+#        executor_policy.model_requirements / permitted_operator_kinds.
+#   MG3. Manifests without version (19 of 42) are backfilled 0.1.0 from the
+#        registry entry's version at migration.
+#   MG4. Kind-conditional sections: planning_blueprint is required for
+#        capability/adapter, forbidden for resource, optional for guard.
+#
+# ID prefixes by kind: cap. | guard. | resource. | adapter.
 
 schema_version: ai4rnd.capability-capsule.v2
 capability_capsule_id: cap.<domain>-<capability>
-capsule_kind: capability            # capability | guard | resource
+capsule_kind: capability            # capability | guard | resource | adapter
 version: 0.1.0
 
 metadata:
@@ -19,7 +43,8 @@ metadata:
   tags: []
 
 portability:
-  scope: universal                 # reusable across projects, agents and teams
+  scope: universal                 # universal | project (project requires owning_project)
+  owning_project: null             # required when scope == project
   executor_agnostic: true
   requires_specific_agent_id: false
   environment_requirements: []
@@ -68,6 +93,7 @@ planning_blueprint:
   steps:
     - step_id: <stable-local-step-id>
       purpose: <what this step establishes>
+      logical_operator_ref: lop://<action-name>@<version>   # typed action identity (review M-2)
       skill_refs:
         - skill://<skill-name>@<version>
       consumes:
@@ -81,6 +107,7 @@ planning_blueprint:
         - <observable pass condition>
     - step_id: <dependent-step-id>
       purpose: <what becomes possible after the prior step>
+      logical_operator_ref: lop://<action-name>@<version>
       skill_refs:
         - skill://<skill-name>@<version>
       consumes:
@@ -125,8 +152,11 @@ executor_policy:
   physical_operator_registry_ref: registry://physical-operators/current
   permitted_operator_kinds: []       # e.g. deep_agent, team, tool, workflow
   forbidden_operator_kinds: []
+  forbidden_operators: []            # id-level DENY-list (safety control, not pinning;
+                                     # restores v1 operator_compatibility.forbidden — review M-3)
   required_capabilities: []
-  model_requirements: []              # capabilities/constraints, not model IDs
+  model_requirements: []              # capabilities/constraints, not model IDs (absorbs
+                                      # v1 runtime_preferences at migration — MG2)
   separation_of_duties:
     writer_may_verify: false
     verifier_must_be_independent: true
@@ -141,7 +171,9 @@ resources:
     optional: []
   mcp_capabilities: []
   data_refs: []
-  secret_refs: []                    # secret:// references only; never values
+  secret_refs: []                    # secret:// references only; never values.
+                                     # Invariant I1: non-empty secret_refs REQUIRE at least
+                                     # one guard.* in composition.required_guard_capsules
 
 verification:
   self_checks:
@@ -172,7 +204,9 @@ registry_status:
   reason: <why this state is justified>
 
 runtime_status:
-  # Normally maintained by the registry/control plane, shown here as the contract.
+  # OWNED BY THE CONTROL PLANE, keyed by (capsule id, version); shown here only as
+  # the field contract. Values in a manifest file are ignored at load time —
+  # mutable operational state never lives in a versioned definition artifact.
   binding: unbound                  # unbound | bound | unavailable
   readiness: not_proven             # not_proven | runnable | integrated | degraded
   last_probe_ref: null

@@ -123,7 +123,7 @@ def ai4rnd():
     s.arrow("M280 371 H295"); s.arrow("M530 371 H545"); s.arrow("M780 371 H795")
 
     s.panel(30,515,1040,230,"2. Governed capability and operator model","Reusable product semantics are separate from the workers that happen to execute them", "purple")
-    s.node(50,575,240,130,"Capability Capsules",("41 manifests; 34 registered", "applicability · contract · effects", "composition · verification · provenance"))
+    s.node(50,575,240,130,"Capability Capsules",("42 manifests; 35 registered", "applicability · contract · effects", "composition · verification · provenance"))
     s.node(310,575,230,130,"Logical Operators",("stable DAG-callable actions", "required capabilities · evidence", "completion and write scope"))
     s.node(560,575,230,130,"Physical Operators",("worker profiles · quota · cost", "health · model · runtime", "hard admission, then binding"))
     s.node(810,575,240,130,"Runtime gate",("inputs · preconditions · resources", "sensitive effects · idempotency", "cooldown · verifier attachment"))
@@ -264,7 +264,7 @@ def capsule_design():
     s.rect(50, 405, 980, 48, "yellow", radius=8)
     s.text(64, 427, "Invariant", "n")
     s.text(132, 427, "A Capsule may constrain or expand the plan; it may not hide Logical Operators, embed credentials, or pin one agent instance.", "s")
-    s.text(64, 444, "Current source: 41 unique manifests; all carry 11 v1 sections. Registry: 34 entries (30 stable, 4 draft), with 7 manifests unregistered.", "tiny")
+    s.text(64, 444, "Current source: 42 unique manifests; all carry 11 v1 sections. Registry: 35 entries (30 stable, 5 draft), with 7 manifests unregistered.", "tiny")
 
     s.panel(30, 520, 1040, 250, "2. Planning contribution — the house-plan model", "The Planner selects reusable partial plans, then composes them into the project TaskGraph", "green")
     s.node(50, 585, 200, 120, "Project Contract", ("goal · constraints · budgets", "acceptance · required evidence"))

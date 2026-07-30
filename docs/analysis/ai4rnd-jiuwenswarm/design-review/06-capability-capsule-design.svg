@@ -42,7 +42,7 @@
 <rect x="50" y="405" width="980" height="48" rx="8" fill="#fff8e7" stroke="#c3a158" stroke-width="1.2"/>
 <text x="64" y="427" class="n">Invariant</text>
 <text x="132" y="427" class="s">A Capsule may constrain or expand the plan; it may not hide Logical Operators, embed credentials, or pin one agent instance.</text>
-<text x="64" y="444" class="tiny">Current source: 41 unique manifests; all carry 11 v1 sections. Registry: 34 entries (30 stable, 4 draft), with 7 manifests unregistered.</text>
+<text x="64" y="444" class="tiny">Current source: 42 unique manifests; all carry 11 v1 sections. Registry: 35 entries (30 stable, 5 draft), with 7 manifests unregistered.</text>
 <rect x="30" y="520" width="1040" height="250" rx="10" fill="#e9f2ec" stroke="#84a98c" stroke-width="1.2"/>
 <text x="44" y="544" class="h">2. Planning contribution — the house-plan model</text>
 <text x="44" y="563" class="m">The Planner selects reusable partial plans, then composes them into the project TaskGraph</text>

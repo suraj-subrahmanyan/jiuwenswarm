@@ -1,0 +1,1155 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI4RnD × OpenJiuwen — Low-Level Design</title>
+<style>
+:root{--lv-bg:#f7f8fa;--lv-surface:#ffffff;--lv-ink:#16202e;--lv-sub:#3f4c5e;--lv-muted:#68788d;
+--lv-line:#8494a8;--lv-gray:#f1f4f8;--lv-gray-s:#a8b4c4;
+--lv-blue:#e9eff8;--lv-blue-s:#7d97b8;--lv-green:#eaf3ee;--lv-green-s:#84a98c;--lv-green-ink:#2f6b43;
+--lv-sand:#f5f0e6;--lv-sand-s:#b3a689;--lv-purple:#f2edf8;--lv-purple-s:#9873bb;
+--lv-yellow:#fdf7e6;--lv-yellow-s:#c3a158;--lv-cyan:#e9f4f6;--lv-cyan-s:#73a0aa;
+--lv-red:#fdefed;--lv-red-s:#d16d62;--lv-red-ink:#a33f35;
+--code:#f1f4f8;--chip:#e9eff8}
+:root[data-theme=dark]{--lv-bg:#10151c;--lv-surface:#1a212b;--lv-ink:#e8edf4;--lv-sub:#c0cbd9;
+--lv-muted:#8b99ac;--lv-line:#5d6c80;--lv-gray:#1e2733;--lv-gray-s:#48566a;
+--lv-blue:#1c2836;--lv-blue-s:#4c6a8e;--lv-green:#1b2a22;--lv-green-s:#4f7a5c;--lv-green-ink:#8fce9f;
+--lv-sand:#2a2620;--lv-sand-s:#8a7c5c;--lv-purple:#251f2e;--lv-purple-s:#7a5b99;
+--lv-yellow:#2a2617;--lv-yellow-s:#9b8348;--lv-cyan:#17262a;--lv-cyan-s:#4f7d88;
+--lv-red:#2e1c1a;--lv-red-s:#a35049;--lv-red-ink:#e09188;
+--code:#141b24;--chip:#1c2836}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--lv-bg);color:var(--lv-sub);
+font:15px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:44px 28px 110px}
+h1{font-size:30px;line-height:1.25;color:var(--lv-ink);margin:6px 0 8px}
+h2{font-size:21px;color:var(--lv-ink);margin:56px 0 8px;padding-top:18px;border-top:1px solid var(--lv-gray-s)}
+h3{font-size:16px;color:var(--lv-ink);margin:30px 0 6px}
+p{margin:10px 0}
+.crumb{font-size:12.5px;color:var(--lv-muted);letter-spacing:.02em}
+.chips{margin:14px 0 4px}
+.chip{display:inline-block;background:var(--chip);border:1px solid var(--lv-blue-s);
+border-radius:20px;padding:2px 12px;font-size:12px;color:var(--lv-sub);margin:0 6px 6px 0}
+.toc{background:var(--lv-surface);border:1px solid var(--lv-gray-s);border-radius:12px;
+padding:16px 20px;margin:26px 0;font-size:14px}
+.toc a{display:block;color:var(--lv-sub);text-decoration:none;padding:3px 0}
+.toc a:hover{color:var(--lv-ink)}
+.toc .h{font-weight:700;color:var(--lv-ink);margin-bottom:6px}
+.fig{background:var(--lv-surface);border:1px solid var(--lv-gray-s);border-radius:14px;
+padding:18px;margin:18px 0;overflow-x:auto}
+.fig svg{display:block;min-width:1120px}
+.figcap{font-size:12.5px;color:var(--lv-muted);margin:10px 4px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;background:var(--lv-surface);display:block;overflow-x:auto}
+table tbody{display:table;width:100%}
+th,td{border:1px solid var(--lv-gray-s);padding:7px 11px;text-align:left;vertical-align:top}
+th{background:var(--lv-gray);color:var(--lv-ink);font-size:12.5px}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font-size:12.8px}
+pre{background:var(--code);border:1px solid var(--lv-gray-s);border-radius:10px;
+padding:16px;overflow-x:auto;font-size:12.3px;line-height:1.55}
+pre code{background:none;padding:0}
+.callout{border-left:4px solid var(--lv-blue-s);background:var(--lv-blue);
+border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.callout.warn{border-left-color:var(--lv-red-s);background:var(--lv-red)}
+.callout.ok{border-left-color:var(--lv-green-s);background:var(--lv-green)}
+.tt{position:fixed;right:18px;bottom:18px;width:42px;height:42px;border-radius:50%;
+border:1px solid var(--lv-gray-s);background:var(--lv-surface);color:var(--lv-ink);
+font-size:18px;cursor:pointer}
+.small{font-size:12.5px;color:var(--lv-muted)}
+@media (prefers-color-scheme: dark){:root:not([data-theme=light]){--lv-bg:#10151c;--lv-surface:#1a212b;
+--lv-ink:#e8edf4;--lv-sub:#c0cbd9;--lv-muted:#8b99ac;--lv-line:#5d6c80;--lv-gray:#1e2733;
+--lv-gray-s:#48566a;--lv-blue:#1c2836;--lv-blue-s:#4c6a8e;--lv-green:#1b2a22;--lv-green-s:#4f7a5c;
+--lv-green-ink:#8fce9f;--lv-sand:#2a2620;--lv-sand-s:#8a7c5c;--lv-purple:#251f2e;--lv-purple-s:#7a5b99;
+--lv-yellow:#2a2617;--lv-yellow-s:#9b8348;--lv-cyan:#17262a;--lv-cyan-s:#4f7d88;--lv-red:#2e1c1a;
+--lv-red-s:#a35049;--lv-red-ink:#e09188;--code:#141b24;--chip:#1c2836}}
+</style></head><body><main>
+<div class="crumb">Design package · low-level companion to the review plates ·
+jiuwenswarm a98d7ad · openjiuwen 0.1.15.post3 · AI4Research d35c511</div>
+<h1>Low-Level Design — OpenJiuwen runtime, AI4RnD as-is, and Capability Capsules</h1>
+<p>The review plates (06–10) hold the design at architecture altitude. This document goes one
+level down: <strong>exact classes, functions, enum values, error strings and line references</strong>,
+so a design decision can be checked against the code it binds to. Every fact here is
+source-verified or execution-verified; the verification record is
+<code>adversarial-review.md</code> in this directory. Two things are as-is throughout —
+the AI4RnD diagram and the Capsule inventory. The only to-be content is §4 (status
+definitions) and §5 (the revised template), and both are labelled as proposals.</p>
+<div class="chips">
+<span class="chip">§1 OpenJiuwen runtime — low level</span>
+<span class="chip">§2 AI4RnD as-is — low level, RSI in detail</span>
+<span class="chip">§3 Capsules as-is</span>
+<span class="chip">§4 Status definitions</span>
+<span class="chip">§5 To-be template, draft 2</span>
+</div>
+<nav class="toc"><div class="h">Contents</div>
+<a href="#s1">1 · OpenJiuwen runtime — low level (diagram + hook envelope + sharp edges)</a>
+<a href="#s2">2 · AI4RnD as-is — low level (diagram + gate ledger anatomy + RSI module map)</a>
+<a href="#s3">3 · Capability Capsules — as-is (corrected census, section anatomy, enforcement)</a>
+<a href="#s4">4 · Status definitions — the three axes, precisely</a>
+<a href="#s5">5 · Capability Capsule to-be template — draft 2</a>
+<a href="#s6">6 · Changes applied in this revision</a>
+</nav>
+
+<h2 id="s1">1 · OpenJiuwen runtime — low level</h2>
+<p>One diagram, five bands: request resolution and construction (A), the exact callback
+order of one invocation (B) with its control surfaces, the ability path expanded to its
+real pipeline (C), the internals of the three other orchestration mechanisms (D), and the
+state actually written (E). Red strips are verified hazards, not stylistic warnings.</p>
+<div class="fig"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 2120" width="1120" font-family="inherit" role="img" aria-label="OpenJiuwen runtime, low level">
+<defs><marker id="lva" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--lv-line)"/></marker></defs>
+<rect x="8" y="8" width="1104" height="320" rx="12" fill="var(--lv-blue)" stroke="var(--lv-blue-s)" stroke-width="1.2"/>
+<text x="24" y="33" font-size="15" fill="var(--lv-ink)" font-weight="700">A. Request resolution and agent construction</text>
+<text x="24" y="52" font-size="11" fill="var(--lv-muted)">Exact classes on the path from an IM message to a live DeepAgent</text>
+<rect x="28" y="62" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="39" y="83" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Channel adapter</text>
+<text x="39" y="101.0" font-size="10.5" fill="var(--lv-sub)">9 IM channels</text>
+<text x="39" y="116.5" font-size="10.5" fill="var(--lv-sub)">message + identity</text>
+<text x="215" y="77" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">jiuwenswarm</text>
+<rect x="244" y="62" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="255" y="83" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Gateway</text>
+<text x="255" y="101.0" font-size="10.5" fill="var(--lv-sub)">app_gateway.py</text>
+<text x="255" y="116.5" font-size="10.5" fill="var(--lv-sub)">E2A envelope</text>
+<text x="255" y="132.0" font-size="10.5" fill="var(--lv-sub)">route + session</text>
+<text x="431" y="77" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">jiuwenswarm</text>
+<path d="M224 110 H240" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="460" y="62" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="471" y="83" font-size="12.5" fill="var(--lv-ink)" font-weight="700">AgentServer</text>
+<text x="471" y="101.0" font-size="10.5" fill="var(--lv-sub)">app_agentserver.py</text>
+<text x="471" y="116.5" font-size="10.5" fill="var(--lv-sub)">WS entrypoint</text>
+<text x="471" y="132.0" font-size="10.5" fill="var(--lv-sub)">extensions load</text>
+<text x="647" y="77" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">jiuwenswarm</text>
+<path d="M440 110 H456" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="676" y="62" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="687" y="83" font-size="12.5" fill="var(--lv-ink)" font-weight="700">agent_manager</text>
+<text x="687" y="101.0" font-size="10.5" fill="var(--lv-sub)">server/runtime/</text>
+<text x="687" y="116.5" font-size="10.5" fill="var(--lv-sub)">agent_manager.py</text>
+<text x="687" y="132.0" font-size="10.5" fill="var(--lv-sub)">load/rebuild · bind session</text>
+<text x="863" y="77" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">jiuwenswarm</text>
+<path d="M656 110 H672" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="892" y="62" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="903" y="83" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Invocation ctx</text>
+<text x="903" y="101.0" font-size="10.5" fill="var(--lv-sub)">request · mode</text>
+<text x="903" y="116.5" font-size="10.5" fill="var(--lv-sub)">workspace</text>
+<text x="903" y="132.0" font-size="10.5" fill="var(--lv-sub)">permissions</text>
+<text x="1079" y="77" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">jiuwenswarm</text>
+<path d="M872 110 H888" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="28" y="186" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="39" y="207" font-size="12.5" fill="var(--lv-ink)" font-weight="700">DeepAgentSpec</text>
+<text x="39" y="225.0" font-size="10.5" fill="var(--lv-sub)">deep_agent_spec.py:427</text>
+<text x="39" y="240.5" font-size="10.5" fill="var(--lv-sub)">model · prompt · tools</text>
+<text x="39" y="256.0" font-size="10.5" fill="var(--lv-sub)">Rails · skills · policy</text>
+<text x="215" y="201" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">openjiuwen</text>
+<rect x="244" y="186" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="255" y="207" font-size="12.5" fill="var(--lv-ink)" font-weight="700">BuildContext</text>
+<text x="255" y="225.0" font-size="10.5" fill="var(--lv-sub)">build_context.py:27</text>
+<text x="255" y="240.5" font-size="10.5" fill="var(--lv-sub)">derive() :51</text>
+<text x="255" y="256.0" font-size="10.5" fill="var(--lv-sub)">from_seed() :92</text>
+<text x="431" y="201" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">openjiuwen</text>
+<path d="M224 234 H240" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="460" y="186" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="471" y="207" font-size="12.5" fill="var(--lv-ink)" font-weight="700">resolve_parts()</text>
+<text x="471" y="225.0" font-size="10.5" fill="var(--lv-sub)">deep_agent_spec.py:479</text>
+<text x="471" y="240.5" font-size="10.5" fill="var(--lv-sub)">registries resolved</text>
+<text x="471" y="256.0" font-size="10.5" fill="var(--lv-sub)">Rail instances</text>
+<text x="647" y="201" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">openjiuwen</text>
+<path d="M440 234 H456" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="676" y="186" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="687" y="207" font-size="12.5" fill="var(--lv-ink)" font-weight="700">DeepAgentConfig</text>
+<text x="687" y="225.0" font-size="10.5" fill="var(--lv-sub)">harness/schema/</text>
+<text x="687" y="240.5" font-size="10.5" fill="var(--lv-sub)">config.py:163</text>
+<text x="687" y="256.0" font-size="10.5" fill="var(--lv-sub)">live references</text>
+<text x="863" y="201" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">openjiuwen</text>
+<path d="M656 234 H672" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="892" y="186" width="196" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="903" y="207" font-size="12.5" fill="var(--lv-ink)" font-weight="700">DeepAgent</text>
+<text x="903" y="225.0" font-size="10.5" fill="var(--lv-sub)">harness/deep_agent.py</text>
+<text x="903" y="240.5" font-size="10.5" fill="var(--lv-sub)">built by .build()</text>
+<text x="903" y="256.0" font-size="10.5" fill="var(--lv-sub)">spec.build() :561</text>
+<text x="1079" y="201" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">openjiuwen</text>
+<path d="M872 234 H888" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<path d="M126 158 V186" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<text x="28" y="312" font-size="11" fill="var(--lv-muted)">BuildContext carries the cross-process rebuild seed: definitions travel; process-local resources are re-resolved.</text>
+<rect x="8" y="348" width="764" height="866" rx="12" fill="var(--lv-sand)" stroke="var(--lv-sand-s)" stroke-width="1.2"/>
+<text x="24" y="373" font-size="15" fill="var(--lv-ink)" font-weight="700">B. One invocation — exact callback order</text>
+<text x="24" y="392" font-size="11" fill="var(--lv-muted)">AgentCallbackEvent (core/single_agent/rail/base.py:214-224), fire sites in react_agent.py</text>
+<rect x="30" y="404" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="425" font-size="12.5" fill="var(--lv-ink)" font-weight="700">1 · invoke()</text>
+<text x="41" y="443.0" font-size="10.5" fill="var(--lv-sub)">ctx.lifecycle(BEFORE_INVOKE … AFTER_INVOKE)  base.py:382</text>
+<text x="41" y="458.5" font-size="10.5" fill="var(--lv-sub)">lifecycle guarantees AFTER_INVOKE on every exit path</text>
+<rect x="30" y="500" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="521" font-size="12.5" fill="var(--lv-ink)" font-weight="700">2 · outer task iteration</text>
+<text x="41" y="539.0" font-size="10.5" fill="var(--lv-sub)">fires BEFORE_TASK_ITERATION</text>
+<text x="41" y="554.5" font-size="10.5" fill="var(--lv-sub)">budget, cancellation, follow-up, prior session state</text>
+<path d="M388 478 V496" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="30" y="596" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="617" font-size="12.5" fill="var(--lv-ink)" font-weight="700">3 · assemble model context</text>
+<text x="41" y="635.0" font-size="10.5" fill="var(--lv-sub)">system prompt + history + skill guidance</text>
+<text x="41" y="650.5" font-size="10.5" fill="var(--lv-sub)">+ memory + ability cards</text>
+<path d="M388 574 V592" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="30" y="692" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="713" font-size="12.5" fill="var(--lv-ink)" font-weight="700">4 · model call</text>
+<text x="41" y="731.0" font-size="10.5" fill="var(--lv-sub)">BEFORE_MODEL_CALL → allocator → provider client</text>
+<text x="41" y="746.5" font-size="10.5" fill="var(--lv-sub)">→ AFTER_MODEL_CALL | ON_MODEL_EXCEPTION  react_agent.py:718-720</text>
+<path d="M388 670 V688" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="30" y="788" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="809" font-size="12.5" fill="var(--lv-ink)" font-weight="700">5 · parse response</text>
+<text x="41" y="827.0" font-size="10.5" fill="var(--lv-sub)">plain text may finish the ReAct turn</text>
+<text x="41" y="842.5" font-size="10.5" fill="var(--lv-sub)">tool requests enter the ability path (band C)</text>
+<path d="M388 766 V784" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="30" y="884" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="905" font-size="12.5" fill="var(--lv-ink)" font-weight="700">6 · execute abilities</text>
+<text x="41" y="923.0" font-size="10.5" fill="var(--lv-sub)">per tool call: band C pipeline</text>
+<text x="41" y="938.5" font-size="10.5" fill="var(--lv-sub)">ToolMessage or typed exception appended</text>
+<path d="M388 862 V880" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="30" y="980" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="1001" font-size="12.5" fill="var(--lv-ink)" font-weight="700">7 · AFTER_REACT_ITERATION</text>
+<text x="41" y="1019.0" font-size="10.5" fill="var(--lv-sub)">fired at react_agent.py:1818</text>
+<text x="41" y="1034.5" font-size="10.5" fill="var(--lv-sub)">success-only: never fired on a break path  base.py:200-202</text>
+<path d="M388 958 V976" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="30" y="1076" width="716" height="74" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="41" y="1097" font-size="12.5" fill="var(--lv-ink)" font-weight="700">8 · decide</text>
+<text x="41" y="1115.0" font-size="10.5" fill="var(--lv-sub)">continue ReAct · finish task iteration (AFTER_TASK_ITERATION)</text>
+<text x="41" y="1130.5" font-size="10.5" fill="var(--lv-sub)">interrupt · fail → AFTER_INVOKE</text>
+<path d="M388 1054 V1072" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<path d="M746 918 C 778 918 778 500 746 500" fill="none" stroke="var(--lv-line)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#lva)"/>
+<text x="780" y="700" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">next</text>
+<text x="780" y="712" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">ReAct</text>
+<text x="780" y="724" font-size="9.5" fill="var(--lv-muted)" font-weight="700" letter-spacing=".05em" text-anchor="end">turn</text>
+<rect x="30" y="1160" width="716" height="48" rx="7" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="42" y="1179" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">Verified hazard: resolve_member_model (agent_teams/models/allocator.py:387-423) returns None for a</text>
+<text x="42" y="1195" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">missing pool group and the caller proceeds on the default model — a silent fallback. Fix before reuse.</text>
+<rect x="788" y="348" width="324" height="866" rx="12" fill="var(--lv-purple)" stroke="var(--lv-purple-s)" stroke-width="1.2"/>
+<text x="804" y="373" font-size="15" fill="var(--lv-ink)" font-weight="700">Control surfaces</text>
+<text x="804" y="392" font-size="11" fill="var(--lv-muted)">AgentCallbackContext base.py:231</text>
+<rect x="806" y="410" width="288" height="88" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="817" y="431" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Retry</text>
+<text x="817" y="449.0" font-size="10.5" fill="var(--lv-sub)">request_retry(delay)  :278</text>
+<text x="817" y="464.5" font-size="10.5" fill="var(--lv-sub)">consume_retry_request  :293</text>
+<text x="817" y="480.0" font-size="10.5" fill="var(--lv-sub)">RetryRequest  :166</text>
+<rect x="806" y="514" width="288" height="88" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="817" y="535" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Force finish</text>
+<text x="817" y="553.0" font-size="10.5" fill="var(--lv-sub)">request_force_finish(result) :299</text>
+<text x="817" y="568.5" font-size="10.5" fill="var(--lv-sub)">consume_force_finish  :308</text>
+<text x="817" y="584.0" font-size="10.5" fill="var(--lv-sub)">ForceFinishRequest  :173</text>
+<rect x="806" y="618" width="288" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="817" y="639" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Steering</text>
+<text x="817" y="657.0" font-size="10.5" fill="var(--lv-sub)">bind_steering_queue  :321</text>
+<text x="817" y="672.5" font-size="10.5" fill="var(--lv-sub)">push_steering  :336</text>
+<text x="817" y="688.0" font-size="10.5" fill="var(--lv-sub)">drain_steering  :347</text>
+<text x="817" y="703.5" font-size="10.5" fill="var(--lv-sub)">has_pending_steering  :366</text>
+<rect x="806" y="738" width="288" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="817" y="759" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Rail surface (ABC)</text>
+<text x="817" y="777.0" font-size="10.5" fill="var(--lv-sub)">AgentRail  base.py:456</text>
+<text x="817" y="792.5" font-size="10.5" fill="var(--lv-sub)">10 overridables, exactly the</text>
+<text x="817" y="808.0" font-size="10.5" fill="var(--lv-sub)">callback enum minus</text>
+<text x="817" y="823.5" font-size="10.5" fill="var(--lv-sub)">AFTER_REACT_ITERATION*</text>
+<text x="806" y="862" font-size="11" fill="var(--lv-muted)">*ReAct-iteration Rails subscribe via</text>
+<text x="806" y="878" font-size="11" fill="var(--lv-muted)">get_callbacks() :549 — no before-</text>
+<text x="806" y="894" font-size="11" fill="var(--lv-muted)">ReAct hook exists; per-iteration</text>
+<text x="806" y="910" font-size="11" fill="var(--lv-muted)">pre-checks must ride BEFORE_MODEL_CALL.</text>
+<rect x="806" y="934" width="288" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="817" y="955" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Run heartbeats</text>
+<text x="817" y="973.0" font-size="10.5" fill="var(--lv-sub)">RunKind  base.py:43</text>
+<text x="817" y="988.5" font-size="10.5" fill="var(--lv-sub)">HeartbeatReason  :50</text>
+<text x="817" y="1004.0" font-size="10.5" fill="var(--lv-sub)">InvokeInputs.is_heartbeat :88</text>
+<text x="817" y="1019.5" font-size="10.5" fill="var(--lv-sub)">is_cron :98 · lightweight :92</text>
+<rect x="806" y="1054" width="288" height="88" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="817" y="1075" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Typed inputs per event</text>
+<text x="817" y="1093.0" font-size="10.5" fill="var(--lv-sub)">ModelCallInputs  :104</text>
+<text x="817" y="1108.5" font-size="10.5" fill="var(--lv-sub)">ToolCallInputs  :120</text>
+<text x="817" y="1124.0" font-size="10.5" fill="var(--lv-sub)">TaskIterationInputs  :138</text>
+<rect x="8" y="1234" width="1104" height="258" rx="12" fill="var(--lv-green)" stroke="var(--lv-green-s)" stroke-width="1.2"/>
+<text x="24" y="1259" font-size="15" fill="var(--lv-ink)" font-weight="700">C. Ability path — one tool call, exact order</text>
+<text x="24" y="1278" font-size="11" fill="var(--lv-muted)">Permission enforcement is itself a before-tool Rail, not a separate engine stage</text>
+<rect x="24" y="1296" width="168" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="1317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">before_tool_call Rails</text>
+<text x="35" y="1335.0" font-size="10.5" fill="var(--lv-sub)">ordered Rail list;</text>
+<text x="35" y="1350.5" font-size="10.5" fill="var(--lv-sub)">SysOperationRail auto-</text>
+<text x="35" y="1366.0" font-size="10.5" fill="var(--lv-sub)">prepended factory.py:119</text>
+<rect x="206" y="1296" width="168" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="217" y="1317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">ToolSecurityRail</text>
+<text x="217" y="1335.0" font-size="10.5" fill="var(--lv-sub)">harness/rails/security/</text>
+<text x="217" y="1350.5" font-size="10.5" fill="var(--lv-sub)">tool_security_rail.py</text>
+<text x="217" y="1366.0" font-size="10.5" fill="var(--lv-sub)">argument + policy checks</text>
+<path d="M192 1344 H204" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="388" y="1296" width="168" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="399" y="1317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">check_permission</text>
+<text x="399" y="1335.0" font-size="10.5" fill="var(--lv-sub)">harness/security/</text>
+<text x="399" y="1350.5" font-size="10.5" fill="var(--lv-sub)">core.py:145</text>
+<text x="399" y="1366.0" font-size="10.5" fill="var(--lv-sub)">tiered policy :508</text>
+<path d="M374 1344 H386" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="570" y="1296" width="168" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="581" y="1317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">ALLOW | ASK | DENY</text>
+<text x="581" y="1335.0" font-size="10.5" fill="var(--lv-sub)">PermissionLevel</text>
+<text x="581" y="1350.5" font-size="10.5" fill="var(--lv-sub)">models.py:26-28</text>
+<text x="581" y="1366.0" font-size="10.5" fill="var(--lv-sub)">ASK routes to human</text>
+<path d="M556 1344 H568" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="752" y="1296" width="168" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="763" y="1317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Resource runner</text>
+<text x="763" y="1335.0" font-size="10.5" fill="var(--lv-sub)">Tool · MCP · sub-agent</text>
+<text x="763" y="1350.5" font-size="10.5" fill="var(--lv-sub)">workflow · SysOperation</text>
+<text x="763" y="1366.0" font-size="10.5" fill="var(--lv-sub)">core/sys_operation</text>
+<path d="M738 1344 H750" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="934" y="1296" width="168" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="945" y="1317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Result</text>
+<text x="945" y="1335.0" font-size="10.5" fill="var(--lv-sub)">ToolMessage or typed</text>
+<text x="945" y="1350.5" font-size="10.5" fill="var(--lv-sub)">exception → after_tool_call</text>
+<text x="945" y="1366.0" font-size="10.5" fill="var(--lv-sub)">| on_tool_exception</text>
+<path d="M920 1344 H932" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="24" y="1408" width="1072" height="48" rx="7" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="36" y="1427" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">Verified hazard: in the JiuwenSwarm layout the tiered-policy loader (harness/security/tiered_policy.py) resolves builtin rules from the</text>
+<text x="36" y="1443" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">package path only — resources/builtin_rules.yaml is written by common/utils.py + init_workspace.py and read by nothing: 0 rules load.</text>
+<rect x="8" y="1512" width="1104" height="400" rx="12" fill="var(--lv-cyan)" stroke="var(--lv-cyan-s)" stroke-width="1.2"/>
+<text x="24" y="1537" font-size="15" fill="var(--lv-ink)" font-weight="700">D. Orchestration mechanisms — internals and sharp edges</text>
+<text x="24" y="1556" font-size="11" fill="var(--lv-muted)">What each scheduler actually calls, persists and returns</text>
+<rect x="24" y="1574" width="356" height="210" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="1595" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Core Workflow / Pregel</text>
+<text x="35" y="1613.0" font-size="10.5" fill="var(--lv-sub)">core/workflow/workflow.py</text>
+<text x="35" y="1628.5" font-size="10.5" fill="var(--lv-sub)">Workflow.invoke(inputs, session)</text>
+<text x="35" y="1644.0" font-size="10.5" fill="var(--lv-sub)">add_conditional_connection(src, router)</text>
+<text x="35" y="1659.5" font-size="10.5" fill="var(--lv-sub)">Router = Callable[..., Hashable|list]</text>
+<text x="35" y="1675.0" font-size="10.5" fill="var(--lv-sub)">router is invoked with NO arguments</text>
+<text x="35" y="1690.5" font-size="10.5" fill="var(--lv-sub)">WorkflowComponent: invoke + add_component</text>
+<text x="35" y="1706.0" font-size="10.5" fill="var(--lv-sub)">durability: checkpointer snapshots</text>
+<text x="35" y="1721.5" font-size="10.5" fill="var(--lv-sub)">returns: graph outputs · interrupt state</text>
+<rect x="396" y="1574" width="356" height="210" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="407" y="1595" font-size="12.5" fill="var(--lv-ink)" font-weight="700">SwarmFlow</text>
+<text x="407" y="1613.0" font-size="10.5" fill="var(--lv-sub)">agent_teams/workflow/  engine:</text>
+<text x="407" y="1628.5" font-size="10.5" fill="var(--lv-sub)">run_workflow(path, args, backend,</text>
+<text x="407" y="1644.0" font-size="10.5" fill="var(--lv-sub)">  resume, journal_path, …)</text>
+<text x="407" y="1659.5" font-size="10.5" fill="var(--lv-sub)">AgentBackend.run(prompt, opts, schema)</text>
+<text x="407" y="1675.0" font-size="10.5" fill="var(--lv-sub)">→ AgentResult(text, structured,</text>
+<text x="407" y="1690.5" font-size="10.5" fill="var(--lv-sub)">  tokens, skipped)</text>
+<text x="407" y="1706.0" font-size="10.5" fill="var(--lv-sub)">journal key: {team}/sessions/{sid}/</text>
+<text x="407" y="1721.5" font-size="10.5" fill="var(--lv-sub)">  workflows/{name} · ConcurrencyGovernor</text>
+<rect x="768" y="1574" width="328" height="210" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="779" y="1595" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Dynamic Team / NativeHarness</text>
+<text x="779" y="1613.0" font-size="10.5" fill="var(--lv-sub)">agent_teams/harness/native_harness.py</text>
+<text x="779" y="1628.5" font-size="10.5" fill="var(--lv-sub)">TeamRole: WORKER · HUMAN_AGENT ·</text>
+<text x="779" y="1644.0" font-size="10.5" fill="var(--lv-sub)">  BRIDGE_AGENT · …</text>
+<text x="779" y="1659.5" font-size="10.5" fill="var(--lv-sub)">task board tools/tool_task.py:</text>
+<text x="779" y="1675.0" font-size="10.5" fill="var(--lv-sub)">  depends_on · add_blocked_by ·</text>
+<text x="779" y="1690.5" font-size="10.5" fill="var(--lv-sub)">  task_manager.add_dependencies</text>
+<text x="779" y="1706.0" font-size="10.5" fill="var(--lv-sub)">reliability detectors + remediation</text>
+<text x="779" y="1721.5" font-size="10.5" fill="var(--lv-sub)">durability: team task DB + worktrees</text>
+<rect x="24" y="1800" width="1072" height="84" rx="7" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="36" y="1819" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">Verified hazards (executed probes): a SwarmFlow step that fails rt.retries+1 times makes agent() return None while the run reports</text>
+<text x="36" y="1835" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">SUCCESS, and the journal replays the None; SwarmflowTool rejects resume_id/name (&quot;not supported yet&quot;) — resume is engine-API-only;</text>
+<text x="36" y="1851" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">unknown engine options fail loudly (allowed: agent_type · isolation · label · model · phase · schema · timeout). Typos fail loudly;</text>
+<text x="36" y="1867" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">unimplemented features fail silently — adapters must validate results, not trust run status.</text>
+<rect x="8" y="1932" width="1104" height="176" rx="12" fill="var(--lv-gray)" stroke="var(--lv-gray-s)" stroke-width="1.2"/>
+<text x="24" y="1957" font-size="15" fill="var(--lv-ink)" font-weight="700">E. State actually written</text>
+<text x="24" y="1976" font-size="11" fill="var(--lv-muted)">Operational state is split; none of it is AI4RnD evidence by itself</text>
+<rect x="24" y="1994" width="200" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="2015" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Session</text>
+<text x="35" y="2033.0" font-size="10.5" fill="var(--lv-sub)">sqlite by default:</text>
+<text x="35" y="2048.5" font-size="10.5" fill="var(--lv-sub)">ensure_persistent_</text>
+<text x="35" y="2064.0" font-size="10.5" fill="var(--lv-sub)">checkpointer()</text>
+<text x="35" y="2079.5" font-size="10.5" fill="var(--lv-sub)">interface_deep.py</text>
+<rect x="244" y="1994" width="200" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="255" y="2015" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Engine checkpoint</text>
+<text x="255" y="2033.0" font-size="10.5" fill="var(--lv-sub)">Pregel snapshots</text>
+<text x="255" y="2048.5" font-size="10.5" fill="var(--lv-sub)">SwarmFlow journal/WAL</text>
+<text x="255" y="2064.0" font-size="10.5" fill="var(--lv-sub)">resume replays steps</text>
+<text x="255" y="2079.5" font-size="10.5" fill="var(--lv-sub)">including None results</text>
+<rect x="464" y="1994" width="200" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="475" y="2015" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Team task DB</text>
+<text x="475" y="2033.0" font-size="10.5" fill="var(--lv-sub)">assignees · reviewers</text>
+<text x="475" y="2048.5" font-size="10.5" fill="var(--lv-sub)">dependencies · status</text>
+<text x="475" y="2064.0" font-size="10.5" fill="var(--lv-sub)">member worktrees</text>
+<rect x="684" y="1994" width="200" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="695" y="2015" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Workspace</text>
+<text x="695" y="2033.0" font-size="10.5" fill="var(--lv-sub)">private · team</text>
+<text x="695" y="2048.5" font-size="10.5" fill="var(--lv-sub)">worktree · sandbox</text>
+<text x="695" y="2064.0" font-size="10.5" fill="var(--lv-sub)">SysOperation modes</text>
+<rect x="904" y="1994" width="200" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="915" y="2015" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Memory</text>
+<text x="915" y="2033.0" font-size="10.5" fill="var(--lv-sub)">long-term · coding</text>
+<text x="915" y="2048.5" font-size="10.5" fill="var(--lv-sub)">team memory</text>
+<text x="915" y="2064.0" font-size="10.5" fill="var(--lv-sub)">retrieval indices</text>
+</svg></div>
+<p class="figcap">Diagram LL-1 — OpenJiuwen runtime at implementation granularity. All line references:
+openjiuwen 0.1.15.post3 installed package; JiuwenSwarm paths from the a98d7ad checkout.</p>
+<h3>1.1 The hook envelope, exactly</h3>
+
+<table>
+<tr><th>Hook point</th><th>Enum value (<code>AgentCallbackEvent</code>)</th><th>Fires</th><th>Fire site / note</th></tr>
+<tr><td rowspan="2">Invocation</td><td><code>BEFORE_INVOKE</code></td><td>before</td><td rowspan="2"><code>ctx.lifecycle(...)</code> — <code>react_agent.py:1670</code>; AFTER guaranteed on every exit path</td></tr>
+<tr><td><code>AFTER_INVOKE</code></td><td>after</td></tr>
+<tr><td rowspan="2">Task iteration (outer loop)</td><td><code>BEFORE_TASK_ITERATION</code></td><td>before</td><td rowspan="2">one outer coordinator iteration</td></tr>
+<tr><td><code>AFTER_TASK_ITERATION</code></td><td>after</td></tr>
+<tr><td>ReAct iteration (inner loop)</td><td><code>AFTER_REACT_ITERATION</code></td><td><strong>after only</strong></td><td><code>react_agent.py:1818</code>; success-only — never fired on a break path (<code>base.py:200-202</code>). There is no before-ReAct hook; per-iteration pre-checks must ride <code>BEFORE_MODEL_CALL</code>.</td></tr>
+<tr><td rowspan="3">Model call</td><td><code>BEFORE_MODEL_CALL</code></td><td>before</td><td rowspan="3">decorated call, <code>react_agent.py:718-720</code></td></tr>
+<tr><td><code>AFTER_MODEL_CALL</code></td><td>after</td></tr>
+<tr><td><code>ON_MODEL_EXCEPTION</code></td><td>exception</td></tr>
+<tr><td rowspan="3">Tool call</td><td><code>BEFORE_TOOL_CALL</code></td><td>before</td><td rowspan="3">per ability execution; permission enforcement lives inside this phase (<code>ToolSecurityRail</code>)</td></tr>
+<tr><td><code>AFTER_TOOL_CALL</code></td><td>after</td></tr>
+<tr><td><code>ON_TOOL_EXCEPTION</code></td><td>exception</td></tr>
+</table>
+<h3>1.2 Verified sharp edges and the adapter obligations they impose</h3>
+
+<table>
+<tr><th>#</th><th>Verified sharp edge</th><th>Evidence</th><th>Adapter obligation</th></tr>
+<tr><td>1</td><td>SwarmFlow step failure is silent at run level: after <code>rt.retries+1</code> attempts <code>agent()</code> returns <code>None</code> and the run reports SUCCESS; the journal replays the <code>None</code> on resume.</td><td>executed probe (three-run journal replay)</td><td>validate every step result; a <code>None</code> is a failed attempt, never a receipt</td></tr>
+<tr><td>2</td><td>Team model allocation falls back silently: <code>resolve_member_model</code> returns <code>None</code> for a missing pool group and the default model runs.</td><td><code>agent_teams/models/allocator.py:387-423</code> + executed audit</td><td>fail closed for capsule-bound attempts (wrapper or upstream fix)</td></tr>
+<tr><td>3</td><td>Deployed guardrails load zero rules: the tiered-policy loader reads the package path only; JiuwenSwarm's <code>resources/builtin_rules.yaml</code> is written but never read.</td><td><code>harness/security/tiered_policy.py</code> + executed probe</td><td>wire the rules path or ship AI4RnD policy loading</td></tr>
+<tr><td>4</td><td>Core Workflow conditional routers are invoked with <em>no arguments</em>; routing state must travel out-of-band.</td><td><code>core/workflow/workflow.py</code> (<code>Router</code> type) + executed probe</td><td>encode branch state in channels, not router params</td></tr>
+<tr><td>5</td><td><code>SwarmflowTool</code> rejects <code>resume_id</code>/<code>name</code> ("not supported yet"); resume works only through <code>run_workflow(..., resume=…)</code>.</td><td>executed probe (tool schema)</td><td>drive resume through the engine API</td></tr>
+<tr><td>6</td><td>Unknown SwarmFlow options fail loudly (allowed: <code>agent_type · isolation · label · model · phase · schema · timeout</code>) — the codebase fails loudly on typos and silently on unimplemented features.</td><td>executed probe (<code>WorkflowError</code>)</td><td>treat loud failures as friendly; hunt the silent ones</td></tr>
+</table>
+
+<h2 id="s2">2 · AI4RnD — as-is, low level</h2>
+<p>Seven bands, all current state: intake/coordinator (A), the capsule resolver's seven
+checks in code order with their exact error strings (B), worker assignment (C), the
+physical carrier that runs today and is rejected for the target (D), the return path with
+the gate-ledger record anatomy (E), the four disjoint evidence stores (F), and RSI at
+module granularity (G). Nothing in this diagram is target design.</p>
+<div class="fig"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 2410" width="1120" font-family="inherit" role="img" aria-label="AI4RnD as-is, low level">
+<defs><marker id="lva" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--lv-line)"/></marker></defs>
+<rect x="8" y="8" width="1104" height="210" rx="12" fill="var(--lv-blue)" stroke="var(--lv-blue-s)" stroke-width="1.2"/>
+<text x="24" y="33" font-size="15" fill="var(--lv-ink)" font-weight="700">A. Intake, coordinator and plan — as-is</text>
+<text x="24" y="52" font-size="11" fill="var(--lv-muted)">graph_scheduler.py (4,189 LOC) + graph_node_dispatcher.py (~7,900 LOC)</text>
+<rect x="24" y="66" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="87" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Run intake</text>
+<text x="35" y="105.0" font-size="10.5" fill="var(--lv-sub)">objective · repo/workspace</text>
+<text x="35" y="120.5" font-size="10.5" fill="var(--lv-sub)">budget · mode hints</text>
+<text x="35" y="136.0" font-size="10.5" fill="var(--lv-sub)">sprint scaffold</text>
+<rect x="296" y="66" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="87" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Coordinator roles</text>
+<text x="307" y="105.0" font-size="10.5" fill="var(--lv-sub)">PM·产品经理 → Planner·规划者</text>
+<text x="307" y="120.5" font-size="10.5" fill="var(--lv-sub)">→ Builder·建设者 → Evaluator·审判官</text>
+<text x="307" y="136.0" font-size="10.5" fill="var(--lv-sub)">role regexes dispatcher:7104</text>
+<path d="M276 118 H294" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="568" y="66" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="87" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Lifecycle控制</text>
+<text x="579" y="105.0" font-size="10.5" fill="var(--lv-sub)">retry · timeout</text>
+<text x="579" y="120.5" font-size="10.5" fill="var(--lv-sub)">quarantine + one-shot human</text>
+<text x="579" y="136.0" font-size="10.5" fill="var(--lv-sub)">resume  scheduler:2724</text>
+<path d="M548 118 H566" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="840" y="66" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="87" font-size="12.5" fill="var(--lv-ink)" font-weight="700">TaskGraph</text>
+<text x="851" y="105.0" font-size="10.5" fill="var(--lv-sub)">task_graph_io.py</text>
+<text x="851" y="120.5" font-size="10.5" fill="var(--lv-sub)">DAG · topo layers · readiness</text>
+<text x="851" y="136.0" font-size="10.5" fill="var(--lv-sub)">write scope + evidence owed</text>
+<path d="M820 118 H838" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<text x="24" y="198" font-size="11" fill="var(--lv-muted)">Batch safety: ready nodes co-run only when dependencies, write scopes, effects and resources are compatible.</text>
+<rect x="8" y="238" width="1104" height="396" rx="12" fill="var(--lv-purple)" stroke="var(--lv-purple-s)" stroke-width="1.2"/>
+<text x="24" y="263" font-size="15" fill="var(--lv-ink)" font-weight="700">B. Capsule resolution — the seven checks, in code order</text>
+<text x="24" y="282" font-size="11" fill="var(--lv-muted)">resolve_capability_capsule_for_task, capability_capsules.py:1246-1338 — every failure is an honest stall with a typed reason</text>
+<rect x="24" y="296" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">1 · candidate admission</text>
+<text x="35" y="335.0" font-size="10.5" fill="var(--lv-sub)">rank_capsule_candidates</text>
+<text x="35" y="350.5" font-size="10.5" fill="var(--lv-sub)">empty → CapsuleResolutionError</text>
+<text x="35" y="366.0" font-size="10.5" fill="var(--lv-sub)">“admission_failed: no capability</text>
+<text x="35" y="381.5" font-size="10.5" fill="var(--lv-sub)">capsule candidate”  :1273</text>
+<rect x="296" y="296" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">2 · preconditions</text>
+<text x="307" y="335.0" font-size="10.5" fill="var(--lv-sub)">_check_preconditions(task,</text>
+<text x="307" y="350.5" font-size="10.5" fill="var(--lv-sub)">manifest) → admission_failed:</text>
+<text x="307" y="366.0" font-size="10.5" fill="var(--lv-sub)">&lt;failed assertions&gt;  :1281-1283</text>
+<path d="M276 352 H294" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="568" y="296" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">3 · operator deny-list</text>
+<text x="579" y="335.0" font-size="10.5" fill="var(--lv-sub)">operator_compatibility.forbidden</text>
+<text x="579" y="350.5" font-size="10.5" fill="var(--lv-sub)">operator_id in forbidden →</text>
+<text x="579" y="366.0" font-size="10.5" fill="var(--lv-sub)">“operator_incompatible: &lt;id&gt;”</text>
+<text x="579" y="381.5" font-size="10.5" fill="var(--lv-sub)">:1286-1287</text>
+<path d="M548 352 H566" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="840" y="296" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="317" font-size="12.5" fill="var(--lv-ink)" font-weight="700">4 · attach guard capsules</text>
+<text x="851" y="335.0" font-size="10.5" fill="var(--lv-sub)">_attach_referenced_capsules(</text>
+<text x="851" y="350.5" font-size="10.5" fill="var(--lv-sub)">required_guard_capsules,</text>
+<text x="851" y="366.0" font-size="10.5" fill="var(--lv-sub)">kind=guard)  :1290-1294</text>
+<path d="M820 352 H838" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="24" y="424" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="445" font-size="12.5" fill="var(--lv-ink)" font-weight="700">5 · attach resource capsules</text>
+<text x="35" y="463.0" font-size="10.5" fill="var(--lv-sub)">_attach_referenced_capsules(</text>
+<text x="35" y="478.5" font-size="10.5" fill="var(--lv-sub)">required_resource_capsules,</text>
+<text x="35" y="494.0" font-size="10.5" fill="var(--lv-sub)">kind=resource)  :1295-1299</text>
+<rect x="296" y="424" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="445" font-size="12.5" fill="var(--lv-ink)" font-weight="700">6 · secrets / effects policy</text>
+<text x="307" y="463.0" font-size="10.5" fill="var(--lv-sub)">secret_refs w/o guard →</text>
+<text x="307" y="478.5" font-size="10.5" fill="var(--lv-sub)">“policy_blocked” :1302-1303</text>
+<text x="307" y="494.0" font-size="10.5" fill="var(--lv-sub)">high-risk effects w/o guard →</text>
+<text x="307" y="509.5" font-size="10.5" fill="var(--lv-sub)">“effect_escalation_requires_human”</text>
+<path d="M276 480 H294" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="568" y="424" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="445" font-size="12.5" fill="var(--lv-ink)" font-weight="700">7 · bindings + verifier</text>
+<text x="579" y="463.0" font-size="10.5" fill="var(--lv-sub)">_resolve_bindings → skills, MCP</text>
+<text x="579" y="478.5" font-size="10.5" fill="var(--lv-sub)">verifier required w/o pass_conds →</text>
+<text x="579" y="494.0" font-size="10.5" fill="var(--lv-sub)">“policy_blocked: verifier required</text>
+<text x="579" y="509.5" font-size="10.5" fill="var(--lv-sub)">but no pass_conditions” :1310-1311</text>
+<path d="M548 480 H566" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="840" y="424" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="445" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Resolution record</text>
+<text x="851" y="463.0" font-size="10.5" fill="var(--lv-sub)">selected_skills · resolved_mcp_</text>
+<text x="851" y="478.5" font-size="10.5" fill="var(--lv-sub)">bindings · attached guards/resources</text>
+<text x="851" y="494.0" font-size="10.5" fill="var(--lv-sub)">effect_summary · verification_hooks</text>
+<text x="851" y="509.5" font-size="10.5" fill="var(--lv-sub)">operator_constraints</text>
+<path d="M820 480 H838" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<path d="M840 408 C 900 430 300 400 276 424" fill="none" stroke="var(--lv-line)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#lva)"/>
+<rect x="24" y="560" width="1072" height="48" rx="7" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="36" y="579" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">As-is pin: operator_constraints carries registry default_operator_profile (e.g. mini-claude-sonnet-builder-2) — an identity-pinned</text>
+<text x="36" y="595" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">executor default that the to-be template forbids; migration must relocate it to the Physical Operator registry.</text>
+<rect x="8" y="654" width="1104" height="208" rx="12" fill="var(--lv-green)" stroke="var(--lv-green-s)" stroke-width="1.2"/>
+<text x="24" y="679" font-size="15" fill="var(--lv-ink)" font-weight="700">C. Worker assignment — as-is</text>
+<text x="24" y="698" font-size="11" fill="var(--lv-muted)">Hard admission first; scoring only among qualified candidates</text>
+<rect x="24" y="712" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="733" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Busy classification</text>
+<text x="35" y="751.0" font-size="10.5" fill="var(--lv-sub)">_worker_busy :1937-1938</text>
+<text x="35" y="766.5" font-size="10.5" fill="var(--lv-sub)">status ∈ busy·leased·running</text>
+<text x="35" y="782.0" font-size="10.5" fill="var(--lv-sub)">pane markers</text>
+<rect x="296" y="712" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="733" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Pane conflict marking</text>
+<text x="307" y="751.0" font-size="10.5" fill="var(--lv-sub)">_workers_with_used_panes_</text>
+<text x="307" y="766.5" font-size="10.5" fill="var(--lv-sub)">marked_busy :2422-2430</text>
+<text x="307" y="782.0" font-size="10.5" fill="var(--lv-sub)">per-batch copies</text>
+<path d="M276 764 H294" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="568" y="712" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="733" font-size="12.5" fill="var(--lv-ink)" font-weight="700">assign_workers loop</text>
+<text x="579" y="751.0" font-size="10.5" fill="var(--lv-sub)">scheduler:2490 per node</text>
+<text x="579" y="766.5" font-size="10.5" fill="var(--lv-sub)">capabilities · role · quota ·</text>
+<text x="579" y="782.0" font-size="10.5" fill="var(--lv-sub)">health · capacity</text>
+<path d="M548 764 H566" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="840" y="712" width="252" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="733" font-size="12.5" fill="var(--lv-ink)" font-weight="700">No qualified worker</text>
+<text x="851" y="751.0" font-size="10.5" fill="var(--lv-sub)">reason = “no_matching_worker”</text>
+<text x="851" y="766.5" font-size="10.5" fill="var(--lv-sub)">:2386 — node strands honestly,</text>
+<text x="851" y="782.0" font-size="10.5" fill="var(--lv-sub)">run does not lie</text>
+<path d="M820 764 H838" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<text x="24" y="842" font-size="11" fill="var(--lv-muted)">Capsule-backed nodes reach this path too: enrichment seams at scheduler:2151 and :2253 exist precisely to stop them stranding.</text>
+<rect x="8" y="882" width="1104" height="250" rx="12" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.2"/>
+<text x="24" y="907" font-size="15" fill="var(--lv-ink)" font-weight="700">D. Physical carrier — runs today, rejected for the target</text>
+<text x="24" y="926" font-size="11" fill="var(--lv-muted)">The exact tmux mechanics the target replaces (all in graph_node_dispatcher.py)</text>
+<rect x="24" y="940" width="198" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1" stroke-dasharray="5 4"/>
+<text x="35" y="961" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Pane classification</text>
+<text x="35" y="979.0" font-size="10.5" fill="var(--lv-sub)">role/negative regexes</text>
+<text x="35" y="994.5" font-size="10.5" fill="var(--lv-sub)">:7104 · :7108 · :7180</text>
+<text x="35" y="1010.0" font-size="10.5" fill="var(--lv-sub)">PM|产品经理|Planner|…</text>
+<rect x="242" y="940" width="198" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1" stroke-dasharray="5 4"/>
+<text x="253" y="961" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Readiness probe</text>
+<text x="253" y="979.0" font-size="10.5" fill="var(--lv-sub)">capture-pane + busy markers</text>
+<text x="253" y="994.5" font-size="10.5" fill="var(--lv-sub)">“Enter to confirm” patterns</text>
+<text x="253" y="1010.0" font-size="10.5" fill="var(--lv-sub)">:1455 · :1644 · :7309</text>
+<path d="M222 992 H240" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="460" y="940" width="198" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1" stroke-dasharray="5 4"/>
+<text x="471" y="961" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Keystroke injection</text>
+<text x="471" y="979.0" font-size="10.5" fill="var(--lv-sub)">tmux send-keys :7580 :7605</text>
+<text x="471" y="994.5" font-size="10.5" fill="var(--lv-sub)">:7825 :7948 · separate</text>
+<text x="471" y="1010.0" font-size="10.5" fill="var(--lv-sub)">“Enter” send :7958</text>
+<path d="M440 992 H458" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="678" y="940" width="198" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1" stroke-dasharray="5 4"/>
+<text x="689" y="961" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Confirm sequences</text>
+<text x="689" y="979.0" font-size="10.5" fill="var(--lv-sub)">(“Enter”) · (“1”,“Enter”) ·</text>
+<text x="689" y="994.5" font-size="10.5" fill="var(--lv-sub)">(“y”,“Enter”)  :7947</text>
+<text x="689" y="1010.0" font-size="10.5" fill="var(--lv-sub)">2s subprocess timeouts</text>
+<path d="M658 992 H676" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="896" y="940" width="198" height="104" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1" stroke-dasharray="5 4"/>
+<text x="907" y="961" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Reconciliation</text>
+<text x="907" y="979.0" font-size="10.5" fill="var(--lv-sub)">handoff mtime :3416</text>
+<text x="907" y="994.5" font-size="10.5" fill="var(--lv-sub)">artifact mtimes ≥ handoff</text>
+<text x="907" y="1010.0" font-size="10.5" fill="var(--lv-sub)">:3433 · status file</text>
+<path d="M876 992 H894" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="24" y="1060" width="1072" height="48" rx="7" fill="var(--lv-yellow)" stroke="var(--lv-yellow-s)" stroke-width="1.1"/>
+<text x="36" y="1079" font-size="10.5" fill="var(--lv-sub)">Retained across replacement: typed work packet, capability decision, artifact expectations, evaluator independence</text>
+<text x="36" y="1095" font-size="10.5" fill="var(--lv-sub)">(_lab_builder_can_host_evaluator :7167 keeps writers from verifying their own work).</text>
+<rect x="8" y="1152" width="1104" height="320" rx="12" fill="var(--lv-sand)" stroke="var(--lv-sand-s)" stroke-width="1.2"/>
+<text x="24" y="1177" font-size="15" fill="var(--lv-ink)" font-weight="700">E. Return path and the gate ledger record — as-is</text>
+<text x="24" y="1196" font-size="11" fill="var(--lv-muted)">gate_ledger.py: append-only JSONL, writer-attributed; node status is a projection</text>
+<rect x="24" y="1210" width="340" height="240" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="1231" font-size="12.5" fill="var(--lv-ink)" font-weight="700">append_record — gate_ledger.py:110</text>
+<text x="35" y="1249.0" font-size="10.5" fill="var(--lv-sub)">record_id · sid · node_id</text>
+<text x="35" y="1264.5" font-size="10.5" fill="var(--lv-sub)">kind ∈ RECORD_KINDS</text>
+<text x="35" y="1280.0" font-size="10.5" fill="var(--lv-sub)">author {type ∈ AUTHOR_TYPES}</text>
+<text x="35" y="1295.5" font-size="10.5" fill="var(--lv-sub)">writer — audit key (AC-R4.3)  :21</text>
+<text x="35" y="1311.0" font-size="10.5" fill="var(--lv-sub)">verdict · verdict_kind ∈ VERDICT_KINDS</text>
+<text x="35" y="1326.5" font-size="10.5" fill="var(--lv-sub)">eval_generation · repair_attempt</text>
+<text x="35" y="1342.0" font-size="10.5" fill="var(--lv-sub)">pm_task_id · evidence_snapshot_at</text>
+<text x="35" y="1357.5" font-size="10.5" fill="var(--lv-sub)">route (for route_record kind)</text>
+<text x="35" y="1373.0" font-size="10.5" fill="var(--lv-sub)">BEST-EFFORT: returns None on any</text>
+<text x="35" y="1388.5" font-size="10.5" fill="var(--lv-sub)">failure — never breaks dispatch  :127</text>
+<rect x="384" y="1210" width="340" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="395" y="1231" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Projection, not state</text>
+<text x="395" y="1249.0" font-size="10.5" fill="var(--lv-sub)">project_node_status  :212</text>
+<text x="395" y="1264.5" font-size="10.5" fill="var(--lv-sub)">read_records (malformed lines</text>
+<text x="395" y="1280.0" font-size="10.5" fill="var(--lv-sub)">skipped)  :182</text>
+<text x="395" y="1295.5" font-size="10.5" fill="var(--lv-sub)">corrections supersede history</text>
+<rect x="384" y="1338" width="340" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="395" y="1359" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Consumability</text>
+<text x="395" y="1377.0" font-size="10.5" fill="var(--lv-sub)">is_gate_consumable  :285</text>
+<text x="395" y="1392.5" font-size="10.5" fill="var(--lv-sub)">latest_consumable_verdict  :316</text>
+<text x="395" y="1408.0" font-size="10.5" fill="var(--lv-sub)">generation-scoped: stale verdicts</text>
+<text x="395" y="1423.5" font-size="10.5" fill="var(--lv-sub)">are not consumable</text>
+<rect x="744" y="1210" width="352" height="240" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="755" y="1231" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Independent evaluation — as-is</text>
+<text x="755" y="1249.0" font-size="10.5" fill="var(--lv-sub)">worker handoff: artifacts · tests ·</text>
+<text x="755" y="1264.5" font-size="10.5" fill="var(--lv-sub)">  claimed completion</text>
+<text x="755" y="1280.0" font-size="10.5" fill="var(--lv-sub)">receipt: writer identity · hashes ·</text>
+<text x="755" y="1295.5" font-size="10.5" fill="var(--lv-sub)">  attempt + timestamps</text>
+<text x="755" y="1311.0" font-size="10.5" fill="var(--lv-sub)">evaluator: separate pane/role by</text>
+<text x="755" y="1326.5" font-size="10.5" fill="var(--lv-sub)">  dispatcher rule :7167</text>
+<text x="755" y="1342.0" font-size="10.5" fill="var(--lv-sub)">verdict → append_record →</text>
+<text x="755" y="1357.5" font-size="10.5" fill="var(--lv-sub)">  projection advances the node</text>
+<text x="755" y="1373.0" font-size="10.5" fill="var(--lv-sub)">failed verdict → new attempt or</text>
+<text x="755" y="1388.5" font-size="10.5" fill="var(--lv-sub)">  versioned plan revision</text>
+<rect x="8" y="1492" width="1104" height="262" rx="12" fill="var(--lv-yellow)" stroke="var(--lv-yellow-s)" stroke-width="1.2"/>
+<text x="24" y="1517" font-size="15" fill="var(--lv-ink)" font-weight="700">F. Evidence stores — four disjoint stores today</text>
+<text x="24" y="1536" font-size="11" fill="var(--lv-muted)">No shared keys between them; the one-store-with-projections model is target, not current</text>
+<rect x="24" y="1550" width="252" height="178" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="1571" font-size="12.5" fill="var(--lv-ink)" font-weight="700">research SQLite</text>
+<text x="35" y="1589.0" font-size="10.5" fill="var(--lv-sub)">research/migrations/001_init.sql</text>
+<text x="35" y="1604.5" font-size="10.5" fill="var(--lv-sub)">research_sources: content_hash,</text>
+<text x="35" y="1620.0" font-size="10.5" fill="var(--lv-sub)">content_span · evidence_items:</text>
+<text x="35" y="1635.5" font-size="10.5" fill="var(--lv-sub)">span_start/end, content_hash</text>
+<text x="35" y="1651.0" font-size="10.5" fill="var(--lv-sub)">claims: stance ∈ supports/refutes/</text>
+<text x="35" y="1666.5" font-size="10.5" fill="var(--lv-sub)">neutral · claim_evidence: relation ∈</text>
+<text x="35" y="1682.0" font-size="10.5" fill="var(--lv-sub)">supports/refutes/qualifies</text>
+<rect x="296" y="1550" width="252" height="178" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="1571" font-size="12.5" fill="var(--lv-ink)" font-weight="700">gate ledger JSONL</text>
+<text x="307" y="1589.0" font-size="10.5" fill="var(--lv-sub)">gate_ledger.py (372 LOC)</text>
+<text x="307" y="1604.5" font-size="10.5" fill="var(--lv-sub)">verdicts · transitions · routes</text>
+<text x="307" y="1620.0" font-size="10.5" fill="var(--lv-sub)">writer-attributed, append-only</text>
+<text x="307" y="1635.5" font-size="10.5" fill="var(--lv-sub)">sprint-co-located</text>
+<rect x="568" y="1550" width="252" height="178" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="1571" font-size="12.5" fill="var(--lv-ink)" font-weight="700">evidence_ledger JSONL</text>
+<text x="579" y="1589.0" font-size="10.5" fill="var(--lv-sub)">evidence_ledger.py (117 LOC)</text>
+<text x="579" y="1604.5" font-size="10.5" fill="var(--lv-sub)">scheduler run entries only</text>
+<text x="579" y="1620.0" font-size="10.5" fill="var(--lv-sub)">NO content hashes</text>
+<text x="579" y="1635.5" font-size="10.5" fill="var(--lv-sub)">NO spans · NO claim links</text>
+<rect x="840" y="1550" width="252" height="178" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="1571" font-size="12.5" fill="var(--lv-ink)" font-weight="700">GEPA ArtifactStore</text>
+<text x="851" y="1589.0" font-size="10.5" fill="var(--lv-sub)">integrations/gepa_optimizer/</text>
+<text x="851" y="1604.5" font-size="10.5" fill="var(--lv-sub)">RunRecord · CandidateRecord</text>
+<text x="851" y="1620.0" font-size="10.5" fill="var(--lv-sub)">sha256 sidecars</text>
+<text x="851" y="1635.5" font-size="10.5" fill="var(--lv-sub)">isolated from the other three</text>
+<rect x="8" y="1774" width="1104" height="610" rx="12" fill="var(--lv-purple)" stroke="var(--lv-purple-s)" stroke-width="1.2"/>
+<text x="24" y="1799" font-size="15" fill="var(--lv-ink)" font-weight="700">G. RSI as-is — GEPA at module granularity</text>
+<text x="24" y="1818" font-size="11" fill="var(--lv-muted)">harness/integrations/gepa_optimizer/ (~3,540 LOC) — implemented and unit-tested, wired to nothing</text>
+<rect x="24" y="1834" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="1855" font-size="12.5" fill="var(--lv-ink)" font-weight="700">candidate_schema.py</text>
+<text x="35" y="1873.0" font-size="10.5" fill="var(--lv-sub)">CandidateType :23-30 =</text>
+<text x="35" y="1888.5" font-size="10.5" fill="var(--lv-sub)">SKILL · CAPSULE ·</text>
+<text x="35" y="1904.0" font-size="10.5" fill="var(--lv-sub)">ROUTING_POLICY ·</text>
+<text x="35" y="1919.5" font-size="10.5" fill="var(--lv-sub)">REWRITE_RULES · COST_MODEL</text>
+<rect x="296" y="1834" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="1855" font-size="12.5" fill="var(--lv-ink)" font-weight="700">budget + stoppers</text>
+<text x="307" y="1873.0" font-size="10.5" fill="var(--lv-sub)">Budget · SpendStopper</text>
+<text x="307" y="1888.5" font-size="10.5" fill="var(--lv-sub)">EvalStopper · WalltimeStopper</text>
+<text x="307" y="1904.0" font-size="10.5" fill="var(--lv-sub)">PlateauStopper · StopFileStopper</text>
+<text x="307" y="1919.5" font-size="10.5" fill="var(--lv-sub)">hard ceilings, not advisory</text>
+<rect x="568" y="1834" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="1855" font-size="12.5" fill="var(--lv-ink)" font-weight="700">adapter</text>
+<text x="579" y="1873.0" font-size="10.5" fill="var(--lv-sub)">GEPAAdapter wraps</text>
+<text x="579" y="1888.5" font-size="10.5" fill="var(--lv-sub)">gepa.optimize_anything</text>
+<text x="579" y="1904.0" font-size="10.5" fill="var(--lv-sub)">candidate in, scored</text>
+<text x="579" y="1919.5" font-size="10.5" fill="var(--lv-sub)">candidate out</text>
+<rect x="840" y="1834" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="1855" font-size="12.5" fill="var(--lv-ink)" font-weight="700">hard_policy_checker</text>
+<text x="851" y="1873.0" font-size="10.5" fill="var(--lv-sub)">check_candidate:</text>
+<text x="851" y="1888.5" font-size="10.5" fill="var(--lv-sub)">frozen-section diff — cannot</text>
+<text x="851" y="1904.0" font-size="10.5" fill="var(--lv-sub)">relax secrets, git push,</text>
+<text x="851" y="1919.5" font-size="10.5" fill="var(--lv-sub)">destructive shell, payments</text>
+<rect x="24" y="1962" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="1983" font-size="12.5" fill="var(--lv-ink)" font-weight="700">artifact_store</text>
+<text x="35" y="2001.0" font-size="10.5" fill="var(--lv-sub)">RunRecord · CandidateRecord</text>
+<text x="35" y="2016.5" font-size="10.5" fill="var(--lv-sub)">content-addressed artifacts</text>
+<text x="35" y="2032.0" font-size="10.5" fill="var(--lv-sub)">sha256 sidecars</text>
+<rect x="296" y="1962" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="307" y="1983" font-size="12.5" fill="var(--lv-ink)" font-weight="700">promoter</text>
+<text x="307" y="2001.0" font-size="10.5" fill="var(--lv-sub)">Promoter.promote / rollback</text>
+<text x="307" y="2016.5" font-size="10.5" fill="var(--lv-sub)">tmp-vs-production guards</text>
+<text x="307" y="2032.0" font-size="10.5" fill="var(--lv-sub)">atomic writes</text>
+<text x="307" y="2047.5" font-size="10.5" fill="var(--lv-sub)">sidecar verification</text>
+<rect x="568" y="1962" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="1983" font-size="12.5" fill="var(--lv-ink)" font-weight="700">cli</text>
+<text x="579" y="2001.0" font-size="10.5" fill="var(--lv-sub)">dry-run by default</text>
+<text x="579" y="2016.5" font-size="10.5" fill="var(--lv-sub)">explicit flag to touch</text>
+<text x="579" y="2032.0" font-size="10.5" fill="var(--lv-sub)">production artifacts</text>
+<rect x="840" y="1962" width="252" height="112" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="851" y="1983" font-size="12.5" fill="var(--lv-ink)" font-weight="700">tests</text>
+<text x="851" y="2001.0" font-size="10.5" fill="var(--lv-sub)">tests/integrations/</text>
+<text x="851" y="2016.5" font-size="10.5" fill="var(--lv-sub)">gepa_optimizer/ — unit level</text>
+<text x="851" y="2032.0" font-size="10.5" fill="var(--lv-sub)">no scheduler / ledger imports</text>
+<text x="851" y="2047.5" font-size="10.5" fill="var(--lv-sub)">anywhere in the package</text>
+<rect x="24" y="2098" width="528" height="128" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="35" y="2119" font-size="12.5" fill="var(--lv-ink)" font-weight="700">On-ramp status per improvement surface — as-is</text>
+<text x="35" y="2137.0" font-size="10.5" fill="var(--lv-sub)">skill / prompt-text        schema + tests          (CandidateType.SKILL)</text>
+<text x="35" y="2152.5" font-size="10.5" fill="var(--lv-sub)">capsule                    schema only             (CandidateType.CAPSULE)</text>
+<text x="35" y="2168.0" font-size="10.5" fill="var(--lv-sub)">routing · rewrite · cost   schema only             (three enum members)</text>
+<text x="35" y="2183.5" font-size="10.5" fill="var(--lv-sub)">taskgraph pattern · evaluator/reward · memory ·</text>
+<text x="35" y="2199.0" font-size="10.5" fill="var(--lv-sub)">model weights · data/benchmark      ABSENT (no candidate type)</text>
+<rect x="568" y="2098" width="528" height="128" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="579" y="2119" font-size="12.5" fill="var(--lv-ink)" font-weight="700">openjiuwen agent_evolving — overlap, not replacement</text>
+<text x="579" y="2137.0" font-size="10.5" fill="var(--lv-sub)">Trainer requires agent.get_operators(); sole implementor:</text>
+<text x="579" y="2152.5" font-size="10.5" fill="var(--lv-sub)">core/single_agent/agents/react_agent_evolve.py</text>
+<text x="579" y="2168.0" font-size="10.5" fill="var(--lv-sub)">“Operator is NOT an executable unit”  core/operator/base.py</text>
+<text x="579" y="2183.5" font-size="10.5" fill="var(--lv-sub)">JiuwenSwarm imports only EvolutionStore / experience / tool-</text>
+<text x="579" y="2199.0" font-size="10.5" fill="var(--lv-sub)">description parts → GEPA governance (freeze/promote/rollback) stays</text>
+<rect x="24" y="2244" width="1072" height="48" rx="7" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="36" y="2263" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">As-is verdict: no RSI loop is executable end-to-end today. GEPA candidate→check→store→promote works in isolation (unit-tested);</text>
+<text x="36" y="2279" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">nothing produces trajectories for it, nothing consumes its promotions, and no scheduler or ledger references it.</text>
+</svg></div>
+<p class="figcap">Diagram LL-2 — AI4RnD current implementation. File references relative to the
+AI4Research checkout at d35c511; <code>scheduler:</code> = harness/lib/graph_scheduler.py,
+<code>dispatcher:</code> = harness/lib/graph_node_dispatcher.py.</p>
+<h3>2.1 RSI as-is — module status</h3>
+
+<table>
+<tr><th>Module</th><th>What it implements</th><th>Wiring status (as-is)</th></tr>
+<tr><td><code>candidate_schema.py</code></td><td><code>CandidateType</code> = SKILL · CAPSULE · ROUTING_POLICY · REWRITE_RULES · COST_MODEL (<code>:23-30</code>)</td><td>schema only; SKILL exercised by tests</td></tr>
+<tr><td>budget / stoppers</td><td><code>Budget</code> + Spend/Eval/Walltime/Plateau/StopFile stoppers — hard ceilings</td><td>unit-tested, unwired</td></tr>
+<tr><td>adapter</td><td><code>GEPAAdapter</code> wrapping <code>gepa.optimize_anything</code></td><td>unit-tested, unwired</td></tr>
+<tr><td><code>hard_policy_checker</code></td><td><code>check_candidate</code>: frozen-section diff — a candidate cannot relax secrets, git push, destructive shell or payment policies</td><td>unit-tested, unwired</td></tr>
+<tr><td><code>artifact_store</code></td><td><code>RunRecord</code> / <code>CandidateRecord</code>, content-addressed with sha256 sidecars</td><td>unit-tested, isolated store</td></tr>
+<tr><td><code>promoter</code></td><td><code>Promoter.promote/rollback</code>: tmp-vs-production guards, atomic writes, sidecar verification</td><td>unit-tested, unwired</td></tr>
+<tr><td><code>cli</code></td><td>dry-run by default; explicit flag required to touch production artifacts</td><td>runnable standalone</td></tr>
+</table>
+<div class="callout warn"><strong>As-is RSI verdict.</strong> The candidate→policy-check→store→promote
+mechanics are implemented and unit-tested, and the governance properties (frozen sections,
+dry-run default, atomic promotion, rollback) are real code — but nothing produces
+trajectories for GEPA and nothing consumes its promotions. No RSI loop is executable
+end-to-end today, and no diagram or document should claim otherwise.</div>
+
+<h2 id="s3">3 · Capability Capsules — as-is</h2>
+<p>Recounted from source for this document (census scripts in the verification record):</p>
+<table>
+<tr><th>Fact</th><th>Value</th><th>Source</th></tr>
+<tr><td>Unique manifests</td><td><strong>42</strong> (19 in <code>harness/capability-capsules/</code> + 23 in <code>harness/config/capability-capsules/</code>; zero duplicate IDs)</td><td>directory census</td></tr>
+<tr><td>Universal v1 sections</td><td><strong>11</strong>: <code>capability_capsule_id · capsule_kind · metadata · applicability · contract · composition · effects · bindings · verification · operator_compatibility · provenance</code></td><td>key-intersection over all 42</td></tr>
+<tr><td>Optional extras</td><td><code>version</code> in 23 manifests; <code>runtime_preferences</code> in 6</td><td>key census</td></tr>
+<tr><td>Registry entries</td><td><strong>35</strong> (32 capability · 1 guard · 2 resource)</td><td><code>capability-capsules.registry.yaml</code></td></tr>
+<tr><td>Statuses</td><td><strong>30 stable · 5 draft</strong> (the five <code>cap.understand-anything-*</code>)</td><td>registry</td></tr>
+<tr><td>Unregistered manifests</td><td><strong>7</strong>: 3 × <code>adapter.*</code> + <code>cap.chatgpt-browser-agent</code>, <code>cap.gemini-enhanced-search</code>, <code>cap.notebooklm-enrichment</code>, <code>cap.skill-execution-bridge</code></td><td>reconciliation</td></tr>
+<tr><td>Ghost entries / broken paths</td><td><strong>0</strong> — every registry <code>manifest_path</code> resolves</td><td>reconciliation</td></tr>
+</table>
+<h3>3.1 What v1 actually enforces (as-is)</h3>
+<p>The manifest is not decorative — three enforcement layers exist today, all in
+<code>harness/lib/capability_capsules.py</code>:</p>
+<table>
+<tr><th>Layer</th><th>Checks</th><th>Failure behaviour</th></tr>
+<tr><td>Schema validation</td><td>Draft 2020-12 JSON Schema (<code>schemas/draft/capability-capsule.v1.draft.json</code>)</td><td>error list from <code>validate_capability_capsule</code></td></tr>
+<tr><td>Semantic validation (<code>:618-652</code>)</td><td>non-empty pre/postconditions and invariants; all four effect classes present; <strong>secret_refs ⇒ at least one guard.* reference</strong>; resource capsules may not declare <code>effects.execute</code>; guard capsules must declare pass conditions</td><td>error list; registration blocked</td></tr>
+<tr><td>Resolution (<code>:1246-1338</code>)</td><td>the seven checks of diagram LL-2 band B, each with a typed <code>CapsuleResolutionError</code> string</td><td>honest stall — no silent degradation</td></tr>
+</table>
+<div class="callout"><strong>The as-is status problem.</strong> The registry's single
+<code>status</code> field expresses definition maturity only. Nothing anywhere in the 42
+manifests or 35 entries records whether a capsule has ever executed, is currently
+executable, or has independently verified evidence. "Stable" therefore reads as
+"works" while meaning only "schema settled" — the motivating defect for §4.</div>
+
+<h2 id="s4">4 · Status definitions — the three axes, precisely</h2>
+<p>Proposed (to-be). Three independent axes with distinct owners and transition rules.
+The state diagram shows both worlds; the tables give the operative definitions the
+template in §5 references.</p>
+<div class="fig"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 760" width="1120" font-family="inherit" role="img" aria-label="Capability Capsule status model">
+<defs><marker id="lva" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--lv-line)"/></marker></defs>
+<rect x="8" y="8" width="348" height="700" rx="12" fill="var(--lv-gray)" stroke="var(--lv-gray-s)" stroke-width="1.2"/>
+<text x="24" y="33" font-size="15" fill="var(--lv-ink)" font-weight="700">As-is — one flag</text>
+<text x="24" y="52" font-size="11" fill="var(--lv-muted)">What the 42 manifests + registry express</text>
+<rect x="28" y="74" width="308" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="39" y="95" font-size="12.5" fill="var(--lv-ink)" font-weight="700">registry status (only axis)</text>
+<text x="39" y="113.0" font-size="10.5" fill="var(--lv-sub)">capability-capsules.registry.yaml</text>
+<text x="39" y="128.5" font-size="10.5" fill="var(--lv-sub)">status ∈ {draft, stable} observed</text>
+<text x="39" y="144.0" font-size="10.5" fill="var(--lv-sub)">meaning: definition maturity only</text>
+<rect x="28" y="190" width="308" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="39" y="211" font-size="12.5" fill="var(--lv-ink)" font-weight="700">No runtime axis</text>
+<text x="39" y="229.0" font-size="10.5" fill="var(--lv-sub)">no field records whether a capsule</text>
+<text x="39" y="244.5" font-size="10.5" fill="var(--lv-sub)">has ever executed, is bound,</text>
+<text x="39" y="260.0" font-size="10.5" fill="var(--lv-sub)">or is currently executable</text>
+<rect x="28" y="306" width="308" height="96" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="39" y="327" font-size="12.5" fill="var(--lv-ink)" font-weight="700">No assurance axis</text>
+<text x="39" y="345.0" font-size="10.5" fill="var(--lv-sub)">“stable” carries zero evidence:</text>
+<text x="39" y="360.5" font-size="10.5" fill="var(--lv-sub)">no probe refs, no verifier record,</text>
+<text x="39" y="376.0" font-size="10.5" fill="var(--lv-sub)">no approval, no revocation path</text>
+<rect x="28" y="424" width="308" height="84" rx="7" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="40" y="443" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">Consequence: “stable” reads as</text>
+<text x="40" y="459" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">“works” but only means “schema</text>
+<text x="40" y="475" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">settled”. 30 stable entries include</text>
+<text x="40" y="491" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600">capsules that have never executed.</text>
+<rect x="28" y="530" width="308" height="150" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="39" y="551" font-size="12.5" fill="var(--lv-ink)" font-weight="700">Counts (recounted from source)</text>
+<text x="39" y="569.0" font-size="10.5" fill="var(--lv-sub)">42 manifests (19 + 23 dirs)</text>
+<text x="39" y="584.5" font-size="10.5" fill="var(--lv-sub)">11 universal v1 sections</text>
+<text x="39" y="600.0" font-size="10.5" fill="var(--lv-sub)">35 registry entries</text>
+<text x="39" y="615.5" font-size="10.5" fill="var(--lv-sub)">30 stable · 5 draft</text>
+<text x="39" y="631.0" font-size="10.5" fill="var(--lv-sub)">7 unregistered (3 adapter.* +</text>
+<text x="39" y="646.5" font-size="10.5" fill="var(--lv-sub)">4 cap.*) · 0 ghost entries</text>
+<rect x="372" y="8" width="740" height="700" rx="12" fill="var(--lv-cyan)" stroke="var(--lv-cyan-s)" stroke-width="1.2"/>
+<text x="388" y="33" font-size="15" fill="var(--lv-ink)" font-weight="700">To-be — three independent axes</text>
+<text x="388" y="52" font-size="11" fill="var(--lv-muted)">Never compress definition maturity, runtime health and certification into one flag</text>
+<rect x="392" y="74" width="700" height="118" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="403" y="95" font-size="12.5" fill="var(--lv-ink)" font-weight="700">registry_status — definition lifecycle (owner: registry curator)</text>
+<rect x="410" y="116" width="116" height="34" rx="17" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="468" y="138" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">draft</text>
+<rect x="546" y="116" width="116" height="34" rx="17" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="604" y="138" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">candidate</text>
+<path d="M528 133 H544" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="682" y="116" width="116" height="34" rx="17" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="740" y="138" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">stable</text>
+<path d="M664 133 H680" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="818" y="116" width="116" height="34" rx="17" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="876" y="138" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">deprecated</text>
+<path d="M800 133 H816" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="954" y="116" width="116" height="34" rx="17" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="1012" y="138" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">retired</text>
+<path d="M936 133 H952" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<text x="410" y="174" font-size="10.5" fill="var(--lv-sub)">draft: schema-valid, not planner-selectable · candidate: complete, non-production only · stable: frozen per</text>
+<text x="410" y="188" font-size="10.5" fill="var(--lv-sub)">version, selectable · deprecated: pinned in-flight runs only · retired: never selectable, history kept</text>
+<rect x="392" y="210" width="700" height="190" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="403" y="231" font-size="12.5" fill="var(--lv-ink)" font-weight="700">runtime_status — operational health (owner: control plane, never the manifest file)</text>
+<text x="410" y="252" font-size="12.5" fill="var(--lv-ink)" font-weight="700">binding:</text>
+<rect x="480" y="236" width="130" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="545" y="256" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">unbound</text>
+<rect x="630" y="236" width="130" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="695" y="256" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">bound</text>
+<path d="M612 251 H628" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="780" y="236" width="130" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="845" y="256" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">unavailable</text>
+<path d="M762 251 H778" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<text x="410" y="298" font-size="12.5" fill="var(--lv-ink)" font-weight="700">readiness:</text>
+<rect x="490" y="282" width="128" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="554" y="302" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">not_proven</text>
+<rect x="638" y="282" width="128" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="702" y="302" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">runnable</text>
+<path d="M620 297 H636" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="786" y="282" width="128" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="850" y="302" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">integrated</text>
+<path d="M768 297 H784" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="934" y="282" width="128" height="30" rx="15" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="998" y="302" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">degraded</text>
+<path d="M916 297 H932" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<text x="410" y="336" font-size="10.5" fill="var(--lv-sub)">not_proven: never executed at this version · runnable: bindings probe-executed successfully · integrated: completed</text>
+<text x="410" y="351" font-size="10.5" fill="var(--lv-sub)">inside a real TaskGraph run with receipts · degraded: recent failures over threshold — control plane demotes</text>
+<text x="410" y="366" font-size="10.5" fill="var(--lv-sub)">automatically and re-promotes on healthy probes. Stored keyed by (capsule id, version); mirrored read-only in views.</text>
+<rect x="392" y="418" width="700" height="168" rx="7" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="403" y="439" font-size="12.5" fill="var(--lv-ink)" font-weight="700">assurance_status — certification (owner: independent verifier + human approver)</text>
+<rect x="410" y="460" width="130" height="32" rx="16" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="475" y="481" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">unassessed</text>
+<rect x="560" y="460" width="130" height="32" rx="16" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="625" y="481" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">tested</text>
+<path d="M542 476 H558" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="710" y="460" width="130" height="32" rx="16" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="775" y="481" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">verified</text>
+<path d="M692 476 H708" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="860" y="460" width="130" height="32" rx="16" fill="var(--lv-surface)" stroke="var(--lv-line)" stroke-width="1.1"/>
+<text x="925" y="481" font-size="12.5" fill="var(--lv-ink)" font-weight="700" text-anchor="middle">certified</text>
+<path d="M842 476 H858" fill="none" stroke="var(--lv-line)" stroke-width="1.6" marker-end="url(#lva)"/>
+<rect x="1010" y="460" width="76" height="32" rx="16" fill="var(--lv-red)" stroke="var(--lv-red-s)" stroke-width="1.1"/>
+<text x="1048" y="481" font-size="10.5" fill="var(--lv-red-ink)" font-weight="600" text-anchor="middle">revoked</text>
+<text x="410" y="516" font-size="10.5" fill="var(--lv-sub)">tested: self_checks pass in isolation · verified: an independent verifier accepted a real run&#x27;s evidence ·</text>
+<text x="410" y="531" font-size="10.5" fill="var(--lv-sub)">certified: human approval recorded under policy_ref · revoked: evidence invalidated or regression — any state</text>
+<text x="410" y="546" font-size="10.5" fill="var(--lv-sub)">may drop to revoked; recovery re-enters at tested. Evidence lives in evidence_refs; approval is attributable.</text>
+<rect x="392" y="606" width="700" height="48" rx="7" fill="var(--lv-yellow)" stroke="var(--lv-yellow-s)" stroke-width="1.1"/>
+<text x="404" y="625" font-size="10.5" fill="var(--lv-sub)">Axis independence (invariant): stable + unbound + unassessed is legal and common; certified requires verified</text>
+<text x="404" y="641" font-size="10.5" fill="var(--lv-sub)">history but never implies runnable-now. A UI may summarise; the stored model never collapses the axes.</text>
+</svg></div>
+<p class="figcap">Diagram LL-3 — Capsule status: the as-is single flag versus the three
+to-be axes with their transitions.</p>
+
+<h3>4.1 registry_status — definition lifecycle (owner: registry curator)</h3>
+<table>
+<tr><th>Value</th><th>Definition</th><th>Entry criterion</th><th>Planner visibility</th></tr>
+<tr><td><code>draft</code></td><td>schema-valid definition exists; composition not guaranteed</td><td>manifest passes schema validation</td><td>not selectable</td></tr>
+<tr><td><code>candidate</code></td><td>definition complete: contract, effects, composition and verification all populated and semantically valid</td><td><code>validate_capability_capsule</code> returns zero errors</td><td>selectable in non-production runs only</td></tr>
+<tr><td><code>stable</code></td><td>definition frozen for this version; changes require a new version</td><td>curator review recorded</td><td>selectable</td></tr>
+<tr><td><code>deprecated</code></td><td>superseded or discouraged; kept for pinned in-flight runs</td><td><code>replaced_by</code> set or curator decision</td><td>pinned runs only</td></tr>
+<tr><td><code>retired</code></td><td>never selectable again; history retained</td><td>no in-flight pins remain</td><td>none</td></tr>
+</table>
+<h3>4.2 runtime_status — operational health (owner: control plane; never stored in the manifest file)</h3>
+<table>
+<tr><th>Axis</th><th>Value</th><th>Definition</th></tr>
+<tr><td rowspan="3"><code>binding</code></td><td><code>unbound</code></td><td>no Physical Operator currently satisfies <code>executor_policy</code></td></tr>
+<tr><td><code>bound</code></td><td>at least one qualified operator is admitted and healthy</td></tr>
+<tr><td><code>unavailable</code></td><td>previously bound; all qualified operators currently failing health/quota</td></tr>
+<tr><td rowspan="4"><code>readiness</code></td><td><code>not_proven</code></td><td>this capsule version has never executed</td></tr>
+<tr><td><code>runnable</code></td><td>bindings executed successfully in a probe (skills load, MCP reachable, guards pass)</td></tr>
+<tr><td><code>integrated</code></td><td>completed inside a real TaskGraph run with receipts and an accepted verdict</td></tr>
+<tr><td><code>degraded</code></td><td>recent failure rate over threshold; control plane demotes automatically, re-promotes on healthy probes</td></tr>
+</table>
+<h3>4.3 assurance_status — certification (owner: independent verifier + human approver)</h3>
+<table>
+<tr><th>Value</th><th>Definition</th><th>Evidence required</th></tr>
+<tr><td><code>unassessed</code></td><td>no assurance evidence exists</td><td>—</td></tr>
+<tr><td><code>tested</code></td><td>all <code>verification.self_checks</code> pass in isolation</td><td>test run reference in <code>evidence_refs</code></td></tr>
+<tr><td><code>verified</code></td><td>an independent verifier accepted a real run's evidence against the contract</td><td>verifier verdict, writer-attributed, in the gate ledger</td></tr>
+<tr><td><code>certified</code></td><td>human approval recorded under <code>policy_ref</code></td><td>approval record: who, when, under which policy</td></tr>
+<tr><td><code>revoked</code></td><td>evidence invalidated or regression observed; recovery re-enters at <code>tested</code></td><td>revocation reason + reference</td></tr>
+</table>
+<div class="callout"><strong>Axis independence (invariant).</strong> <code>stable</code> + <code>unbound</code> + <code>unassessed</code>
+is a legal, common combination. <code>certified</code> requires verified history but never implies runnable-now.
+A dashboard may summarise the three axes into one badge; the stored model never collapses them.</div>
+
+<h2 id="s5">5 · Capability Capsule to-be template — draft 2</h2>
+<p>The full revised template (<code>capability-capsule.to-be.template.yaml</code> in this
+directory). Draft 2 keeps draft 1's structure — universal capsule, planner blueprint,
+replaceable bindings, three status axes — and repairs the five migration defects the
+adversarial review filed against draft 1:</p>
+<table>
+<tr><th>Review finding</th><th>Draft-2 change</th></tr>
+<tr><td><strong>M-2</strong> — plate and template disagreed on the blueprint step unit</td><td>each step now carries <code>logical_operator_ref</code> as its typed action identity; skills remain the ingredients under it</td></tr>
+<tr><td><strong>M-3</strong> — id-level operator deny-list dropped</td><td><code>executor_policy.forbidden_operators</code> restored (deny-by-id is a safety control, distinct from pinning; allow-lists stay kind/capability-based)</td></tr>
+<tr><td><strong>M-4</strong> — registry <code>default_operator_profile</code> conflicts with <code>forbid_identity_pinning</code></td><td>explicit migration rule in the header: defaults move to the Physical Operator registry keyed by capability; the field is deleted from registry entries at migration</td></tr>
+<tr><td><strong>M-5</strong> — secrets-require-guard invariant lost</td><td>schema invariants block restored in the header; <code>resources.secret_refs</code> annotated with the rule; validator + JSON schema listed as migration artifacts</td></tr>
+<tr><td>Kind/prefix and corpus gaps</td><td><code>adapter</code> added to <code>capsule_kind</code>; per-kind ID prefixes stated; <code>portability.scope</code> gains <code>project</code>; <code>runtime_preferences</code> mapping and <code>version</code> backfill rules stated; kind-conditional sections marked</td></tr>
+</table>
+<pre><code># Proposal — Capability Capsule v2, DRAFT 2
+# (draft 1 revised per design-review/adversarial-review.md findings M-2..M-5)
+#
+# Design rule:
+#   A Capsule is a governed, reusable capability blueprint created before a
+#   project is planned. The Planner selects it and expands its ordered steps
+#   into the project TaskGraph. Each step&#x27;s typed action identity is a Logical
+#   Operator; Skills are the primary reusable ingredients under it. MCP/tool
+#   requirements are typed resources. Runtime executor selection is a later
+#   concern and remains in the Physical Operator registry.
+#
+# Schema invariants (enforced by the JSON schema + semantic validator; these
+# migrate from v1 — see capability_capsules.py validate_capability_capsule_semantics):
+#   I1. resources.secret_refs non-empty  =&gt;  composition.required_guard_capsules
+#       non-empty (v1 rule retained across the bindings-&gt;resources relocation).
+#   I2. capsule_kind == resource  =&gt;  effects.execute empty.
+#   I3. capsule_kind == guard     =&gt;  verification declares pass conditions.
+#   I4. No field anywhere may name a permanent agent/team/model instance;
+#       pin_binding_for_attempt is the only sanctioned pinning.
+#
+# Migration rules (v1 corpus -&gt; v2):
+#   MG1. Registry default_operator_profile is DELETED from registry entries;
+#        defaults move to the Physical Operator registry keyed by capability
+#        (resolves the forbid_identity_pinning conflict, review M-4).
+#   MG2. v1 runtime_preferences (6 manifests) maps into
+#        executor_policy.model_requirements / permitted_operator_kinds.
+#   MG3. Manifests without version (19 of 42) are backfilled 0.1.0 from the
+#        registry entry&#x27;s version at migration.
+#   MG4. Kind-conditional sections: planning_blueprint is required for
+#        capability/adapter, forbidden for resource, optional for guard.
+#
+# ID prefixes by kind: cap. | guard. | resource. | adapter.
+
+schema_version: ai4rnd.capability-capsule.v2
+capability_capsule_id: cap.&lt;domain&gt;-&lt;capability&gt;
+capsule_kind: capability            # capability | guard | resource | adapter
+version: 0.1.0
+
+metadata:
+  name: &lt;human-readable name&gt;
+  description: &lt;one-sentence capability promise&gt;
+  owner: &lt;team-or-person&gt;
+  tags: []
+
+portability:
+  scope: universal                 # universal | project (project requires owning_project)
+  owning_project: null             # required when scope == project
+  executor_agnostic: true
+  requires_specific_agent_id: false
+  environment_requirements: []
+
+applicability:
+  task_types: []
+  positive_signals: []
+  negative_signals: []
+  exclusions: []
+
+contract:
+  inputs:
+    required:
+      - name: &lt;input-name&gt;
+        schema_ref: schema://&lt;input-schema&gt;@&lt;version&gt;
+        description: &lt;meaning&gt;
+    optional: []
+  outputs:
+    required:
+      - name: &lt;output-name&gt;
+        schema_ref: schema://&lt;output-schema&gt;@&lt;version&gt;
+        description: &lt;meaning&gt;
+    optional: []
+  preconditions:
+    - id: &lt;precondition-id&gt;
+      assertion: &lt;machine-checkable or reviewable condition&gt;
+  postconditions:
+    - id: &lt;postcondition-id&gt;
+      assertion: &lt;machine-checkable or reviewable condition&gt;
+  invariants:
+    - &lt;condition that must remain true throughout execution&gt;
+
+composition:
+  consumes: []                      # typed artifact/schema references
+  produces: []                      # typed artifact/schema references
+  compatible_with: []               # Capsule IDs
+  incompatible_with: []             # Capsule IDs
+  requires_before: []                # Capsule IDs
+  requires_after: []                 # Capsule IDs
+  required_guard_capsules: []        # guard.* Capsule IDs
+  required_resource_capsules: []     # resource.* Capsule IDs
+
+planning_blueprint:
+  # The Planner instantiates this reusable partial graph inside the project plan.
+  expansion: planner_expands_into_taskgraph
+  steps:
+    - step_id: &lt;stable-local-step-id&gt;
+      purpose: &lt;what this step establishes&gt;
+      logical_operator_ref: lop://&lt;action-name&gt;@&lt;version&gt;   # typed action identity (review M-2)
+      skill_refs:
+        - skill://&lt;skill-name&gt;@&lt;version&gt;
+      consumes:
+        - schema://&lt;input-artifact&gt;@&lt;version&gt;
+      produces:
+        - schema://&lt;output-artifact&gt;@&lt;version&gt;
+      depends_on: []
+      tool_requirements: []           # capabilities, not concrete tool instances
+      mcp_requirements: []            # capabilities, not server credentials
+      completion_checks:
+        - &lt;observable pass condition&gt;
+    - step_id: &lt;dependent-step-id&gt;
+      purpose: &lt;what becomes possible after the prior step&gt;
+      logical_operator_ref: lop://&lt;action-name&gt;@&lt;version&gt;
+      skill_refs:
+        - skill://&lt;skill-name&gt;@&lt;version&gt;
+      consumes:
+        - schema://&lt;output-artifact&gt;@&lt;version&gt;
+      produces:
+        - schema://&lt;next-artifact&gt;@&lt;version&gt;
+      depends_on:
+        - &lt;stable-local-step-id&gt;
+      tool_requirements: []
+      mcp_requirements: []
+      completion_checks:
+        - &lt;observable pass condition&gt;
+  ordering_constraints:
+    - before: &lt;stable-local-step-id&gt;
+      after: &lt;dependent-step-id&gt;
+      reason: &lt;why the dependency is mandatory&gt;
+  planner_policy:
+    may_skip_optional_steps: true
+    may_add_project_specific_steps: true
+    may_remove_required_steps: false
+    may_relax_contract: false
+
+effects:
+  read:
+    scopes: []
+  write:
+    scopes: []
+  execute:
+    classes: []
+  network:
+    destinations: []
+  cost:
+    budget_class: &lt;low|medium|high|custom&gt;
+    hard_limit_ref: policy://&lt;budget-policy&gt;
+  risk:
+    class: &lt;low|medium|high|critical&gt;
+    policy_refs: []
+
+executor_policy:
+  # Applied after planning: the binder resolves a Physical Operator separately.
+  selection: fail_closed             # fail_closed | require_human
+  physical_operator_registry_ref: registry://physical-operators/current
+  permitted_operator_kinds: []       # e.g. deep_agent, team, tool, workflow
+  forbidden_operator_kinds: []
+  forbidden_operators: []            # id-level DENY-list (safety control, not pinning;
+                                     # restores v1 operator_compatibility.forbidden — review M-3)
+  required_capabilities: []
+  model_requirements: []              # capabilities/constraints, not model IDs (absorbs
+                                      # v1 runtime_preferences at migration — MG2)
+  separation_of_duties:
+    writer_may_verify: false
+    verifier_must_be_independent: true
+  bind_at: runtime
+  pin_binding_for_attempt: true
+  forbid_identity_pinning: true      # no permanent agent/team/model instance ID
+
+resources:
+  # Skills are the main Capsule ingredients. Tools/MCP are typed dependencies.
+  skills:
+    required: []
+    optional: []
+  mcp_capabilities: []
+  data_refs: []
+  secret_refs: []                    # secret:// references only; never values.
+                                     # Invariant I1: non-empty secret_refs REQUIRE at least
+                                     # one guard.* in composition.required_guard_capsules
+
+verification:
+  self_checks:
+    - id: &lt;self-check-id&gt;
+      method: &lt;test|schema|rule|metric&gt;
+      pass_condition: &lt;condition&gt;
+  external_verifier:
+    required: true
+    capability_requirements: []
+  acceptance:
+    all_of: []
+    any_of: []
+  evidence_requirements:
+    artifact_receipt: true
+    execution_receipt: true
+    provenance: true
+    evaluation_record: true
+
+provenance:
+  origin: &lt;human|repository|generated|derived&gt;
+  source_refs: []
+  created_by: &lt;actor-id&gt;
+  created_at: &lt;RFC3339 timestamp&gt;
+
+registry_status:
+  # Definition lifecycle only. It does not claim runtime or assurance readiness.
+  value: draft                      # draft | candidate | stable | deprecated | retired
+  reason: &lt;why this state is justified&gt;
+
+runtime_status:
+  # OWNED BY THE CONTROL PLANE, keyed by (capsule id, version); shown here only as
+  # the field contract. Values in a manifest file are ignored at load time —
+  # mutable operational state never lives in a versioned definition artifact.
+  binding: unbound                  # unbound | bound | unavailable
+  readiness: not_proven             # not_proven | runnable | integrated | degraded
+  last_probe_ref: null
+
+assurance_status:
+  # Certification is evidence-backed and independent from registry_status.
+  value: unassessed                 # unassessed | tested | verified | certified | revoked
+  policy_ref: policy://capsule-certification/v1
+  evidence_refs: []
+  approved_by: null
+  approved_at: null
+
+lifecycle:
+  in_flight_version_policy: pin
+  supersedes: null
+  replaced_by: null
+  promotion_policy_ref: policy://capsule-promotion/v1
+  rollback_policy_ref: policy://capsule-rollback/v1
+
+history_refs:
+  change_ledger: ledger://capsules/&lt;capsule-id&gt;/changes
+  evaluation_ledger: ledger://capsules/&lt;capsule-id&gt;/evaluations
+  performance_ledger: ledger://capsules/&lt;capsule-id&gt;/performance
+
+evolution:
+  enabled: false
+  allowed_surfaces: []              # prompt, routing, contract, evaluator, etc.
+  candidate_generator: null          # e.g. gepa://text-artifact
+  frozen_policy_refs: []
+  evaluation_suite_refs: []
+  promotion_requires_human: true
+  rollback_on_regression: true
+</code></pre>
+
+<h2 id="s6">6 · Changes applied in this revision</h2>
+<table>
+<tr><th>Change</th><th>Files</th></tr>
+<tr><td>Corrected the capsule inventory everywhere it appears (42 manifests · 35 entries · 30 stable + 5 draft), closing review blocker B-1</td><td><code>build_design.py</code> (2 sites), regenerated <code>06-capability-capsule-design.svg</code></td></tr>
+<tr><td>New low-level design document (this page) with diagrams LL-1/LL-2/LL-3 at implementation granularity, generated by <code>build_lowlevel.py</code></td><td><code>low-level-design.html</code>, <code>build_lowlevel.py</code></td></tr>
+<tr><td>Capability Capsule to-be template revised to draft 2 (M-2 … M-5 + corpus fixes)</td><td><code>capability-capsule.to-be.template.yaml</code></td></tr>
+<tr><td>Package index updated to point at the low-level companion</td><td><code>README.md</code>, <code>diagram-review.html</code></td></tr>
+</table>
+<p class="small">Generated by build_lowlevel.py — do not edit the HTML by hand.</p>
+</main>
+<button class="tt" id="tt" aria-label="Toggle colour theme">&#9689;</button>
+<script>(function(){
+var r=document.documentElement,k='lv-theme',s=null;try{s=localStorage.getItem(k)}catch(e){}
+if(s)r.setAttribute('data-theme',s);
+document.getElementById('tt').addEventListener('click',function(){
+var cur=r.getAttribute('data-theme');
+var next=cur==='dark'?'light':cur==='light'?'dark':
+(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark');
+r.setAttribute('data-theme',next);try{localStorage.setItem(k,next)}catch(e){}});
+})();</script>
+</body></html>
